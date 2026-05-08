@@ -132,4 +132,6 @@ and Automated Computational Workflows. Manuscript in preparation / under review.
 
 ## License
 
-No production license is implied by this sanitized snapshot. Before redistributing or reusing this code beyond paper review and inspection, add an explicit license file approved by the project owners.
+This repository is distributed under the custom **CEMP Source Code Review License** in `LICENSE`.
+
+No open-source, production, commercial, redistribution, or sublicensing permission is granted by this sanitized snapshot. The code is provided only for paper review, academic inspection, and non-production reproducibility assessment unless the project owners provide separate written approval.

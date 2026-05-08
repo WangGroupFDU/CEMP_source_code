@@ -1,21 +1,59 @@
-MIT License
+CEMP Source Code Review License
 
-Copyright (c) 2026 WangGroupFDU
+Copyright (c) 2026 Wang Group, Fudan University.
+All rights reserved except as expressly granted below.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+1. Purpose
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+This repository is a sanitized source-code snapshot of the Clean Energy
+Materials Platform (CEMP). It is provided only for paper review, academic
+inspection, and reproducibility assessment of the associated manuscript.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. Limited Permission
+
+The project owners grant you a limited, non-exclusive, non-transferable, and
+revocable permission to access, read, clone, and inspect this repository solely
+for paper review, academic evaluation, and non-production reproducibility
+assessment.
+
+3. Restrictions
+
+Without prior written permission from the project owners, you may not:
+
+- use this code, in whole or in part, in any production system or public service;
+- redistribute, republish, mirror, sublicense, sell, rent, lease, or otherwise
+  transfer this code or derivative works;
+- use this code for commercial purposes;
+- remove or obscure copyright, attribution, license, or security notices;
+- imply that this sanitized snapshot represents the complete production CEMP
+  system;
+- use any placeholder configuration as a production credential or deployment
+  setting.
+
+4. No Production License
+
+No production license, deployment license, commercial license, redistribution
+license, or open-source license is granted by this snapshot. Any use beyond
+paper review, academic inspection, and non-production reproducibility assessment
+requires a separate written license approved by the project owners.
+
+5. Sanitized Snapshot
+
+This repository intentionally excludes production databases, user data, uploaded
+files, logs, task outputs, real credentials, private server configuration,
+deployment endpoints, and other non-public operational assets. The snapshot is
+provided for code inspection and architectural understanding only.
+
+6. No Warranty
+
+THIS SOFTWARE SNAPSHOT IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, SECURITY, ACCURACY, OR
+AVAILABILITY. THE AUTHORS AND PROJECT OWNERS SHALL NOT BE LIABLE FOR ANY CLAIM,
+DAMAGE, OR OTHER LIABILITY ARISING FROM ACCESS TO OR USE OF THIS SNAPSHOT.
+
+7. Contact
+
+For permission to redistribute, reuse, deploy, commercialize, or otherwise use
+this code beyond the limited scope above, contact the project owners and obtain
+written approval before proceeding.
