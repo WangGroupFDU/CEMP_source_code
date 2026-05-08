@@ -1,0 +1,141 @@
+{% extends 'bms_base.html' %}
+{% load static %}
+
+{% block header_scripts %}
+
+<script src="https://unpkg.com/vue@3.4.12/dist/vue.global.prod.js"></script>
+<link href="{% static 'battery_manage_system/opendata.css' %}" rel="stylesheet" />
+
+{% endblock header_scripts %}
+
+{% block content %}
+    <div id="app">
+        <h1>电池数据集信息表</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>数据集名称</th>
+                    <th>正极种类</th>
+                    <th>是否安时级</th>
+                    <th>数据集收集时间</th>
+                    <th>参考链接</th>
+                    <th>发布单位</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="item in datasets" :key="item.name">
+                    <td>[[ item.name ]]</td>
+                    <td>[[ item.cathode ]]</td>
+                    <td>[[ item.capacity ]]</td>
+                    <td>[[ item.time ]]</td>
+                    <td>
+                        <a :href="item.link" target="_blank" v-if="item.link">[[ item.linkText ]]</a>
+                        <span class="no-link" v-else>无</span>
+                    </td>
+                    <td>[[ item.publisher ]]</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock content %}  
+
+{% block scripts %}
+<script>
+
+const app = Vue.createApp({
+    data() {
+        return {
+            datasets: [
+            {
+                name: 'CALCE',
+                cathode: 'LCO',
+                capacity: '是',
+                time: '2011-2013',
+                link: 'https://calce.umd.edu/battery-data',
+                linkText: '链接',
+                publisher: 'Center for Advanced Life Cycle Engineering'
+            },
+            {
+                name: 'OX',
+                cathode: 'LCO',
+                capacity: '是，小型pouch cell,740mAh,8个电池',
+                time: '2017',
+                link: 'https://web.archive.org/web/20220308195115/https://ora.ox.ac.uk/objects/uuid:03ba4b01-cfed-46d3-9b1a-7d4a7bdf6fac',
+                linkText: 'OX参考链接-webarchive',
+                publisher: '牛津大学'
+            },
+            {
+                name: 'MATR-1',
+                cathode: 'LFP',
+                capacity: '是',
+                time: '2017-19',
+                link: 'https://data.matr.io/1/projects/5c48dd2bc625d700019f3204',
+                linkText: 'Three batches',
+                publisher: ''
+            },
+            {
+                name: 'MATR-2',
+                cathode: 'LFP',
+                capacity: '是',
+                time: '2019',
+                link: '',
+                linkText: '',
+                publisher: '斯坦福大学'
+            },
+            {
+                name: 'HNEI',
+                cathode: 'blend of LCO and NMC',
+                capacity: '是',
+                time: '2018',
+                link: 'https://www.batteryarchive.org/index.html',
+                linkText: 'BatteryArchive.org',
+                publisher: 'HNEI'
+            },
+            {
+                name: 'SNL',
+                cathode: 'NMC & LFP',
+                capacity: '是',
+                time: '2020',
+                link: 'https://www.batteryarchive.org/index.html',
+                linkText: 'BatteryArchive.org',
+                publisher: 'SNL'
+            },
+            {
+                name: 'UL_PUR',
+                cathode: 'NCA & NCM',
+                capacity: '是',
+                time: '2020',
+                link: 'https://www.batteryarchive.org/index.html',
+                linkText: 'BatteryArchive.org',
+                publisher: 'UL_PUR'
+            },
+            {
+                name: 'RWTH',
+                cathode: 'NMC/graphite',
+                capacity: '是，约2Ah的nominal capacity',
+                time: '2021',
+                link: 'https://publications.rwth-aachen.de/record/818642/files/Rawdata.zip',
+                linkText: '链接',
+                publisher: 'RWTH'
+            },
+            {
+                name: 'HUST',
+                cathode: 'LFP',
+                capacity: '是',
+                time: '2022',
+                link: 'https://data.mendeley.com/datasets/nsc7hnsg4s/2',
+                linkText: '链接',
+                publisher: '华中科技大学'
+            }
+        ]
+        }
+    }
+});
+
+app.config.compilerOptions.delimiters = ["[[", "]]"];
+
+const vueApp = app.mount("#app");
+
+window.vueApp = vueApp;
+</script>
+{% endblock scripts %}

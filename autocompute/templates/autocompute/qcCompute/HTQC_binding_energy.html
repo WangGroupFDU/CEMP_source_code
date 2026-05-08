@@ -1,0 +1,300 @@
+{% extends 'autocompute/autocompute_base.html' %}
+{% load static %}
+
+{% block navbar %} 
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Database' %}">Database</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:MDCompute' %}">MDCompute</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'home:homepage' %}">Home</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:QcCompute_base' %}">Return</a>
+  </li>
+{% endblock navbar %}
+
+{% block content %}
+<style>
+  ol li {
+      margin-bottom: 20px; 
+  }
+  h1 {
+      font-size: 1.5em; 
+  }
+  h2 {
+      font-size: 1.5em; 
+  }
+  h3 {
+      font-size: 1.5em; 
+  }
+  p {
+      font-size: 1em; 
+      white-space: pre-line; 
+  }
+  h1, h2, h3, p {
+  margin: 0.5px 0; 
+  }
+</style>
+
+<div style="padding: 20px;">
+  <h1>1. Introduction to the High-Throughput Quantum Chemistry Calculation Module</h1>
+    <p>
+        This module is based on Gaussian16 and performs high-throughput calculations of various properties (thermodynamic quantities, energy, binding energy, etc.) of dimers and their components under gas-phase conditions. The formula for calculating the binding energy is shown below: 
+        
+        $$E_{\text {binding energy }}=E\left(A B_n\right)-E(A)-n E(B)$$
+        where  E(ABn)  is the total energy of the complex,  E(A)  and  E(B)  are the energies of the ligands, and  n  represents the number of ligands. It should be noted that the structures of  ABn ,  A , and  B  need to be optimized separately, as the binding energy is defined as the energy required to transition from the bound state to the infinitely separated state.
+
+        <b>Structure Optimization:</b>
+        •	Theoretical level: B3LYP/6-311G**
+        •	Dispersion correction: GD3BJ
+        •	Frequency correction factor: 0.9682
+        •	The program automatically checks for optimization failures or imaginary frequencies and performs error correction if necessary.
+        •	
+        <b>Single-Point Energy Calculation:</b>
+        •	Theoretical level: M062X/6-311+(2d,p)
+        •	Dispersion correction: GD3
+        •	The program automatically checks for calculation failures and performs error correction if necessary.
+    
+    Users need to download the provided Excel file, fill in the calculation parameters, and upload the completed file. The program will automatically execute the calculations and download the results upon completion.
+    </p>
+
+    <br>
+    <br>
+
+    <h2>2. Notes</h2>
+    <p>
+        <b>1.	Gaussian16 License: </b>
+        •	Gaussian16 is a commercial software. The calculation results on this platform are intended for educational purposes only and cannot be used for publication or commercial purposes without purchasing a license.
+        <b>2.	Excel File:</b>
+        •	Users must use the provided Excel file to input relevant parameters.
+        •	Ensure the Name column does not contain illegal characters (e.g., Chinese characters, commas, periods, slashes, etc.).
+        •	Ensure the SMILES notation is correct (RDKit can be used to validate SMILES), otherwise the program will not function correctly.
+        <b>3.	Fixed Parameters:</b>
+        •	The parameters for structure optimization and single-point energy calculations are fixed in the high-throughput calculation program to prevent errors that could result in meaningless results.
+        <b>4.	Applicability:</b>
+        •	The current calculation parameters are only suitable for organic molecular systems.
+        •	Ensure the system does not contain transition metals, as this could lead to erroneous results.
+    </p>
+    <p style="color: red;">
+        <b>5.	 !!!!! Important Considerations !!!!!:</b>
+        •	After the user uploads the HTQC.xlsx file and clicks the Start button, quantum chemistry calculations will begin. The computation time will increase with the number of molecules, the number of atoms within the molecules, and the complexity of the molecules.
+        •	Once the Start button is clicked, the user should not exit or refresh the current page, as this may result in the loss of calculation results. Please do not close or refresh the browser until the computation is complete.
+        •	Quantum chemistry calculations are relatively time-consuming tasks. Users are advised to be patient; as long as there are no red error messages on the browser page, the process is running normally. Please do not close the browser to avoid calculation failure or other issues.
+        •	Due to current computational resource limitations, the maximum level of parallelism provided by this program is 2 (i.e., only 2 quantum chemistry tasks can be executed simultaneously).
+    </p>
+
+    <br>
+    <br>
+
+    
+    <h3>3. Download EXCEL FILE</h3>
+    
+    <p>
+        <a href="{% static 'download/Dimer.xlsx' %}" download>Download HTQC_binding_energy EXCEL FILE (Dimer.xlsx)</a>
+    </p>
+
+    
+    <figure style="text-align: center;">
+      <img src="{% static 'images/binding_energy_example.png' %}" alt="Binding_enegy_Example" style="width: 600px; height: auto; display: block; margin: auto;">
+      <figcaption style="text-align: center;"><b>Figure 1</b>: Example of the HTQC_binding_energy EXCEL file.</figcaption>
+  </figure>
+
+  <h3>4. Upload EXCEL FILE</h3>
+  
+  <form id="upload-form" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label for="file-upload">Upload EXCEL FILE: </label>
+    
+    <input type="file" id="file-upload" name="excel_file" accept=".xlsx,.xls" style="display:none;">
+    
+    <button type="button" id="custom-upload-button" class="btn btn-primary">Select File</button>
+    
+    <span id="file-name" style="margin-left: 10px;">No file chosen</span>
+    
+    <button type="submit" id="submit-button" class="btn btn-success" disabled>Upload</button>
+  </form>
+  
+  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    
+    document.getElementById('custom-upload-button').addEventListener('click', function() {
+
+        document.getElementById('file-upload').click();
+    });
+
+    document.getElementById('file-upload').addEventListener('change', function() {
+
+        var fileName = this.files[0] ? this.files[0].name : "No file chosen";
+        document.getElementById('file-name').textContent = fileName;
+
+
+        if (this.files.length > 0) {
+            document.getElementById('submit-button').disabled = false;
+        }
+    });
+
+      $(document).ready(function(){
+          $('#upload-form').on('submit', function(e){
+              e.preventDefault();
+              
+              var formData = new FormData(this);
+              
+              $.ajax({
+                  url: "{% url 'autocompute:upload_excel_QcCoumpute_HTQC_binding_energy' %}",
+                  type: "POST",
+                  data: formData,
+                  processData: false,
+                  contentType: false,
+                  success: function(response) {
+
+                      alert("Upload Success!");
+                  },
+                  error: function(response) {
+
+                      alert("Upload Failed: " + response.responseJSON.error);
+                  }
+              });
+          });
+      });
+  </script>
+
+    
+    <button id="start-button">Start</button>
+
+    
+    <div id="elapsed-time">Elapsed Time: </div>
+    
+    
+    <div id="error-message" style="color: red; display: none;"></div>
+
+    
+    <p id="download-link"></p>
+</div>
+
+<script>
+
+    document.getElementById('upload-form').onsubmit = function(event) {
+        const fileInput = document.getElementById('file-upload');
+        const file = fileInput.files[0];
+        if (!file) {
+            alert('请上传一个文件');
+            return false;
+        }
+        const fileType = file.name.split('.').pop();
+        if (fileType !== 'xlsx' && fileType !== 'xls') {
+            alert('请上传EXCEL类型的文件');
+            event.preventDefault();
+        }
+    };
+
+
+    document.getElementById('start-button').addEventListener('click', startProcessing);
+
+    function startProcessing() {
+        
+
+    document.getElementById('start-button').disabled = true;
+    const formData = new FormData(document.getElementById('upload-form'));
+
+
+    const startTime = new Date();
+    
+
+    function updateElapsedTime() {
+        const now = new Date();
+        const elapsedTime = Math.floor((now - startTime) / 1000);
+        document.getElementById('elapsed-time').textContent = `Elapsed Time: ${elapsedTime} seconds`;
+        
+
+        if (!taskCompleted) {
+            setTimeout(updateElapsedTime, 1000);
+        }
+    }
+    
+
+    let taskCompleted = false;
+    updateElapsedTime();
+    
+    fetch("{% url 'autocompute:process_excel_QcCoumpute_HTQC_binding_energy' %}", {
+        method: 'POST',
+        body: formData,
+    })
+
+    .then(response => {
+
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+        return response.json();
+    } else {
+        return response.text().then(text => {
+            throw new Error(`Expected JSON but got: ${text}`);
+        });
+    }
+    })
+    
+    .then(data => {
+        if (data.download_url) {
+            taskCompleted = true;
+
+
+            const downloadLink = document.createElement('a');
+            downloadLink.href = data.download_url;
+            downloadLink.textContent = 'Download Dimer.xlsx';
+            downloadLink.download = 'Dimer.xlsx';
+
+            const downloadContainer = document.getElementById('download-link');
+            downloadContainer.innerHTML = '';
+            downloadContainer.appendChild(downloadLink);
+
+
+            if (data.zip_download_url) {
+                const zipDownloadLink = document.createElement('a');
+                zipDownloadLink.href = data.zip_download_url;
+                zipDownloadLink.textContent = 'Download All Results (ZIP)';
+                zipDownloadLink.download = 'all_results.zip';
+                downloadContainer.appendChild(document.createElement('br'));
+                downloadContainer.appendChild(zipDownloadLink);
+            }
+
+            alert('File processing is complete and ready for download!');
+        } else if (data.error) {
+
+            const errorMessageDiv = document.getElementById('error-message');
+            errorMessageDiv.textContent = `Processing failed: ${data.error}\n\nStdout:\n${data.stdout}\n\nStderr:\n${data.stderr}`;
+            errorMessageDiv.style.display = 'block';
+        } else {
+            const errorMessageDiv = document.getElementById('error-message');
+            errorMessageDiv.textContent = 'Processing failed, please try again!';
+            errorMessageDiv.style.display = 'block';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        const errorMessageDiv = document.getElementById('error-message');
+        errorMessageDiv.textContent = 'An unexpected error occurred. Please try again later.';
+        errorMessageDiv.style.display = 'block';
+    });
+
+}
+
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock content %}

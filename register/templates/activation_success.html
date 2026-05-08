@@ -1,0 +1,54 @@
+{% extends 'home_base.html' %}
+
+{% block title %}Account Activated{% endblock title %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white text-center">
+                    <h3><i class="fas fa-check-circle"></i> Activation Successful!</h3>
+                </div>
+                <div class="card-body">
+                    {% if already_active %}
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-info-circle"></i> Account Status</h5>
+                        <p class="mb-0">
+                            <strong>{{ username }}</strong>, your account is already activated. You can login directly.
+                        </p>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-success">
+                        <h5><i class="fas fa-check-circle"></i> Activation Complete</h5>
+                        <p class="mb-0">
+                            Congratulations, <strong>{{ username }}</strong>! Your account (<strong>{{ email }}</strong>) has been successfully activated.
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    <div class="alert alert-primary">
+                        <h5><i class="fas fa-sign-in-alt"></i> Next Steps</h5>
+                        <ul class="mb-0">
+                            <li>You can now login with your username and password.</li>
+                            <li>After login, you can access all features of CEMP platform.</li>
+                        </ul>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <a href="{% url 'register:login' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-sign-in-alt"></i> Login Now
+                        </a>
+                        <a href="{% url 'home:homepage' %}" class="btn btn-secondary">
+                            <i class="fas fa-home"></i> Back to Home
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer text-muted text-center">
+                    <small>Thank you for using CEMP (Clean Energy Materials Platform)!</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

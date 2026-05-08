@@ -1,0 +1,249 @@
+{% extends 'polymer_base.html'%}
+{% load static %}
+
+{% block head %} 
+
+
+
+
+<script
+type="text/javascript"
+src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.js"
+></script>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+<script src="https://unpkg.com/element-plus/dist/index.full.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+
+<style>
+    .container {
+        width: 100%; 
+        overflow-x: auto; 
+    }
+    .table-responsive {
+        min-width: 100%; 
+    }
+</style>
+{% endblock head %}
+{% block navbar %} 
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'home:homepage' %}">Home</a>
+  </li>
+{% endblock navbar %}
+{% block content %}
+
+
+
+{{ field_names|json_script:"field_names_json" }}
+{{ data|json_script:"data_json" }}
+
+<div id="app" class="container">
+    
+    {% verbatim %}
+    <div style="margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+      <el-input v-model="searchText" placeholder="Search Data..." clearable>
+        <template #prefix><el-icon><Search /></el-icon></template>
+      </el-input>
+      <div style="display: flex; gap: 10px;">
+        <el-button type="primary" @click="exportToExcel" size="small">Export Excel</el-button>
+        <el-button type="success" @click="exportToCSV" size="small">Export CSV</el-button>
+        <el-button type="warning" @click="exportToPDF" size="small">Export PDF</el-button>
+      </div>
+    </div>
+    {% endverbatim %}
+  
+    
+    {% verbatim %}
+    <el-table :data="paginatedData" stripe border height="600" :loading="loading">
+      <el-table-column
+        v-for="(field, index) in field_names"
+        :key="index"
+        :prop="field"
+        :label="field"
+        :sortable="true"
+        :min-width="120"
+        show-overflow-tooltip
+      >
+        <template #default="scope">
+          <span v-if="scope.row[field] !== null && scope.row[field] !== ''">
+            {{ formatValue(scope.row[field]) }}
+          </span>
+          <el-tag v-else type="info" size="small">-</el-tag>
+        </template>
+      </el-table-column>
+    </el-table>
+    {% endverbatim %}
+  
+    
+    {% verbatim %}
+    <el-pagination
+      v-model:current-page="currentPage"
+      v-model:page-size="pageSize"
+      :page-sizes="[10, 25, 50, 100]"
+      :total="filteredData.length"
+      layout="total, sizes, prev, pager, next, jumper"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+    />
+    {% endverbatim %}
+  </div>
+  
+{% endblock content %}
+
+{% block script %}
+<script>
+const { createApp, ref, computed } = Vue;
+const { ElMessage } = ElementPlus;
+
+
+const fieldNames = JSON.parse(document.getElementById('field_names_json').textContent);
+const rawData = JSON.parse(document.getElementById('data_json').textContent);
+
+
+const tableData = rawData.map((row, index) => {
+  const obj = { id: index + 1 };
+  fieldNames.forEach((field, fieldIndex) => {
+    obj[field] = row[fieldIndex];
+  });
+  return obj;
+});
+
+createApp({
+  setup() {
+
+    const searchText = ref('');
+    const currentPage = ref(1);
+    const pageSize = ref(25);
+    const loading = ref(false);
+
+
+    const filteredData = computed(() => {
+      if (!searchText.value) return tableData;
+      return tableData.filter(row => {
+        return fieldNames.some(field => {
+          const value = row[field];
+          if (value === null || value === undefined) return false;
+          return String(value).toLowerCase().includes(searchText.value.toLowerCase());
+        });
+      });
+    });
+
+
+    const paginatedData = computed(() => {
+      const start = (currentPage.value - 1) * pageSize.value;
+      const end = start + pageSize.value;
+      return filteredData.value.slice(start, end);
+    });
+
+
+    const handleSizeChange = (val) => {
+      pageSize.value = val;
+      currentPage.value = 1;
+    };
+
+    const handleCurrentChange = (val) => {
+      currentPage.value = val;
+    };
+
+    const handleSortChange = ({ prop, order }) => {
+      console.log('排序:', prop, order);
+    };
+
+    const formatValue = (value) => {
+      if (value === null || value === undefined || value === '') return '-';
+      if (typeof value === 'number') {
+        return value.toFixed(4);
+      }
+      return String(value);
+    };
+
+
+    const exportToExcel = () => {
+      loading.value = true;
+      try {
+        const ws = XLSX.utils.json_to_sheet(filteredData.value);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, '聚合物数据');
+        XLSX.writeFile(wb, '聚合物实验数据.xlsx');
+        ElMessage.success('Excel导出成功！');
+      } catch (error) {
+        ElMessage.error('导出失败：' + error.message);
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    const exportToCSV = () => {
+      loading.value = true;
+      try {
+        const csvContent = [
+          fieldNames.join(','),
+          ...filteredData.value.map(row => 
+            fieldNames.map(field => `"${row[field] || ''}"`).join(',')
+          )
+        ].join('\n');
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = '聚合物实验数据.csv';
+        link.click();
+        ElMessage.success('CSV导出成功！');
+      } catch (error) {
+        ElMessage.error('导出失败：' + error.message);
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    const exportToPDF = () => {
+      loading.value = true;
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        doc.autoTable({
+          head: [fieldNames],
+          body: filteredData.value.map(row => 
+            fieldNames.map(field => row[field] || '')
+          ),
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [102, 126, 234] }
+        });
+        
+        doc.save('聚合物实验数据.pdf');
+        ElMessage.success('PDF导出成功！');
+      } catch (error) {
+        ElMessage.error('导出失败：' + error.message);
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    return {
+      field_names: fieldNames,
+      searchText,
+      currentPage,
+      pageSize,
+      loading,
+      filteredData,
+      paginatedData,
+      handleSizeChange,
+      handleCurrentChange,
+      handleSortChange,
+      formatValue,
+      exportToExcel,
+      exportToCSV,
+      exportToPDF
+    };
+  }
+}).use(ElementPlus).mount('#app');
+
+</script>
+{% endblock script %}

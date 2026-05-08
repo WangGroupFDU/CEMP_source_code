@@ -1,0 +1,18 @@
+Hello {{ ticket.creator.username }},
+
+There is a new maintainer reply for your ticket on the CEMP platform.
+
+Ticket information:
+- Ticket ID: #{{ ticket.id }}
+- Subject: {{ ticket.subject }}
+- Current Status: {{ ticket.get_status_display }}
+
+Latest reply:
+{{ message.content }}
+
+Please open the ticket page to review the full conversation and continue the discussion if needed:
+{{ detail_url }}
+
+Best regards,
+CEMP Platform
+

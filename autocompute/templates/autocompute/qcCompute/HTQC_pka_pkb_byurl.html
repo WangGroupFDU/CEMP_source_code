@@ -1,0 +1,457 @@
+{% extends 'autocompute/autocompute_base.html' %}
+{% load static %}
+
+{% block navbar %} 
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Database' %}">Database</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:MDCompute' %}">MDCompute</a>
+  </li>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:SMILESDrawer' %}">SMILESDrawer</a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:Visualization' %}">Visualization</a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:from_smiles_get_name' %}">GetName</a>
+    </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'home:homepage' %}">Home</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:QcCompute_base' %}">Return</a>
+  </li>
+{% endblock navbar %}
+
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+
+{% block content %}
+<style>
+
+    h1, h2, h3 {
+        color: #2c3e50;
+    }
+    h1 {
+        text-align: center;
+    }
+    .equation {
+        text-align: center;
+        margin: 20px 0;
+    }
+    .content {
+        max-width: 800px;
+        margin: auto;
+        background: #fff;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    hr {
+        border: 0;
+        height: 1px;
+        background: #ddd;
+        margin: 40px 0;
+    }
+    ul, ol {
+        margin-left: 20px;
+    }
+    p, li {
+        font-size: 1.1em;
+    }
+    em {
+        font-style: italic;
+    }
+    
+</style>
+
+<div style="padding: 20px;">
+  <h2>1. Introduction to the High-Throughput pkb (pka) Calculation Module</h2>
+    <p>
+        This module facilitates high-throughput quantum chemistry calculations based on Gaussian16, incorporating both structure optimization and single-point energy calculations.
+        
+        <li><b>Structure Optimization:</b></li>
+        <li>Theoretical level: B3LYP/6-311G**</li>
+        <li>Dispersion correction: GD3BJ</li>
+        <li>Frequency correction factor: 0.9682</li>
+        <li>Implicit solvent model: SMD (water)</li>
+        <li>The program automatically checks for optimization failures or imaginary frequencies and performs error correction if necessary.</li>
+	
+        <li><b>Single-Point Energy Calculation:</b></li>
+        <li>Theoretical level: M062X/6-311+(2d,p)</li>
+        <li>Dispersion correction: GD3</li>
+        <li>Implicit solvent model: SMD (water)</li>
+        <li>The program automatically checks for calculation failures and performs error correction if necessary.</li>
+    
+    Users need to download the provided Excel file, fill in the calculation parameters, and upload the completed file. The program will automatically execute the calculations and download the results upon completion.
+    </p>
+
+    <br>
+    <br>
+
+    <h2>2. Notes</h2>
+    <p>
+        <li><b>1.	Gaussian16 License: </b></li>
+        <li>Gaussian16 is a commercial software. The calculation results on this platform are intended for educational purposes only and cannot be used for publication or commercial purposes without purchasing a license.</li>
+        <li><b>2.	Excel File:</b></li>
+        <li>Users must use the provided Excel file to input relevant parameters.</li>
+        <li>Ensure the Name column does not contain illegal characters (e.g., Chinese characters, commas, periods, slashes, etc.).</li>
+        <li>Ensure the SMILES notation is correct (RDKit can be used to validate SMILES), otherwise the program will not function correctly.</li>
+        <li><b>3.	Fixed Parameters:</b></li>
+        <li>The parameters for structure optimization and single-point energy calculations are fixed in the high-throughput calculation program to prevent errors that could result in meaningless results.</li>
+        <li><b>4.	Applicability:</b></li>
+        <li>The current calculation parameters are only suitable for organic molecular systems.</li>
+        <li>Ensure the system does not contain transition metals, as this could lead to erroneous results.</li>
+    </p>
+
+    <div class="content">
+        <h1>Calculation Methods for <em>pK<sub>a</sub></em> and <em>pK<sub>b</sub></em></h1>
+        <p>
+            The acid dissociation constant (<em>K<sub>a</sub></em>) and base dissociation constant (<em>K<sub>b</sub></em>) are fundamental parameters in understanding the strength of acids and bases. They are commonly expressed in their logarithmic forms, <em>pK<sub>a</sub></em> and <em>pK<sub>b</sub></em>, respectively. This document outlines detailed methods for calculating these constants using thermodynamic data and demonstrates the mathematical relationships involved.
+        </p>
+        
+        <h2>Relationship between <em>pK<sub>a</sub></em> and <em>pK<sub>b</sub></em></h2>
+        <p>
+            At 25°C, in aqueous solutions, the relationship between <em>pK<sub>a</sub></em> and <em>pK<sub>b</sub></em> for a conjugate acid-base pair is given by:
+        </p>
+        <div class="equation">
+            $$ pK_a + pK_b = 14 $$
+        </div>
+        <p>
+            This equation allows the calculation of one constant if the other is known.
+        </p>
+        
+        <h2>Calculating <em>pK<sub>a</sub></em> from Gibbs Free Energy</h2>
+        <p>
+            The dissociation of an acid (HA) in water can be represented as:
+        </p>
+        <div class="equation">
+            $$ \text{HA} \leftrightarrow \text{H}^+ + \text{A}^- $$
+        </div>
+        <p>
+            The standard Gibbs free energy change (<em>ΔG<sup>°</sup></em>) for this reaction is calculated using the standard Gibbs free energies of formation:
+        </p>
+        <div class="equation">
+            $$ \Delta G^\circ = G^\circ_{\text{A}^-} + G^\circ_{\text{H}^+} - G^\circ_{\text{HA}} $$
+        </div>
+        <p>
+            The acid dissociation constant (<em>K<sub>a</sub></em>) is related to the Gibbs free energy change by:
+        </p>
+        <div class="equation">
+            $$ \Delta G^\circ = -RT \ln K_a $$
+        </div>
+        <p>
+            Solving for <em>pK<sub>a</sub></em>:
+        </p>
+        <div class="equation">
+            $$ pK_a = \frac{\Delta G^\circ}{2.303RT} $$
+        </div>
+        <p>
+            Where:
+        </p>
+        <ul>
+            <li><em>R</em> = 8.314 J·mol<sup>−1</sup>·K<sup>−1</sup> (universal gas constant)</li>
+            <li><em>T</em> = Temperature in Kelvin (usually 298 K)</li>
+            <li>2.303 converts natural logarithm to base 10 logarithm</li>
+        </ul>
+        
+        <h2>Calculating <em>pK<sub>b</sub></em> from Gibbs Free Energy</h2>
+        <p>
+            For a base (B), the protonation reaction in water is:
+        </p>
+        <div class="equation">
+            $$ \text{B} + \text{H}^+ \leftrightarrow \text{BH}^+ $$
+        </div>
+        <p>
+            The standard Gibbs free energy change is:
+        </p>
+        <div class="equation">
+            $$ \Delta G^\circ = G^\circ_{\text{BH}^+} - G^\circ_{\text{B}} - G^\circ_{\text{H}^+} $$
+        </div>
+        <p>
+            The base dissociation constant (<em>K<sub>b</sub></em>) relates to its conjugate acid's <em>pK<sub>a</sub></em> by:
+        </p>
+        <div class="equation">
+            $$ pK_b = 14 - pK_a $$
+        </div>
+        <p>
+            Alternatively, you can calculate <em>K<sub>b</sub></em> directly using the Gibbs free energy change for the base hydrolysis reaction.
+        </p>
+        
+        <h2>Practical Calculation Steps</h2>
+        <ol>
+            <li><strong>Compute Gibbs Free Energies:</strong> Use quantum chemistry calculations (e.g., DFT) to obtain the standard Gibbs free energies (<em>G<sup>°</sup></em>) of the species involved, typically in Hartrees.</li>
+            <li><strong>Convert Units:</strong> Convert energies from Hartrees to kJ/mol or kcal/mol using the conversion factors:
+                <ul>
+                    <li>1 Hartree = 2625.5 kJ/mol</li>
+                    <li>1 Hartree = 627.51 kcal/mol</li>
+                </ul>
+            </li>
+            <li><strong>Include the Proton's Free Energy:</strong> The standard Gibbs free energy of the proton in aqueous solution is typically taken as:
+                <div class="equation">
+                    $$ G^\circ_{\text{H}^+} = -272.18\ \text{kcal/mol} $$
+                </div>
+            </li>
+            <li><strong>Calculate Δ<em>G<sup>°</sup></em>:</strong> Apply the appropriate formula for Δ<em>G<sup>°</sup></em> based on the reaction.</li>
+            <li><strong>Compute <em>pK<sub>a</sub></em> or <em>pK<sub>b</sub></em>:</strong> Use the relationship between Δ<em>G<sup>°</sup></em> and <em>pK</em> to calculate the desired constant.</li>
+        </ol>
+        
+        <h2>Conclusion</h2>
+        <p>
+            The calculation of <em>pK<sub>a</sub></em> and <em>pK<sub>b</sub></em> involves thermodynamic principles and requires careful consideration of the Gibbs free energies of the species involved. Accurate calculations must account for solvation effects, temperature, and entropy contributions. Computational chemistry methods can provide estimates, but experimental validation is essential for precise values.
+        </p>
+        
+        <hr>
+        <p>
+            <em>Note:</em> This document uses LaTeX syntax rendered via MathJax for mathematical equations.
+        </p>
+    </div>
+
+    <br>
+    <br>
+
+    <div class="container">
+        
+        <h2>Predict Conjugate Acid and Base from SMILES</h2>
+        <div class="border p-4 mb-5">
+            
+            <p>You can predict possible conjugate acids and bases from SMILES by following these steps:</p>
+            
+            
+            <h4>1. Download Template File</h4>
+            <p>
+                <a href="{% static 'download/conjugate_acid_base_predict.xlsx' %}" class="btn btn-primary" download>
+                    Download Conjugate Acid/Base Prediction Template
+                </a>
+            </p>
+
+            
+
+            
+            <h4 class="mt-4">2. Upload Your Excel File</h4>
+            <form method="post" enctype="multipart/form-data" action="{% url 'autocompute:predict_conjugate_acid_base' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="excelFile">Upload Excel File:</label>
+                    <input type="file" class="form-control-file" id="excelFile" name="excel_file" accept=".xlsx, .xls" required>
+                </div>
+                <button type="submit" class="btn btn-success">Predict Conjugate Acid and Base</button>
+            </form>
+            
+            
+            {% if error_message %}
+                <div class="alert alert-danger mt-3">{{ error_message }}</div>
+            {% endif %}
+            {% if success_message %}
+                <div class="alert alert-success mt-3">{{ success_message }}</div>
+                
+                
+                
+                <p>You can download the results here:</p>
+                <a href="{{ result_file_url }}" class="btn btn-info" download>Download Results</a>
+            {% endif %}
+        </div>
+            
+
+
+    <h3>3. Download EXCEL FILE</h3>
+    
+    <p>
+        <a href="{% static 'download/pkb_DFT.xlsx' %}" download>Download HTQC Calculate pkb (pka) EXCEL FILE</a>
+    </p>
+
+    
+    <figure style="text-align: center;">
+      <img src="{% static 'images/pka_pkb_template.png' %}" alt="pka_pkb_Example" style="width: 600px; height: auto; display: block; margin: auto;">
+      <figcaption style="text-align: center;"><b>Figure 1</b>: Example of the pkb (pka) Calculate EXCEL file.</figcaption>
+  </figure>
+
+
+<div class="upload-container">
+    <h3>4. Upload EXCEL File</h3>
+    
+    
+    <form id="upload-form" method="post" enctype="multipart/form-data">
+        <label for="file-upload">Upload EXCEL File:</label>
+        <input type="file" id="file-upload" name="excel_file" accept=".xlsx,.xls">
+        <button type="submit">Upload</button>
+    </form>
+    
+
+<div id="validation-result" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc; display: none;">
+    <h3>Validation Results:</h3>
+    <div id="result-content"></div> 
+</div>
+
+    
+    <button id="start-button">Start</button>
+
+    
+    <div id="elapsed-time">Elapsed Time:</div>
+    
+    
+    <div id="error-message" style="display: none;"></div>
+    
+    
+    <div class="encrypted-id-container" id="encrypted-id-container" style="display: none;">
+        <label>Encrypted ID:</label>
+        <span id="encrypted-id"></span>
+        <button class="copy-button" id="copy-button">Copy</button>
+    </div>
+</div>
+      
+      
+  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+      $(document).ready(function(){
+          $('#upload-form').on('submit', function(e){
+              e.preventDefault();
+              
+              var formData = new FormData(this);
+              
+              $.ajax({
+                  url: "{% url 'autocompute:upload_excel_QcCoumpute_HTQC_pka_pkb' %}",
+                  type: "POST",
+                  data: formData,
+                  processData: false,
+                  contentType: false,
+                  success: function(response) {
+
+                    $('#validation-result').show();
+                    $('#result-content').html(response.validation_result);
+                  },
+                  error: function(response) {
+
+                      alert("Upload Failed: " + response.responseJSON.error);
+                  }
+              });
+          });
+      });
+  </script>
+</div>
+
+<script>
+
+    document.getElementById('upload-form').onsubmit = function(event) {
+        const fileInput = document.getElementById('file-upload');
+        const file = fileInput.files[0];
+        if (!file) {
+            alert('请上传一个文件');
+            return false;
+        }
+        const fileType = file.name.split('.').pop();
+        if (fileType !== 'xlsx' && fileType !== 'xls') {
+            alert('请上传EXCEL类型的文件');
+            event.preventDefault();
+        }
+    };
+
+
+    document.getElementById('start-button').addEventListener('click', startProcessing);
+
+    function startProcessing() {
+        
+
+    document.getElementById('start-button').disabled = true;
+    const formData = new FormData(document.getElementById('upload-form'));
+
+
+    const startTime = new Date();
+    
+
+    function updateElapsedTime() {
+        const now = new Date();
+        const elapsedTime = Math.floor((now - startTime) / 1000);
+        document.getElementById('elapsed-time').textContent = `Elapsed Time: ${elapsedTime} seconds`;
+        
+
+        if (!taskCompleted) {
+            setTimeout(updateElapsedTime, 1000);
+        }
+    }
+    
+
+    let taskCompleted = false;
+    updateElapsedTime();
+    
+    fetch("{% url 'autocompute:process_excel_QcCoumpute_HTQC_pka_pkb' %}", {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json();
+            } else {
+                return response.text().then(text => {
+                    throw new Error(`Expected JSON but got: ${text}`);
+                });
+            }
+        })
+        .then(data => {
+            if (data.encrypted_id) {
+                taskCompleted = true;
+
+
+                const encryptedIdContainer = document.getElementById('encrypted-id-container');
+                const encryptedIdSpan = document.getElementById('encrypted-id');
+                encryptedIdSpan.textContent = data.encrypted_id;
+                encryptedIdContainer.style.display = 'block';
+
+
+                alert('Please copy this ID and keep it in a safe place, then you can check whether the task you submitted is completed or not in the ‘Query’ screen under the main directory.');
+        
+
+                document.getElementById('copy-button').addEventListener('click', function() {
+
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = data.encrypted_id;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+
+
+                    alert('Encrypted ID copied to clipboard!');
+                });
+            } else if (data.error) {
+
+                const errorMessageDiv = document.getElementById('error-message');
+                errorMessageDiv.textContent = `Processing failed: ${data.error}\n\nStdout:\n${data.stdout}\n\nStderr:\n${data.stderr}`;
+                errorMessageDiv.style.display = 'block';
+            } else {
+                const errorMessageDiv = document.getElementById('error-message');
+                errorMessageDiv.textContent = 'Processing failed, please try again!';
+                errorMessageDiv.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const errorMessageDiv = document.getElementById('error-message');
+            errorMessageDiv.textContent = 'An unexpected error occurred. Please try again later.';
+            errorMessageDiv.style.display = 'block';
+        });
+    }
+
+
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock content %}

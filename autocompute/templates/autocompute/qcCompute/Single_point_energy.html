@@ -1,0 +1,212 @@
+{% extends 'autocompute/autocompute_base.html' %}
+{% load static %}
+
+{% block navbar %} 
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Database' %}">Database</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:MDCompute' %}">MDCompute</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'home:homepage' %}">Home</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:QcCompute_base' %}">Return</a>
+  </li>
+{% endblock navbar %}
+
+{% block content %}
+<style>
+    ol li {
+        margin-bottom: 20px; 
+    }
+    h1, h2, h3, p {
+        margin: 0.5px 0;
+        font-size: 1.5em; 
+    }
+    p, input, button {
+        font-size: 1em;
+    }
+    input, button {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+    th {
+        background-color: #f4f4f4;
+    }
+    
+    #excelData {
+    max-width: 100%;    
+    overflow-x: scroll; 
+    border: 1px solid #ddd; 
+    white-space: nowrap;    
+    }
+
+  </style>
+
+
+    <script type="text/javascript" language="javascript" src="{% static 'jsmol/jsme/jsme/jsme.nocache.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jsmol/JSmol.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jsmol/js/JSmolJME.js' %}"></script>
+    
+    <script type="text/javascript">
+    
+    var jmol="jmol";
+    var jme = "jme";
+    
+    var JmolInfo = {
+        width: 500,
+        height: 300,
+        debug: false,
+        color: "black",
+        use: "HTML5",
+      addSelectionOptions: true,
+        serverURL: "https://chemapps.stolaf.edu/jmol/jsmol/php/jsmol.php",
+        jarPath: "{% static 'jsmol/java' %}",
+        jarFile: "JmolAppletSigned.jar",
+        j2sPath: "{% static 'jsmol/j2s' %}",
+        isSigned: true,
+
+        console: "none",
+        script: ""
+    }
+    
+    var JMEInfo = {     
+        use: "HTML5",
+      visible: true
+
+
+
+
+
+      ,"options" : "nocanonize"
+
+    }
+    
+
+    Jmol.setGrabberOptions([["$", "NCI"]])
+            
+    </script>
+
+<div style="padding: 20px;">
+    <h1>1. Writing Molecule Structure</h1>
+    <p>
+        User can draw the molecular structure for quantum chemistry calculations in the “2D” drawing box on the right. After drawing, click the smiley icon in the upper left corner to convert it to a SMILES format, or click the “3D” button to switch to a 3D view and inspect the molecular structure. The visualization is powered by the JSmol plugin. If you already have a SMILES string prepared, you can skip this step.
+    </p>
+    <table width="100%" cellpadding="10">
+        <tr>
+            <td>
+                <a href="javascript:Jmol.show2d(jmol, true)">2D</a>
+                <a href="javascript:Jmol.show2d(jmol, false)">3D</a>
+                <br>
+                <script>
+                    jmol = Jmol.getApplet(jmol, JmolInfo);
+                    jme = Jmol.getJMEApplet(jme, JMEInfo, jmol);
+                </script>
+            </td>
+        </tr>
+    </table>
+
+    
+    <h2>2. User Input</h2>
+    
+    <form id="upload-form" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        
+        <label for="nameInput">Name:</label><br>
+        <input type="text" id="nameInput" name="nameInput" placeholder="Enter your name" required><br>
+        
+        
+        <label for="smilesInput">SMILES:</label><br>
+        <input type="text" id="smilesInput" name="smilesInput" placeholder="Enter the SMILES string" required><br>
+        
+        
+        <button type="submit" id="start-button" class="btn btn-primary">Start</button>
+    </form>
+
+    
+    <div id="excelData" style="margin-top: 20px;">
+        
+    </div>
+
+    
+    <div id="error-message" style="color: red; display: none;"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script>
+        $(document).ready(function(){
+
+            $('#upload-form').on('submit', function(e){
+                e.preventDefault();
+                
+                var formData = new FormData(this);
+                
+
+                $('#start-button').prop('disabled', true);
+                    alert("File uploaded successfully, starting computation!");
+
+                $.ajax({
+                    url: "{% url 'autocompute:process_excel_QcCoumpute_single_point_energy' %}",
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        console.log('Response from server:', response.excel_data);
+
+                        if (response.excel_data) {
+                            renderExcelData(response.excel_data);
+                        } else if (response.error) {
+
+                            $('#error-message').text(response.error).show();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#error-message').text('An unexpected error occurred: ' + error).show();
+                    }
+                });
+            });
+            
+
+            function renderExcelData(excel_data) {
+                var tableHtml = '<table class="table table-striped table-bordered"><thead><tr>';
+                
+
+                excel_data.headers.forEach(function(header) {
+                    tableHtml += '<th>' + header + '</th>';
+                });
+                
+                tableHtml += '</tr></thead><tbody>';
+                
+
+                excel_data.rows.forEach(function(row) {
+                    tableHtml += '<tr>';
+                    row.forEach(function(cell) {
+                        tableHtml += '<td>' + cell + '</td>';
+                    });
+                    tableHtml += '</tr>';
+                });
+                
+                tableHtml += '</tbody></table>';
+                
+
+                $('#excelData').html(tableHtml);
+            }
+            
+        });
+    </script>
+  
+{% endblock content %}

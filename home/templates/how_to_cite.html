@@ -1,0 +1,296 @@
+{% extends 'home_base.html'%}
+{% load static %}
+
+{% block head %} 
+
+<title>How to Cite</title>
+
+{% endblock head %}
+
+{% block content %}
+<style>
+  
+  .cite-page {
+      background:
+          radial-gradient(circle at top left, rgba(31, 87, 140, 0.10), transparent 28%),
+          linear-gradient(180deg, #f5f8fc 0%, #edf3f9 100%);
+      padding: 36px 18px 56px;
+  }
+
+  .cite-shell {
+      max-width: 1180px;
+      margin: 0 auto;
+  }
+
+  
+  .cite-hero {
+      position: relative;
+      overflow: hidden;
+      padding: 34px 36px;
+      border-radius: 28px;
+      background: linear-gradient(135deg, #12314f 0%, #1f578c 56%, #3f8bc8 100%);
+      color: #ffffff;
+      box-shadow: 0 24px 48px rgba(18, 49, 79, 0.16);
+      margin-bottom: 26px;
+  }
+
+  .cite-hero::before,
+  .cite-hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+  }
+
+  .cite-hero::before {
+      width: 240px;
+      height: 240px;
+      right: -70px;
+      top: -120px;
+  }
+
+  .cite-hero::after {
+      width: 150px;
+      height: 150px;
+      right: 180px;
+      bottom: -70px;
+  }
+
+  .cite-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      margin-bottom: 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+  }
+
+  .cite-hero h1 {
+      margin: 0 0 12px;
+      font-size: 36px;
+      color: #ffffff;
+  }
+
+  .cite-hero p {
+      margin: 0;
+      max-width: 820px;
+      font-size: 16px;
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.9);
+  }
+
+  .cite-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
+      gap: 24px;
+      margin-bottom: 24px;
+  }
+
+  .citation-card,
+  .module-card {
+      padding: 28px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(19, 53, 86, 0.08);
+      box-shadow: 0 16px 32px rgba(24, 56, 89, 0.08);
+  }
+
+  .citation-card h2,
+  .module-card h2 {
+      margin: 0 0 12px;
+      font-size: 24px;
+      color: #173450;
+  }
+
+  .citation-card p,
+  .module-card p {
+      margin: 0 0 16px;
+      color: #536374;
+      line-height: 1.8;
+  }
+
+  .must-cite-note {
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: linear-gradient(90deg, rgba(255, 242, 226, 0.95), rgba(255, 248, 238, 0.95));
+      border: 1px solid rgba(224, 145, 54, 0.2);
+      color: #935315;
+      font-weight: 700;
+      line-height: 1.7;
+  }
+
+  .citation-entry {
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: #f8fbfe;
+      border: 1px solid #e2ebf3;
+      color: #32485f;
+      line-height: 1.8;
+      margin-bottom: 18px;
+  }
+
+  .citation-entry strong {
+      color: #173450;
+  }
+
+  .citation-entry a {
+      color: #1b5e98;
+      word-break: break-all;
+  }
+
+  .citation-entry a:hover {
+      color: #123f68;
+      text-decoration: none;
+  }
+
+  .bibtex-block {
+      margin: 0;
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: #13283e;
+      color: #e9f2fb;
+      overflow-x: auto;
+      line-height: 1.7;
+  }
+
+  .module-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 14px;
+  }
+
+  .module-list li {
+      position: relative;
+      padding: 16px 16px 16px 44px;
+      border-radius: 18px;
+      background: #f6f9fc;
+      color: #31475d;
+      line-height: 1.8;
+  }
+
+  .module-list li::before {
+      content: "";
+      position: absolute;
+      top: 23px;
+      left: 18px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1f578c 0%, #63a4df 100%);
+      box-shadow: 0 0 0 5px rgba(79, 143, 202, 0.12);
+  }
+
+  .module-name {
+      display: inline-flex;
+      margin-bottom: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #e9f2fb;
+      color: #1d568c;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+  }
+
+  @media (max-width: 991px) {
+      .cite-grid {
+          grid-template-columns: 1fr;
+      }
+  }
+
+  @media (max-width: 767px) {
+      .cite-page {
+          padding: 24px 14px 40px;
+      }
+
+      .cite-hero,
+      .citation-card,
+      .module-card {
+          padding: 22px;
+          border-radius: 20px;
+      }
+
+      .cite-hero h1 {
+          font-size: 28px;
+      }
+  }
+</style>
+
+<section class="cite-page">
+  <div class="cite-shell">
+    <section class="cite-hero">
+      <span class="cite-eyebrow">Citation Guide</span>
+      <h1>How to Cite CEMP and Its Modules</h1>
+      <p>
+        If you use any functionality of the CEMP platform, the CEMP platform article must be cited.
+        If your work additionally uses specific modules such as Polymer, Ionic Liquid, or Autocompute,
+        please also cite the corresponding module-specific publications listed below.
+      </p>
+    </section>
+
+    <section class="cite-grid">
+      <div class="citation-card">
+        <h2>Mandatory Citation for CEMP</h2>
+        <div class="must-cite-note">
+          If CEMP is used in your work, the following arXiv article is a required citation.
+        </div>
+
+        <div class="citation-entry">
+          Wang, Jifeng; Ju, Jiazhe; Wang, Ying.
+          <strong>CEMP: a platform unifying high-throughput online calculation, databases and predictive models for clean energy materials</strong>.
+          arXiv preprint <em>arXiv:2507.04423</em>, 2025.
+          <br/>
+          <a href="https://arxiv.org/abs/2507.04423" target="_blank" rel="noopener noreferrer">https:
+        </div>
+
+        <p><strong>BibTeX citation:</strong></p>
+        <pre class="bibtex-block"><code class="language-bibtex">@misc{wang2025cemp,
+  title        = {CEMP: a platform unifying high-throughput online calculation, databases and predictive models for clean energy materials},
+  author       = {Jifeng Wang and Jiazhe Ju and Ying Wang},
+  year         = {2025},
+  eprint       = {2507.04423},
+  archivePrefix= {arXiv},
+  primaryClass = {cond-mat.mtrl-sci},
+  url          = {https:
+}</code></pre>
+      </div>
+
+      <aside class="module-card">
+        <h2>Additional Module-Specific Citations</h2>
+        <p>
+          The following references are additionally required when the corresponding module has been used in your study.
+        </p>
+
+        <ul class="module-list">
+          <li>
+            <span class="module-name">Polymer</span>
+            Wang, J.-F.; Sun, Y.-B.; Chen, Q.-T.; Ji, F.-F.; Song, Y.-Y.; Ruan, M.-Y.; Wang, Y.
+            OpenPoly: a polymer database empowering benchmarking and multi-property predictions.
+            <em>Chinese J Polym Sci</em> 2025, <strong>43</strong> (10), 1749-1760.
+          </li>
+          <li>
+            <span class="module-name">Ionic Liquid</span>
+            Wang, J.; Wang, Y. BRICS-Based Generation and AI-Assisted Screening of Ionic Liquids with Mechanistic Insights into Lithium Transport in Electrolytes.
+            <em>Journal of Chemical Information and Modeling</em> 2025, <strong>65</strong> (20), 10961-10976.
+            DOI: 10.1021/acs.jcim.5c01824.
+          </li>
+          <li>
+            <span class="module-name">Autocompute</span>
+            Wang, J.; Wang, Y. Strategies to improve the quantum computation accuracy for electrochemical windows of ionic liquids.
+            <em>The Journal of Physical Chemistry B</em> 2024, <strong>128</strong> (8), 1943-1952.
+          </li>
+        </ul>
+      </aside>
+    </section>
+  </div>
+</section>
+{% endblock content %}

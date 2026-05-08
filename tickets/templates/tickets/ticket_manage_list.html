@@ -1,0 +1,230 @@
+{% extends 'home_base.html' %}
+
+{% block content %}
+<style>
+  .ticket-manage-page {
+    background: linear-gradient(180deg, #f4f8fb 0%, #eef3f8 100%);
+    padding: 36px 18px 56px;
+  }
+
+  .ticket-manage-shell {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .ticket-manage-hero,
+  .ticket-manage-card {
+    border-radius: 24px;
+    border: 1px solid rgba(21, 54, 87, 0.08);
+    box-shadow: 0 18px 36px rgba(16, 44, 72, 0.08);
+    background: rgba(255, 255, 255, 0.96);
+  }
+
+  .ticket-manage-hero {
+    padding: 28px 32px;
+    margin-bottom: 24px;
+  }
+
+  .ticket-manage-hero h1,
+  .ticket-manage-card h2 {
+    margin: 0 0 10px;
+    color: #173450;
+  }
+
+  .ticket-manage-card {
+    padding: 24px 28px;
+  }
+
+  .ticket-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+
+  .ticket-filter-field label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 700;
+    color: #173450;
+  }
+
+  .ticket-manage-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .ticket-manage-table th,
+  .ticket-manage-table td {
+    padding: 14px 10px;
+    border-bottom: 1px solid #e5edf5;
+    text-align: left;
+    vertical-align: top;
+    color: #4f6377;
+  }
+
+  .ticket-manage-table th {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #38506a;
+  }
+
+  .ticket-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    background: #edf4fb;
+    color: #1f578c;
+  }
+
+  .ticket-badge.waiting {
+    background: #fff4cf;
+    color: #8a6500;
+  }
+
+  .ticket-badge.completed {
+    background: #ddf7e7;
+    color: #1f6b3b;
+  }
+
+  .ticket-badge.closed {
+    background: #e8edf2;
+    color: #4c5d6e;
+  }
+
+  .ticket-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+
+  .ticket-manage-empty {
+    padding: 28px 0 8px;
+    text-align: center;
+    color: #4f6377;
+  }
+
+  @media (max-width: 900px) {
+    .ticket-filter-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .ticket-filter-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<section class="ticket-manage-page">
+  <div class="ticket-manage-shell">
+    <div class="ticket-manage-hero">
+      <h1>Ticket Management</h1>
+      <p>Use this page to review all user tickets, filter by status or category, and enter a dedicated reply screen without relying on the default Django Admin inline workflow.</p>
+    </div>
+
+    <div class="ticket-manage-card">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <div class="ticket-toolbar">
+        <h2>All Tickets</h2>
+        <a class="btn btn-outline-secondary" href="/admin/tickets/ticket/?native=1">Open Native Django Admin</a>
+      </div>
+
+      <form method="get" class="mb-4">
+        <div class="ticket-filter-grid">
+          <div class="ticket-filter-field">
+            <label for="ticket-q">Search</label>
+            <input id="ticket-q" class="form-control" type="text" name="q" value="{{ query }}" placeholder="Subject / username / email">
+          </div>
+          <div class="ticket-filter-field">
+            <label for="ticket-status">Status</label>
+            <select id="ticket-status" class="form-select" name="status">
+              <option value="">All</option>
+              {% for value, label in status_choices %}
+                <option value="{{ value }}"{% if selected_status == value %} selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="ticket-filter-field">
+            <label for="ticket-category">Category</label>
+            <select id="ticket-category" class="form-select" name="category">
+              <option value="">All</option>
+              {% for value, label in category_choices %}
+                <option value="{{ value }}"{% if selected_category == value %} selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="ticket-filter-field">
+            <label for="ticket-priority">Priority</label>
+            <select id="ticket-priority" class="form-select" name="priority">
+              <option value="">All</option>
+              {% for value, label in priority_choices %}
+                <option value="{{ value }}"{% if selected_priority == value %} selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          <button type="submit" class="btn btn-primary">Apply Filters</button>
+          <a class="btn btn-outline-secondary" href="{% url 'tickets:manage_list' %}">Reset</a>
+        </div>
+      </form>
+
+      {% if tickets %}
+        <table class="ticket-manage-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Subject</th>
+              <th>User</th>
+              <th>Category</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Updated</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ticket in tickets %}
+              <tr>
+                <td>#{{ ticket.id }}</td>
+                <td>{{ ticket.subject }}</td>
+                <td>
+                  <div>{{ ticket.creator.username }}</div>
+                  <small>{{ ticket.creator.email }}</small>
+                </td>
+                <td>{{ ticket.get_category_display }}</td>
+                <td>{{ ticket.get_priority_display }}</td>
+                <td>
+                  <span class="ticket-badge {{ ticket.status_presentation.tone }}">
+                    {{ ticket.status_presentation.label }}
+                  </span>
+                </td>
+                <td>{{ ticket.updated_at|date:"Y-m-d H:i" }}</td>
+                <td><a class="btn btn-sm btn-primary" href="{% url 'tickets:manage_detail' ticket.id %}">Handle Ticket</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="ticket-manage-empty">
+          No tickets matched the current filters.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock content %}

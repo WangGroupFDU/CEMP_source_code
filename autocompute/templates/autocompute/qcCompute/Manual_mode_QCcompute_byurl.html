@@ -1,0 +1,247 @@
+{% extends 'autocompute/autocompute_base.html' %}
+{% load static %}
+
+{% block navbar %} 
+<li class="nav-item active">
+<a class="nav-link" href="{% url 'autocompute:Database' %}">Database</a>
+</li>
+<li class="nav-item active">
+<a class="nav-link" href="{% url 'autocompute:MDCompute' %}">MDCompute</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:SMILESDrawer' %}">SMILESDrawer</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Visualization' %}">Visualization</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:from_smiles_get_name' %}">GetName</a>
+</li>
+<li class="nav-item active">
+<a class="nav-link" href="{% url 'home:homepage' %}">Home</a>
+</li>
+<li class="nav-item active">
+<a class="nav-link" href="{% url 'autocompute:QcCompute_base' %}">Return</a>
+</li>
+{% endblock navbar %}
+
+{% block content %}
+
+<style>
+    
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa; 
+    }
+    
+    .container {
+        width: 80%;
+        margin: 20px auto;
+        padding: 20px;
+        border-radius: 6px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    
+    .introduction, .operation {
+        margin-bottom: 30px;
+    }
+    
+    h2 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        color: #333333;
+    }
+    
+    label {
+        display: block;
+        margin: 15px 0 5px;
+        font-weight: bold;
+        color: #555555;
+    }
+    
+    input[type="text"],
+    input[type="number"],
+    input[type="file"],
+    select {
+        width: 300px;
+        padding: 8px;
+        border: 1px solid #cccccc;
+        border-radius: 4px;
+        margin-bottom: 5px;
+    }
+    
+    .hint {
+        font-size: 0.9em;
+        color: #888888;
+        margin-bottom: 10px;
+    }
+    
+    .start-button {
+        margin-top: 20px;
+    }
+    
+    button {
+        background-color: #28a745; 
+        color: #ffffff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+    button:hover {
+        background-color: #218838; 
+    }
+    </style>
+
+<div class="container">
+    
+    <div class="introduction">
+        
+        <h2>Manual Mode QCcompute Introduction</h2>
+        <p>
+            When the user's input structure is very complex and cannot be easily converted from SMILES to a 3D structure, this module supports uploading an xyz file and customizing the total charge and spin multiplicity.
+        </p>
+    </div>
+
+    
+    <div class="operation">
+        <h2>Operation Panel</h2>
+        
+        
+        <label for="qc_software">Quantum Chemistry Calculation Software</label>
+        <select id="qc_software" name="qc_software" disabled>
+            <option value="orca" selected>ORCA</option>
+            <option value="gaussian">Gaussian</option>
+        </select>
+        
+        
+        <label for="system_name">Name</label>
+        <input type="text" id="system_name" name="system_name" placeholder="Enter system name">
+        <div class="hint">The system name should consist of letters, underscores, and digits, like "TFSI_1".</div>
+        
+        
+        <label for="xyz_file">Upload xyz file</label>
+        <input type="file" id="xyz_file" name="xyz_file" accept=".xyz">
+        <div class="hint">xyz files can be obtained from gview, Avogadro, Materials Studio...</div>
+        
+        
+        <label for="total_charge">Total Charge</label>
+        <input type="number" id="total_charge" name="total_charge" placeholder="Enter an integer">
+        
+        
+        <label for="spin_multiplicity">Spin Multiplicity</label>
+        <input type="number" id="spin_multiplicity" name="spin_multiplicity" placeholder="Enter an integer">
+        
+        
+        <label for="calc_type">Calculation Type</label>
+        <select id="calc_type" name="calc_type">
+            <option value="opt+freq_energy" selected>opt+freq_energy</option>
+            
+            <option value="energy">energy</option>
+        </select>
+        
+        
+        <label for="calc_condition">Calculation Condition</label>
+        <input type="text" id="calc_condition" name="calc_condition" placeholder="Default for opt+freq_energy" disabled>
+        
+        
+        <div class="start-button">
+            <button type="button" id="start-button">Start</button>
+        </div>
+    </div>
+    
+    <div class="encrypted-id-container" id="encrypted-id-container">
+        <label>Encrypted ID:</label>
+        <span id="encrypted-id"></span>
+        <button class="copy-button" id="copy-button">Copy</button>
+    </div>
+</div>
+
+<script>
+    
+    document.getElementById('start-button').addEventListener('click', startProcessing);
+    
+    
+    function startProcessing() {
+
+        document.getElementById('start-button').disabled = true;
+    
+
+        let formData = new FormData();
+    
+
+        let qcSoftware = document.getElementById('qc_software').value;
+        let systemName = document.getElementById('system_name').value;
+        let xyzFile = document.getElementById('xyz_file').files[0];
+        let totalCharge = document.getElementById('total_charge').value;
+        let spinMultiplicity = document.getElementById('spin_multiplicity').value;
+        let calcType = document.getElementById('calc_type').value;
+        let calcCondition = document.getElementById('calc_condition').value;
+    
+
+        formData.append('qc_software', qcSoftware);
+        formData.append('system_name', systemName);
+        if (xyzFile) {
+            formData.append('xyz_file', xyzFile);
+        }
+        formData.append('total_charge', totalCharge);
+        formData.append('spin_multiplicity', spinMultiplicity);
+        formData.append('calc_type', calcType);
+        formData.append('calc_condition', calcCondition);
+    
+
+        const postUrl = (calcType === 'energy')
+        ? "{% url 'autocompute:manual_mode_qccompute_byurl_energy' %}"
+        : "{% url 'autocompute:manual_mode_qccompute_byurl' %}";
+
+
+        fetch(postUrl, {
+        method: 'POST',
+        body: formData
+        })
+        .then(response => {
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+
+            if (data.encrypted_id) {
+                let encryptedIdSpan = document.getElementById('encrypted-id');
+                let encryptedIdContainer = document.getElementById('encrypted-id-container');
+                encryptedIdSpan.textContent = data.encrypted_id;
+                encryptedIdContainer.style.display = 'block';
+    
+
+                alert('Please copy this Encrypted ID and keep it in a safe place.');
+    
+
+                document.getElementById('copy-button').addEventListener('click', function() {
+
+                    let tempInput = document.createElement('textarea');
+                    tempInput.value = data.encrypted_id;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+    
+                    alert('Encrypted ID copied to clipboard!');
+                });
+            } else {
+
+                alert('No encrypted_id returned from server.');
+            }
+        })
+        .catch(error => {
+
+            console.error('Error:', error);
+            alert('An error occurred. Please try again later.');
+        })
+    }
+</script>
+{% endblock content %}

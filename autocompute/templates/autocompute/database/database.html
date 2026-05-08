@@ -1,0 +1,55 @@
+{% extends 'autocompute/database/database_base.html'%}
+{% load static %}
+
+{% block head %} 
+
+
+
+
+<script
+type="text/javascript"
+src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.js"
+></script>
+
+
+
+<link rel="stylesheet" type="text/css"  href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" type="text/css"  href="https://cdn.datatables.net/buttons/1.4.0/css/buttons.dataTables.min.css" />
+
+<script type="text/javascript" src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.flash.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.colVis.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+
+<script type="text/javascript"
+src="https://cdn.datatables.net/fixedheader/3.2.3/js/dataTables.fixedHeader.min.js"></script>
+{% endblock head %}
+
+{% block content %}
+<style>
+    p {
+    font-size: 1em; 
+    white-space: pre-line; 
+    line-height: 1.5; 
+}
+</style>
+
+<p>
+    Users can select the desired database from the options in the upper right corner. Currently, there are six databases available: <b>Cation, Anion, IL (Ionic Liquid), Electrolyte, Li-electrolyte, and Salt (Li+, Na+, K+ salt).</b>
+
+	1.	<b>Cation Database</b>: Contains 431 entries of cation data, where all cations are monovalent (+1 charge). The SMILES  is sourced from the ILthermo database.
+	2.	<b>Anion Database</b>: Contains 63 entries of anion data, where all anions are monovalent (-1 charge). The SMILES  is sourced from the ILthermo database.
+	3.	<b>IL (Ionic Liquid) Database:</b> Contains 1065 entries of ionic liquid data, with both anions and cations being monovalent. The SMILES is sourced from the ILthermo database.
+	4.	<b>Li-electrolyte Database</b>: Contains 4198 entries of quantum chemistry calculation results for dimers formed by Li+ and organic electrolytes. The SMILES of the electrolytes is sourced from the publication: Data-Driven Insight into the Reductive Stability of Ion−Solvent Complexes in Lithium Battery Electrolytes.
+	5.	<b>Salt Database</b>: Contains 499 entries of salts formed by Li+, Na+, and K+ with corresponding anions. The anions’ SMILES  is sourced from the ILthermo database.
+</p>
+
+{% endblock content %}

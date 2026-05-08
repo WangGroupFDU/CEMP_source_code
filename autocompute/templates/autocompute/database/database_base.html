@@ -1,0 +1,28 @@
+{% extends 'autocompute/autocompute_base.html'%}
+{% load static %}
+
+{%block navbar%}
+</li>
+<li class="nav-item active">
+  <a class="nav-link" href="{% url 'autocompute:QcCompute_base' %}">QcCompute</a>
+</li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:MDCompute' %}">MDCompute</a>
+  </li>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:SMILESDrawer' %}">SMILESDrawer</a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:Visualization' %}">Visualization</a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:from_smiles_get_name' %}">GetName</a>
+    </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'home:homepage' %}">Home</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Database' %}">Return</a>
+  </li>
+{%endblock navbar%}

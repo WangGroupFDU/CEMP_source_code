@@ -1,0 +1,279 @@
+{% extends 'crystals_base.html' %}
+{% load static %}
+<html lang="{{ lang|default:'en' }}">
+{% block head %} 
+<style>
+    
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f2f2f2;
+    }
+    
+    .intro-section {
+      background-color: #ffffff;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .upload-section {
+      background-color: #ffffff;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .model-selection, .file-upload {
+      width: 48%;
+    }
+    
+    label {
+      font-weight: bold;
+    }
+    select, input[type="file"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    
+    .table-section {
+      background-color: #ffffff;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: center;
+    }
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+    
+    .model-accuracy {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .accuracy-images {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+    }
+    .accuracy-images img {
+      max-width: 30%;
+      height: auto;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    @media (max-width: 768px) {
+      .accuracy-images img {
+        max-width: 100%;
+      }
+      .upload-section {
+        flex-direction: column;
+      }
+      .model-selection, .file-upload {
+        width: 100%;
+      }
+    }
+  </style>
+
+{% endblock head %}
+
+{% block content %}
+ 
+ <div class="intro-section">
+    <h1>Crystal Property Prediction</h1>
+    <p>This page predicts the average voltage (V), gravimetric capacity (mAh/g), and gravimetric energy density (mWh/g) of crystals. The applicable domain includes crystals containing Li, Na, Mg, Ca, K, Zn, and Al.</p>
+  </div>
+
+  
+  <div class="upload-section">
+    
+    <div class="model-selection">
+      <label for="modelSelect">Select Model:</label>
+      <select id="modelSelect">
+        <option value="MOCO+GAT">MOCO+GAT</option>
+        <option value="GAT">GAT</option>
+        <option value="GCN">GCN</option>
+      </select>
+    </div>
+    
+    <div class="file-upload">
+      <label for="cifFile">Choose CIF file:</label>
+      <input type="file" id="cifFile" accept=".cif">
+      <button id="uploadButton">Upload</button>
+    </div>
+  </div>
+
+  
+  <div class="table-section">
+    <table>
+      <thead>
+        <tr>
+          <th>Average Voltage (V)</th>
+          <th>Gravimetric Capacity (mAh/g)</th>
+          <th>Gravimetric Energy (mWh/g)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          
+          <td id="avgVoltage"></td>
+          <td id="gravCapacity"></td>
+          <td id="gravEnergy"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  
+
+<div class="model-accuracy">
+    <h2>Model Accuracy (Test Dataset)</h2>
+    <table>
+      <thead>
+        <tr>
+          
+          <th></th>
+          
+          <th>Average Voltage Accuracy</th>
+          <th>Gravimetric Capacity Accuracy</th>
+          <th>Gravimetric Energy Accuracy</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <tr>
+          <th>MOCO+GAT</th>
+          <td>
+            
+            <img src="{% static 'images/average_voltage_MOCO+GAT.png' %}" alt="MOCO+GAT Average Voltage Accuracy" style="width:200px; height:auto;">
+          </td>
+          <td>
+            
+            <img src="{% static 'images/capacity_grav_MOCO+GAT.png' %}" alt="MOCO+GAT Gravimetric Capacity Accuracy" style="width:200px; height:auto;">
+          </td>
+          <td>
+            
+            <img src="{% static 'images/energy_grav_MOCO+GAT.png' %}" alt="MOCO+GAT Gravimetric Energy Accuracy" style="width:200px; height:auto;">
+          </td>
+        </tr>
+        
+        <tr>
+          <th>GAT</th>
+          <td>
+            
+            <img src="{% static 'images/average_voltage_GAT.png' %}" alt="GAT Average Voltage Accuracy" style="width:200px; height:auto;">
+          </td>
+          <td>
+            
+            <img src="{% static 'images/capacity_grav_GAT.png' %}" alt="GAT Gravimetric Capacity Accuracy" style="width:200px; height:auto;">
+          </td>
+          <td>
+            
+            <img src="{% static 'images/energy_grav_GAT.png' %}" alt="GAT Gravimetric Energy Accuracy" style="width:200px; height:auto;">
+          </td>
+        </tr>
+        
+        <tr>
+          <th>GCN</th>
+          <td>
+            
+            <img src="{% static 'images/average_voltage_GCN.png' %}" alt="GCN Average Voltage Accuracy" style="width:200px; height:auto;">
+          </td>
+          <td>
+            
+            <img src="{% static 'images/capacity_grav_GCN.png' %}" alt="GCN Gravimetric Capacity Accuracy" style="width:200px; height:auto;">
+          </td>
+          <td>
+            
+            <img src="{% static 'images/energy_grav_GCN.png' %}" alt="GCN Gravimetric Energy Accuracy" style="width:200px; height:auto;">
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+{% endblock content %}
+
+{% block script %}
+<script>
+
+    document.getElementById("uploadButton").addEventListener("click", function(event) {
+      event.preventDefault();
+
+
+      const formData = new FormData();
+      const modelSelect = document.getElementById("modelSelect").value;
+      formData.append("modelSelect", modelSelect);
+      const cifFile = document.getElementById("cifFile").files[0];
+      if (!cifFile) {
+        alert("Please choose a CIF file.");
+        return;
+      }
+      formData.append("cifFile", cifFile);
+
+
+      fetch("{% url 'crystals:crystal_upload_prediction' %}", {
+        method: "POST",
+        body: formData
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+
+        return response.json();
+      })
+      .then(data => {
+        if (data.error) {
+
+          alert(data.error);
+        } else {
+
+
+          document.getElementById("avgVoltage").innerText = data.average_voltage[0][0];
+          document.getElementById("gravCapacity").innerText = data.capacity_grav[0][0];
+          document.getElementById("gravEnergy").innerText = data.energy_grav[0][0];
+        }
+      })
+      .catch(error => {
+        alert("An error occurred: " + error);
+      });
+    });
+  </script>
+
+{% endblock script %}
+
+</html>

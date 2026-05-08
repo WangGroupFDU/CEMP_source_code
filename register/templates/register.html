@@ -1,0 +1,129 @@
+
+{% extends 'home_base.html'%}
+
+{% block title %} Create Account {% endblock title %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            
+            <div class="alert alert-info mb-4">
+                <h5><i class="fas fa-info-circle"></i> Email Domain Authorization Notice</h5>
+                <p><strong>Limited Authorization Domains:</strong> 126.com, 163.com, qq.com, gmail.com, outlook.com</p>
+                <p>Users with these domains will have <strong>limited authorization</strong> - only able to download database and <strong>not able to submit autocompute tasks</strong>.</p>
+                <p><strong>Full Authorization:</strong> Please use educational (*.edu.*), military (*.mil.*), or government (*.gov.*) domains to get full functionality.</p>
+            </div>
+
+            <form method="post" action="." class="signup-form">
+                {% csrf_token %}
+                <div class="alert alert-dark">
+                    <label for="{{ form.username.id_for_label }}" class="text-justify text-black ">Username (Unique login identifier, linked to your email. Please keep it secure.): </label>
+                    {{ form.username}}
+                </div>
+                <div class="alert alert-dark">
+                    <label for="{{ form.email.id_for_label }}" class="text-justify text-black ">Email Address: </label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <ul>
+                        {% for error in form.email.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                <div class="alert alert-dark">
+                    <label for="{{ form.password1.id_for_label }}" class="text-justify text-black ">Password: </label>
+                    {{ form.password1 }}
+                </div>
+                <div class="alert alert-dark">
+                    <label for="{{ form.password2.id_for_label }}" class="text-justify text-black ">Confirm Password: </label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                    <div class="invalid-feedback">{{ form.password2.errors }}</div>
+                    {% endif %}
+                </div>
+                <button type="submit" class="btn btn btn-dark btn-lg" value="register">Register Account</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.signup-form');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            if (data.success) {
+
+                const emailInput = document.querySelector('input[name="email"]');
+                const email = emailInput ? emailInput.value : '';
+                const limitedDomains = ['126.com', '163.com', 'qq.com', 'gmail.com', 'outlook.com'];
+
+                let isLimitedDomain = false;
+                if (email && email.includes('@')) {
+                    const domain = email.split('@')[1];
+                    isLimitedDomain = limitedDomains.includes(domain);
+                }
+
+                if (isLimitedDomain) {
+
+                    alert('Successfully registered, but Limited Authorization Domains: 126.com, 163.com, qq.com, gmail.com, outlook.com\n\nUsers with these domains will have limited authorization - only able to download database and not able to submit autocompute tasks.');
+                } else {
+                    alert('Registration successful! Redirecting to homepage...');
+                }
+                window.location.href = data.redirect_url || '/';
+            } else {
+
+                let errorMessages = [];
+
+                if (data.errors) {
+                    for (const field in data.errors) {
+                        const fieldErrors = data.errors[field];
+                        fieldErrors.forEach(error => {
+
+                            let fieldName = field;
+                            if (field === 'email') fieldName = 'Email';
+                            if (field === 'username') fieldName = 'Username';
+                            if (field === 'password1') fieldName = 'Password';
+                            if (field === 'password2') fieldName = 'Confirm Password';
+
+                            errorMessages.push(`${fieldName}: ${error}`);
+                        });
+                    }
+                }
+
+                if (errorMessages.length > 0) {
+                    alert('Registration failed:\n\n' + errorMessages.join('\n'));
+                } else {
+                    alert('Registration failed. Please check your input and try again.');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            console.error('Error details:', error.message, error.stack);
+            alert('An error occurred during registration. Please try again. Check console for details.');
+        });
+    });
+});
+</script>
+
+{% endblock content %}

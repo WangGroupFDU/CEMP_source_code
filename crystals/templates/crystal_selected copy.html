@@ -1,0 +1,153 @@
+{% extends 'crystals_base.html'%}
+
+{% block head %} 
+
+<link
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+rel="stylesheet"
+/>
+
+<link
+href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+rel="stylesheet"
+/>
+
+<link
+href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.css"
+rel="stylesheet"
+/>
+
+<script
+type="text/javascript"
+src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.js"
+></script>
+
+
+
+<link rel="stylesheet" type="text/css"  href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" type="text/css"  href="https://cdn.datatables.net/buttons/1.4.0/css/buttons.dataTables.min.css" />
+
+
+
+
+
+<script type="text/javascript" src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.27/build/pdfmake.min.js"></script>
+<script src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.27/build/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.flash.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.colVis.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+
+<script type="text/javascript"
+src="https://cdn.datatables.net/fixedheader/3.2.3/js/dataTables.fixedHeader.min.js"></script>
+{% endblock head %}
+
+{% block content %}
+<div class="panel panel-default">
+  <div class="panel-body">
+    <div class="container-fluid">
+      <div class="row">
+        <h5>Choose Crystal:</h5>
+          <div>
+              <select onchange="window.location.href = this.value;" name="crystal">
+                {% for obj in crystal_list %}
+                  {% if obj.crystal == selected_crystal %}
+                    <option value="/crystals/crystal_selected/?crystal={{ obj.crystal }}" selected>{{ obj.crystal }}</option>
+                  {% else %}
+                    <option value="/crystals/crystal_selected/?crystal={{ obj.crystal }}">{{ obj.crystal }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+          </div>
+         <h5>Show</h5>
+          <select onchange="window.location.href = this.value;">
+            {% if count == 5 %}
+              <option value="/crystals/crystal_selected/?crystal={{selected_crystal}}&count=5" selected>5</option>
+              <option value="/crystals/crystal_selected/?crystal={{selected_crystal}}&count=10">10</option>
+              <option value="/crystals/crystal_selected/?crystal={{selected_crystal}}&count=15">15</option>
+            {% elif count == 10 %}
+              <option value="/crystals/crystal_selected/?crystal={{selected_crystal}}&count=5">5</option>
+              <option value="/crystals/crystal_selected/?crystal={{selected_crystal}}&count=10" selected>10</option>
+              <option value="/crystals/crystal_selected/?crystal={{selected_crystal}}&count=15">15</option>
+            {% else %}
+              <option value="/crystals/crystal_selected/?crystal={{selected_crystal}}&count=5">5</option>
+              <option value="/crystals/crystal_selected/?crystal={{selected_crystal}}&count=10">10</option>
+              <option value="/crystals/crystal_selected/?crystal={{selected_crystal}}&count=15" selected>15</option>
+            {% endif %}
+          </select>
+        <h5>entries</h5>
+      </div>
+    </div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>label</th>
+            <th>band gap</th>
+            <th>chemsys</th>
+            <th>density</th>
+            <th>density atomic</th>
+            <th>deprecated</th>
+            <th>efermi</th>
+            <th>energy above hull</th>
+            <th>energy per atom</th>
+            <th>formation energy per atom</th>
+            <th>formula anonymous</th>
+            <th>formula pretty</th>
+            <th>is gap direct</th>
+            <th>is magnetic</th>
+            <th>is metal</th>
+            <th>is stable</th>
+            <th>nelements</th>
+            <th>nsites</th>
+            <th>num magnetic sites</th>
+            <th>num unique magnetic sites</th>
+            <th>ordering</th>
+            <th>theoretical</th>
+            <th>total magnetization</th>
+            <th>volume</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for obj in property_list %}
+          <tr>
+            <td>{{ obj.label }}</td>
+            <td>{{ obj.band_gap }}</td>
+            <td>{{ obj.chemsys }}</td>
+            <td>{{ obj.density }}</td>
+            <td>{{ obj.density_atomic }}</td>
+            <td>{{ obj.deprecated }}</td>
+            <td>{{ obj.efermi }}</td>
+            <td>{{ obj.energy_above_hull }}</td>
+            <td>{{ obj.energy_per_atom }}</td>
+            <td>{{ obj.formation_energy_per_atom }}</td>
+            <td>{{ obj.formula_anonymous }}</td>
+            <td>{{ obj.formula_pretty }}</td>
+            <td>{{ obj.is_gap_direct }}</td>
+            <td>{{ obj.is_magnetic }}</td>
+            <td>{{ obj.is_metal }}</td>
+            <td>{{ obj.is_stable }}</td>
+            <td>{{ obj.nelements }}</td>
+            <td>{{ obj.nsites }}</td>
+            <td>{{ obj.num_magnetic_sites }}</td>
+            <td>{{ obj.num_unique_magnetic_sites }}</td>
+            <td>{{ obj.ordering }}</td>
+            <td>{{ obj.theoretical }}</td>
+            <td>{{ obj.total_magnetization }}</td>
+            <td>{{ obj.volume }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+  </div>
+</div>
+{% endblock %}

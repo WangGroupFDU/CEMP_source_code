@@ -1,0 +1,231 @@
+{% extends 'autocompute/autocompute_base.html' %}
+{% load static %}
+
+{% block navbar %} 
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Database' %}">Database</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:QcCompute_base' %}">QcCompute</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:MDCompute' %}">MDCompute</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:SMILESDrawer' %}">SMILESDrawer</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Visualization' %}">Visualization</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:from_smiles_get_name' %}">GetName</a>
+</li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'home:homepage' %}">Home</a>
+  </li>
+{% endblock navbar %}
+
+{% block content %}
+<style>
+  ol li {
+      margin-bottom: 20px; 
+  }
+  h1 {
+      font-size: 1.5em; 
+  }
+  h2 {
+      font-size: 1.5em; 
+  }
+  h3 {
+      font-size: 1.5em; 
+  }
+  p {
+      font-size: 1em; 
+      white-space: pre-line; 
+  }
+  h1, h2, h3, p {
+  margin: 0.5px 0; 
+  }
+</style>
+
+<div style="padding: 20px;">
+  <h1>1. Introduction to the Automated Molecular Dynamics Simulation Module</h1>
+    <p>
+        This module enables automated molecular dynamics (MD) simulations using Gromacs 2018.8, with user-defined simulation times (currently capped at a maximum of 5 ns due to computational resource limitations). The module provides a range of computational outputs, including:
+
+        1.	Radial Distribution Function (RDF) and Coordination Number (CN) curves, analyzed at the molecular level.
+        2.	Diffusion coefficients of various system components, also analyzed at the molecular level, derived using the Einstein-Nernst equation.
+        3.	System viscosity, analyzed at the macroscopic level.
+        4.	System density, analyzed at the macroscopic level.
+        5.	Ionic transference numbers within the system, analyzed at the ionic level.
+        6.	System conductivity, analyzed at the macroscopic level.
+        7.	Static dielectric constant of the system, analyzed at the macroscopic level.
+        8.	Potential of Mean Force (PMF) curves for target components, analyzed at the molecular level.
+        9.	Visualization outputs, including system structure diagrams, RDF and CN plots, Mean Square Displacement (MSD) plots, PMF plots, coordination environment diagrams, and simulation snapshots (both component-specific and overall system snapshots).
+        10.	Structure factor, analyzed at the macroscopic level.
+        11.	Strain-stress curves, analyzed at the macroscopic level, which are calculated only when the simulated system comprises pure polymers or polymer/molecular mixtures. Meaningful strain-stress curves require extended simulation times (>50 ns).
+
+    </p>
+
+    <br>
+    <br>
+
+    <h2>2. Important Notes</h2>
+    <p>
+    	1.	Due to computational resource limitations, the maximum allowable simulation time is currently capped at 5 ns, and only one computational task can be run at a time.
+        2.  All relevant parameters must be entered using the provided EXCEL template, adhering strictly to the specified formatting requirements. Detailed instructions for completing the form can be downloaded here. <a href="{% static 'System_tutorial.docx' %}" download="System_tutorial.docx">Download System.xlsx instructions</a>
+        3.	The default force fields used are GAFF, UFF, and Merz. Organic atoms are assigned parameters from GAFF, while metal ions use Merz parameters. If an organic atom lacks a definition in GAFF, UFF parameters will be applied by default. Atomic charges are calculated using RESP and are uniformly scaled to 70% of their original values. These parameters are fixed within the high-throughput computational framework to prevent errors that could result from incorrect user input, ensuring the generation of meaningful results.
+        4.	The current computational parameters are optimized exclusively for systems comprising polymers, organic molecules, or alkali metal salts. It is imperative to ensure that the system does not contain transition metals, particularly elemental metals, as their presence will lead to computational errors.
+    </p>
+    
+    <br>
+    <br>
+
+    
+    <h3>3. Download the EXCEL(System.xlsx) File</h3>
+    
+    <p>
+        <a href="{% static 'download/System.xlsx' %}" download>Download the System.xlsx</a>
+    </p>
+
+    
+    <figure style="text-align: center;">
+      <img src="{% static 'images/HTMD_Example.png' %}" alt="HTMD_Example" style="width: 1000px; height: auto; display: block; margin: auto;">
+      <figcaption style="text-align: center;"><b>Figure 1</b>: Example of the HTMD EXCEL file.</figcaption>
+  </figure>
+
+  <h3>4. Upload the EXCEL(System.xlsx) File</h3>
+    
+    <form id="upload-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="file-upload">Upload EXCEL File:</label>
+        <input type="file" id="file-upload" name="excel_file" accept=".xlsx,.xls">
+        <button type="submit">Upload</button>
+    </form>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $('#upload-form').on('submit', function(e){
+            e.preventDefault();
+            
+            var formData = new FormData(this);
+            
+            $.ajax({
+                url: "{% url 'autocompute:upload_excel_MDCoumpute' %}",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+
+                    alert("Upload Success!");
+                },
+                error: function(response) {
+
+                    alert("Upload Failed: " + response.responseJSON.error);
+                }
+            });
+        });
+    });
+</script>
+
+    
+    <button id="start-button">Start</button>
+
+    
+    <div id="elapsed-time">Elapsed Time: </div>
+
+    
+    <div id="error-message" style="color: red; display: none;"></div>
+
+    
+    <p id="download-link"></p>
+</div>
+
+<script>
+
+    document.getElementById('upload-form').onsubmit = function(event) {
+        const fileInput = document.getElementById('file-upload');
+        const file = fileInput.files[0];
+        if (!file) {
+            alert('请上传一个文件');
+            return false;
+        }
+        const fileType = file.name.split('.').pop();
+        if (fileType !== 'xlsx' && fileType !== 'xls') {
+            alert('请上传EXCEL类型的文件');
+            event.preventDefault();
+        }
+    };
+
+
+    document.getElementById('start-button').addEventListener('click', startProcessing);
+
+    function startProcessing() {
+        
+
+    document.getElementById('start-button').disabled = true;
+    const formData = new FormData(document.getElementById('upload-form'));
+
+
+    const startTime = new Date();
+    
+
+    function updateElapsedTime() {
+        const now = new Date();
+        const elapsedTime = Math.floor((now - startTime) / 1000);
+        document.getElementById('elapsed-time').textContent = `Elapsed Time: ${elapsedTime} seconds`;
+        
+
+        if (!taskCompleted) {
+            setTimeout(updateElapsedTime, 1000);
+        }
+    }
+    
+
+    let taskCompleted = false;
+    updateElapsedTime();
+    
+    fetch("{% url 'autocompute:process_excel_MDCoumpute' %}", {
+        method: 'POST',
+        body: formData,
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.download_url) {
+            taskCompleted = true;
+
+
+            const downloadLink = document.createElement('a');
+            downloadLink.href = data.download_url;
+            downloadLink.textContent = 'Download System.xlsx';
+            downloadLink.download = 'System.xlsx';
+
+            const downloadContainer = document.getElementById('download-link');
+            downloadContainer.innerHTML = '';
+            downloadContainer.appendChild(downloadLink);
+
+            alert('File processing is complete and ready for download!');
+        } else if (data.error) {
+
+            const errorMessageDiv = document.getElementById('error-message');
+            errorMessageDiv.textContent = `Processing failed: ${data.error}\n\nStdout:\n${data.stdout}\n\nStderr:\n${data.stderr}`;
+            errorMessageDiv.style.display = 'block';
+        } else {
+            const errorMessageDiv = document.getElementById('error-message');
+            errorMessageDiv.textContent = 'Processing failed, please try again!';
+            errorMessageDiv.style.display = 'block';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        const errorMessageDiv = document.getElementById('error-message');
+        errorMessageDiv.textContent = 'An unexpected error occurred. Please try again later.';
+        errorMessageDiv.style.display = 'block';
+    });
+
+}
+</script>
+{% endblock content %}

@@ -1,0 +1,366 @@
+{% extends 'crystals_base.html'%}
+{% load static %}
+{% load my_filters_and_tags %}
+
+{% block head %} 
+
+
+
+
+<script
+type="text/javascript"
+src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.js"
+></script>
+
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+<script src="https://unpkg.com/element-plus/dist/index.full.js"></script>
+
+
+
+
+
+<script type="text/javascript" src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
+{% endblock head %}
+
+{% block content %}
+
+
+
+
+{{ field_names|json_script:"field_names_json" }}
+{{ data|json_script:"data_json" }}
+{{ image_extensions|json_script:"image_extensions_json" }}
+{{ file_extensions|json_script:"file_extensions_json" }}
+
+<div class="container">
+    Choose Crystal:
+    <select onchange="window.location.href = this.value;" name="crystal" id="crystal">
+    {% for obj in crystal_list %}
+        {% if obj.crystal == selected_crystal %}
+            <option value="/crystals/crystal_selected/?crystal={{ obj.crystal }}" selected>{{ obj.crystal }}</option>
+        {% else %}
+            <option value="/crystals/crystal_selected/?crystal={{ obj.crystal }}">{{ obj.crystal }}</option>
+        {% endif %}
+    {% endfor %}
+    </select>
+  
+  <div id="app">
+    
+    {% verbatim %}
+    <div style="margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+      <el-input
+        v-model="searchText"
+        placeholder="Search crystal data..."
+        clearable
+        style="width: 300px;"
+      >
+        <template #prefix>
+          <el-icon><Search /></el-icon>
+        </template>
+      </el-input>
+      
+      <div style="display: flex; gap: 10px;">
+        
+        <el-button type="success" @click="exportToCSV" size="small">Export CSV</el-button>
+        
+      </div>
+    </div>
+    {% endverbatim %}
+
+    
+    {% verbatim %}
+    <el-table
+      :data="paginatedData"
+      stripe
+      border
+      height="600"
+      :loading="loading"
+      @sort-change="handleSortChange"
+      style="width: 100%"
+    >
+      <el-table-column
+        v-for="(field, index) in field_names"
+        :key="index"
+        :prop="field"
+        :label="field"
+        :sortable="true"
+        :min-width="120"
+        show-overflow-tooltip
+      >
+        <template #default="scope">
+          <div v-if="scope.row[field]">
+            
+            <img v-if="scope.row[field].url && isImage(scope.row[field])" 
+                 :src="scope.row[field].url" 
+                 alt="figure" 
+                 style="height: 200px; width: 150px; object-fit: cover; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            
+            <a v-else-if="scope.row[field].url && isFile(scope.row[field])" 
+               :href="scope.row[field].url" 
+               target="_blank" 
+               style="color: #409EFF; text-decoration: none; font-weight: 500;">
+              <el-icon><Document /></el-icon> {{ scope.row[field].name }}
+            </a>
+            
+            <span v-else>{{ formatValue(scope.row[field]) }}</span>
+          </div>
+          <el-tag v-else type="info" size="small" effect="plain">Null</el-tag>
+        </template>
+      </el-table-column>
+    </el-table>
+    {% endverbatim %}
+
+    
+    {% verbatim %}
+    <el-pagination
+      v-model:current-page="currentPage"
+      v-model:page-size="pageSize"
+      :page-sizes="[10, 25, 50, 100]"
+      :total="filteredData.length"
+      layout="total, sizes, prev, pager, next, jumper"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      style="margin-top: 20px; justify-content: center;"
+    />
+    {% endverbatim %}
+  </div>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script>
+const { createApp, ref, computed } = Vue;
+const { ElMessage } = ElementPlus;
+
+
+const fieldNames = JSON.parse(document.getElementById('field_names_json').textContent);
+const rawData = JSON.parse(document.getElementById('data_json').textContent);
+const imageExtensions = JSON.parse(document.getElementById('image_extensions_json').textContent);
+const fileExtensions = JSON.parse(document.getElementById('file_extensions_json').textContent);
+
+
+console.log('=== 晶体数据调试信息 ===');
+console.log('fieldNames:', fieldNames);
+console.log('rawData length:', rawData.length);
+console.log('rawData sample:', rawData.slice(0, 2));
+console.log('imageExtensions:', imageExtensions);
+console.log('fileExtensions:', fileExtensions);
+
+
+const tableData = rawData.map((row, index) => {
+  const obj = { id: index + 1 };
+  fieldNames.forEach((field, fieldIndex) => {
+    const value = row[fieldIndex];
+    obj[field] = value;
+
+    if (index < 2) {
+      console.log(`行${index}, 字段${field}:`, value, '类型:', typeof value);
+    }
+  });
+  return obj;
+});
+
+console.log('转换后的tableData:', tableData.slice(0, 2));
+
+createApp({
+  setup() {
+
+    const searchText = ref('');
+    const currentPage = ref(1);
+    const pageSize = ref(25);
+    const loading = ref(false);
+
+
+    const filteredData = computed(() => {
+      console.log('filteredData计算中, tableData长度:', tableData.length);
+      if (!searchText.value) return tableData;
+      return tableData.filter(row => {
+        return fieldNames.some(field => {
+          const value = row[field];
+          if (value === null || value === undefined) return false;
+
+          if (typeof value === 'object' && value.name) {
+            return String(value.name).toLowerCase().includes(searchText.value.toLowerCase());
+          }
+          return String(value).toLowerCase().includes(searchText.value.toLowerCase());
+        });
+      });
+    });
+
+
+    const paginatedData = computed(() => {
+      const start = (currentPage.value - 1) * pageSize.value;
+      const end = start + pageSize.value;
+      const result = filteredData.value.slice(start, end);
+      console.log('paginatedData计算中, 结果长度:', result.length);
+      return result;
+    });
+
+
+    const handleSizeChange = (val) => {
+      pageSize.value = val;
+      currentPage.value = 1;
+    };
+
+    const handleCurrentChange = (val) => {
+      currentPage.value = val;
+    };
+
+    const handleSortChange = ({ prop, order }) => {
+      console.log('排序:', prop, order);
+    };
+
+    const formatValue = (value) => {
+      console.log('formatValue被调用，值:', value, '类型:', typeof value);
+      if (value === null || value === undefined || value === '') return '-';
+      if (typeof value === 'number') {
+        return value.toFixed(4);
+      }
+      if (typeof value === 'object' && value.name) {
+        return value.name;
+      }
+      return String(value);
+    };
+
+
+    const isImage = (value) => {
+      if (!value || !value.name) return false;
+      const extension = value.name.split('.').pop().toLowerCase();
+      return imageExtensions.includes(extension);
+    };
+
+
+    const isFile = (value) => {
+      if (!value || !value.name) return false;
+      const extension = value.name.split('.').pop().toLowerCase();
+      return fileExtensions.includes(extension);
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+    const exportToCSV = () => {
+      loading.value = true;
+      try {
+        const exportData = filteredData.value.map(row => {
+          const exportRow = {};
+          fieldNames.forEach(field => {
+            const value = row[field];
+            if (value && typeof value === 'object' && value.name) {
+              exportRow[field] = value.name;
+            } else {
+              exportRow[field] = value || '';
+            }
+          });
+          return exportRow;
+        });
+        
+        const csvContent = [
+          fieldNames.join(','),
+          ...exportData.map(row => 
+            fieldNames.map(field => `"${row[field] || ''}"`).join(',')
+          )
+        ].join('\n');
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = '晶体数据.csv';
+        link.click();
+        ElMessage.success('CSV导出成功！');
+      } catch (error) {
+        ElMessage.error('导出失败：' + error.message);
+      } finally {
+        loading.value = false;
+      }
+    };
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+
+    return {
+      field_names: fieldNames,
+      searchText,
+      currentPage,
+      pageSize,
+      loading,
+      filteredData,
+      paginatedData,
+      handleSizeChange,
+      handleCurrentChange,
+      handleSortChange,
+      formatValue,
+      isImage,
+      isFile,
+
+      exportToCSV,
+
+    };
+  }
+}).use(ElementPlus).mount('#app');
+</script>
+{% endblock script %}

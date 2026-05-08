@@ -1,0 +1,694 @@
+{% extends 'home_base.html'%}
+{% load static %}
+
+{% block head %} 
+
+<title>CEMP API Introduction</title>
+
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/styles/default.min.css">
+<link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}" />
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<meta name="csrf-token" content="{{ csrf_token }}">
+
+{% endblock head %}
+
+{% block content %}
+<style>
+  
+  .api-page {
+      background:
+          radial-gradient(circle at top left, rgba(31, 87, 140, 0.10), transparent 28%),
+          linear-gradient(180deg, #f5f8fc 0%, #edf3f9 100%);
+      padding: 36px 18px 56px;
+  }
+
+  .api-shell {
+      max-width: 1220px;
+      margin: 0 auto;
+  }
+
+  
+  .api-hero {
+      position: relative;
+      overflow: hidden;
+      padding: 34px 36px;
+      border-radius: 28px;
+      background: linear-gradient(135deg, #12314f 0%, #1f578c 56%, #3f8bc8 100%);
+      color: #ffffff;
+      box-shadow: 0 24px 48px rgba(18, 49, 79, 0.16);
+      margin-bottom: 24px;
+  }
+
+  .api-hero::before,
+  .api-hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+  }
+
+  .api-hero::before {
+      width: 240px;
+      height: 240px;
+      right: -70px;
+      top: -120px;
+  }
+
+  .api-hero::after {
+      width: 160px;
+      height: 160px;
+      right: 180px;
+      bottom: -80px;
+  }
+
+  .api-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+  }
+
+  .api-hero h1 {
+      margin: 0 0 12px;
+      font-size: 36px;
+      color: #ffffff;
+  }
+
+  .api-hero p {
+      margin: 0;
+      max-width: 860px;
+      font-size: 16px;
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.9);
+  }
+
+  .api-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+      gap: 24px;
+      margin-bottom: 24px;
+  }
+
+  .api-card,
+  .api-side-card,
+  .api-section {
+      padding: 28px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(19, 53, 86, 0.08);
+      box-shadow: 0 16px 32px rgba(24, 56, 89, 0.08);
+  }
+
+  .api-card h2,
+  .api-side-card h2,
+  .api-section h2 {
+      margin: 0 0 12px;
+      font-size: 24px;
+      color: #173450;
+  }
+
+  .api-card p,
+  .api-side-card p,
+  .api-section p {
+      margin: 0 0 16px;
+      color: #526273;
+      line-height: 1.8;
+  }
+
+  .api-note {
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: linear-gradient(90deg, rgba(255, 242, 226, 0.95), rgba(255, 248, 238, 0.95));
+      border: 1px solid rgba(224, 145, 54, 0.2);
+      color: #935315;
+      font-weight: 700;
+      line-height: 1.7;
+  }
+
+  .api-btn {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 18px;
+      background: linear-gradient(135deg, #1f578c 0%, #2d79c1 100%);
+      color: #ffffff;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .api-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 22px rgba(45, 121, 193, 0.24);
+  }
+
+  .api-key-box {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: #f7fafc;
+      border: 1px solid #e2ebf3;
+      color: #294662;
+      line-height: 1.7;
+      word-break: break-all;
+      min-height: 56px;
+  }
+
+  .api-step-list,
+  .api-tip-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 14px;
+  }
+
+  .api-step-list li,
+  .api-tip-list li {
+      position: relative;
+      padding: 16px 16px 16px 46px;
+      border-radius: 18px;
+      background: #f6f9fc;
+      color: #31475d;
+      line-height: 1.8;
+  }
+
+  .api-step-list li::before,
+  .api-tip-list li::before {
+      content: "";
+      position: absolute;
+      top: 23px;
+      left: 18px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1f578c 0%, #63a4df 100%);
+      box-shadow: 0 0 0 5px rgba(79, 143, 202, 0.12);
+  }
+
+  .endpoint-table-wrap {
+      overflow-x: auto;
+      border-radius: 18px;
+      border: 1px solid #e0e8ef;
+      background: #ffffff;
+  }
+
+  .endpoint-table {
+      width: 100%;
+      min-width: 940px;
+      border-collapse: separate;
+      border-spacing: 0;
+  }
+
+  .endpoint-table thead th {
+      padding: 14px 16px;
+      background: #f3f7fb;
+      color: #173450;
+      text-align: left;
+      border-bottom: 1px solid #dfe7ee;
+      font-size: 14px;
+  }
+
+  .endpoint-table tbody td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #edf2f7;
+      color: #405567;
+      vertical-align: top;
+      line-height: 1.7;
+      background: #ffffff;
+  }
+
+  .endpoint-table tbody tr:hover td {
+      background: #f8fbfe;
+  }
+
+  .endpoint-method {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #e9f2fb;
+      color: #1c5a94;
+      font-size: 12px;
+      font-weight: 700;
+  }
+
+  .endpoint-auth {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+  }
+
+  .endpoint-auth.required {
+      background: #fde9e9;
+      color: #b23a3a;
+  }
+
+  .endpoint-auth.optional {
+      background: #e8f6ee;
+      color: #1d7b47;
+  }
+
+  
+  pre {
+      margin: 0 0 18px;
+  }
+
+  pre code {
+      background: #13283e;
+      color: #ecf3fb;
+      padding: 18px 20px;
+      display: block;
+      border-radius: 18px;
+      overflow-x: auto;
+      line-height: 1.75;
+  }
+
+  .api-section + .api-section {
+      margin-top: 24px;
+  }
+
+  .mini-heading {
+      display: inline-flex;
+      margin-bottom: 12px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #edf4fb;
+      color: #1f578c;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+  }
+
+  .inline-code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.95em;
+      color: #173450;
+      background: #eef4fa;
+      padding: 2px 6px;
+      border-radius: 8px;
+  }
+
+  @media (max-width: 991px) {
+      .api-grid {
+          grid-template-columns: 1fr;
+      }
+  }
+
+  @media (max-width: 767px) {
+      .api-page {
+          padding: 24px 14px 40px;
+      }
+
+      .api-hero,
+      .api-card,
+      .api-side-card,
+      .api-section {
+          padding: 22px;
+          border-radius: 20px;
+      }
+
+      .api-hero h1 {
+          font-size: 28px;
+      }
+  }
+</style>
+
+<section class="api-page">
+  <div class="api-shell">
+    <section class="api-hero">
+      <span class="api-eyebrow">API Guide</span>
+      <h1>CEMP API Usage Guide</h1>
+      <p>
+        This page is organized according to the practical calling pattern used in the
+        <strong>CEMPAgent</strong> project: first obtain a token, then call authenticated
+        CEMP APIs with <span class="inline-code">Authorization: Token &lt;token&gt;</span>,
+        and for asynchronous compute jobs, continue polling task status with the returned
+        <span class="inline-code">encrypted_id</span>.
+      </p>
+    </section>
+
+    <section class="api-grid">
+      <div class="api-card">
+        <h2>Get Your API Key</h2>
+        <p>
+          This helper button uses your current logged-in browser session to obtain or create the API token
+          associated with your account. This is the easiest way to start testing the API from the web page.
+        </p>
+        <div class="api-note">
+          This page itself requires login. For scripts, automation, or external clients, it is recommended to use
+          <span class="inline-code">POST /api/token/</span> directly with your username and password.
+        </div>
+
+        <button id="btnGenerateAPI" class="api-btn">Generate API Key</button>
+        <div id="apiKeyContainer" class="api-key-box">Your token will be displayed here.</div>
+      </div>
+
+      <aside class="api-side-card">
+        <h2>Recommended Workflow</h2>
+        <ul class="api-step-list">
+          <li>Obtain a token via <span class="inline-code">/api/token/</span> or the button on this page.</li>
+          <li>Attach <span class="inline-code">Authorization: Token &lt;token&gt;</span> to protected requests.</li>
+          <li>Submit asynchronous compute jobs to <span class="inline-code">/autocompute/api/...</span> endpoints.</li>
+          <li>Use <span class="inline-code">/api/check_task_status/</span> with <span class="inline-code">encrypted_id</span> until the task reaches <span class="inline-code">success</span> or <span class="inline-code">failed</span>.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="api-section">
+      <span class="mini-heading">Authentication</span>
+      <h2>1. Obtain Token Programmatically</h2>
+      <p>
+        The CEMPAgent project uses <span class="inline-code">/api/token/</span> as the standard login entry for API calls.
+        Once a token is returned, it can be reused for other authenticated endpoints.
+      </p>
+
+      <pre><code class="language-bash">curl -X POST "https://example.com/api/token/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "YOUR_USERNAME",
+    "password": "YOUR_PASSWORD"
+  }'</code></pre>
+
+      <pre><code class="language-python">import requests
+
+base_url = "https://example.com"
+
+response = requests.post(
+    f"{base_url}/api/token/",
+    json={
+        "username": "YOUR_USERNAME",
+        "password": "YOUR_PASSWORD",
+    },
+    timeout=60,
+)
+response.raise_for_status()
+
+token = response.json()["token"]
+print("Token acquired successfully.")
+print(token)</code></pre>
+    </section>
+
+    <section class="api-section">
+      <span class="mini-heading">Async Jobs</span>
+      <h2>2. Submit Compute Tasks and Query Status</h2>
+      <p>
+        Most Autocompute APIs are asynchronous. After submission, the server returns an
+        <span class="inline-code">encrypted_id</span>. You should then call
+        <span class="inline-code">/api/check_task_status/</span> with the same token to fetch progress,
+        download links, table previews, and figure URLs.
+      </p>
+
+      <pre><code class="language-python">import requests
+
+base_url = "https://example.com"
+token = "<CHANGE_ME_TOKEN>"
+
+headers = {
+    "Authorization": f"Token {token}",
+}
+
+with open("HTQC.xlsx", "rb") as f:
+    submit_response = requests.post(
+        f"{base_url}/autocompute/api/single_point_energy_gaussian/",
+        headers=headers,
+        files={"excel_file": f},
+        timeout=300,
+    )
+
+submit_response.raise_for_status()
+submit_payload = submit_response.json()
+encrypted_id = submit_payload["encrypted_id"]
+print("Task submitted:", encrypted_id)
+
+status_response = requests.post(
+    f"{base_url}/api/check_task_status/",
+    headers={
+        "Authorization": f"Token {token}",
+        "Content-Type": "application/json",
+    },
+    json={"encrypted_id": encrypted_id},
+    timeout=60,
+)
+status_response.raise_for_status()
+status_payload = status_response.json()
+print(status_payload)</code></pre>
+
+      <pre><code class="language-json">{
+  "status": "not_finished | success | failed",
+  "download_urls": ["..."],
+  "task_type": "...",
+  "table_data_url": "...",
+  "figure_data_url_dict": {
+    "figure_name": "..."
+  }
+}</code></pre>
+    </section>
+
+    <section class="api-section">
+      <span class="mini-heading">Core Endpoints</span>
+      <h2>3. Core API Endpoints</h2>
+      <p>
+        The following endpoints are directly aligned with the routes used in the current CEMP project and in the
+        CEMPAgent client implementation.
+      </p>
+
+      <div class="endpoint-table-wrap">
+        <table class="endpoint-table">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Endpoint</th>
+              <th>Authentication</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="endpoint-method">POST</span></td>
+              <td><span class="inline-code">/api/token/</span></td>
+              <td><span class="endpoint-auth optional">No</span></td>
+              <td>Exchange username and password for a reusable token.</td>
+            </tr>
+            <tr>
+              <td><span class="endpoint-method">POST</span></td>
+              <td><span class="inline-code">/generate_API/</span></td>
+              <td><span class="endpoint-auth optional">Session</span></td>
+              <td>Browser helper route for logged-in users to obtain their current token on this page.</td>
+            </tr>
+            <tr>
+              <td><span class="endpoint-method">POST</span></td>
+              <td><span class="inline-code">/api/check_task_status/</span></td>
+              <td><span class="endpoint-auth required">Token</span></td>
+              <td>Query asynchronous task progress and retrieve result links by <span class="inline-code">encrypted_id</span>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="api-section">
+      <span class="mini-heading">Autocompute API</span>
+      <h2>4. Selected Autocompute Endpoints</h2>
+      <p>
+        These endpoints are mounted under <span class="inline-code">/autocompute/api/</span>.
+        They are token-authenticated and generally use multipart form upload with an Excel input file.
+      </p>
+
+      <div class="endpoint-table-wrap">
+        <table class="endpoint-table">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Endpoint</th>
+              <th>Authentication</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="endpoint-method">POST</span></td>
+              <td><span class="inline-code">/autocompute/api/mdcompute/</span></td>
+              <td><span class="endpoint-auth required">Token</span></td>
+              <td>Submit a Gromacs molecular dynamics task from an Excel system file.</td>
+            </tr>
+            <tr>
+              <td><span class="endpoint-method">POST</span></td>
+              <td><span class="inline-code">/autocompute/api/single_point_energy_gaussian/</span></td>
+              <td><span class="endpoint-auth required">Token</span></td>
+              <td>Batch Gaussian single-point energy calculation.</td>
+            </tr>
+            <tr>
+              <td><span class="endpoint-method">POST</span></td>
+              <td><span class="inline-code">/autocompute/api/binding_energy_gaussian/</span></td>
+              <td><span class="endpoint-auth required">Token</span></td>
+              <td>Batch Gaussian binding energy calculation for dimers or complexes.</td>
+            </tr>
+            <tr>
+              <td><span class="endpoint-method">POST</span></td>
+              <td><span class="inline-code">/autocompute/api/pka_pkb_gaussian/</span></td>
+              <td><span class="endpoint-auth required">Token</span></td>
+              <td>Batch Gaussian pKa / pKb related workflow.</td>
+            </tr>
+            <tr>
+              <td><span class="endpoint-method">POST</span></td>
+              <td><span class="inline-code">/autocompute/api/ox_red_gaussian/</span></td>
+              <td><span class="endpoint-auth required">Token</span></td>
+              <td>Batch Gaussian oxidation / reduction property calculation.</td>
+            </tr>
+            <tr>
+              <td><span class="endpoint-method">POST</span></td>
+              <td><span class="inline-code">/autocompute/api/reaction_thermo_gaussian/</span></td>
+              <td><span class="endpoint-auth required">Token</span></td>
+              <td>Batch Gaussian reaction thermodynamics workflow.</td>
+            </tr>
+            <tr>
+              <td><span class="endpoint-method">POST</span></td>
+              <td><span class="inline-code">/autocompute/api/reaction_properties_gaussian/</span></td>
+              <td><span class="endpoint-auth required">Token</span></td>
+              <td>Batch Gaussian global reaction properties workflow.</td>
+            </tr>
+            <tr>
+              <td><span class="endpoint-method">POST</span></td>
+              <td><span class="inline-code">/autocompute/api/single_point_energy_orca/</span></td>
+              <td><span class="endpoint-auth required">Token</span></td>
+              <td>Batch ORCA single-point energy calculation.</td>
+            </tr>
+            <tr>
+              <td><span class="endpoint-method">POST</span></td>
+              <td><span class="inline-code">/autocompute/api/binding_energy_orca/</span></td>
+              <td><span class="endpoint-auth required">Token</span></td>
+              <td>Batch ORCA binding energy calculation.</td>
+            </tr>
+            <tr>
+              <td><span class="endpoint-method">POST</span></td>
+              <td><span class="inline-code">/autocompute/api/ox_red_orca/</span></td>
+              <td><span class="endpoint-auth required">Token</span></td>
+              <td>Batch ORCA oxidation / reduction property calculation.</td>
+            </tr>
+            <tr>
+              <td><span class="endpoint-method">POST</span></td>
+              <td><span class="inline-code">/autocompute/api/query_smiles_to_name/</span></td>
+              <td><span class="endpoint-auth required">Token</span></td>
+              <td>Resolve molecular names from submitted SMILES spreadsheets.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="api-section">
+      <span class="mini-heading">Ionic Liquid API</span>
+      <h2>5. Selected Ionic Liquid Endpoints</h2>
+      <p>
+        The current repository also exposes JSON and prediction APIs under the
+        <span class="inline-code">/ionic_liquid/</span> route tree.
+      </p>
+
+      <div class="endpoint-table-wrap">
+        <table class="endpoint-table">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Endpoint</th>
+              <th>Authentication</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="endpoint-method">POST</span></td>
+              <td><span class="inline-code">/ionic_liquid/api/ionic_liquid_predict_excel/</span></td>
+              <td><span class="endpoint-auth required">Token</span></td>
+              <td>Batch ionic-liquid property prediction using an Excel file.</td>
+            </tr>
+            <tr>
+              <td><span class="endpoint-method">POST</span></td>
+              <td><span class="inline-code">/ionic_liquid/api/ionic_liquid_predict_SMILES/</span></td>
+              <td><span class="endpoint-auth required">Token</span></td>
+              <td>Predict ionic-liquid properties from a single SMILES input.</td>
+            </tr>
+            <tr>
+              <td><span class="endpoint-method">POST</span></td>
+              <td><span class="inline-code">/ionic_liquid/api/similarity_search/</span></td>
+              <td><span class="endpoint-auth optional">Depends on deployment</span></td>
+              <td>Search similar ionic-liquid structures.</td>
+            </tr>
+            <tr>
+              <td><span class="endpoint-method">POST</span></td>
+              <td><span class="inline-code">/ionic_liquid/api/property_filter/</span></td>
+              <td><span class="endpoint-auth optional">Depends on deployment</span></td>
+              <td>Filter ionic-liquid candidates by property constraints.</td>
+            </tr>
+            <tr>
+              <td><span class="endpoint-method">GET / POST</span></td>
+              <td><span class="inline-code">/ionic_liquid/api/Cation_QC_data</span>, <span class="inline-code">/ionic_liquid/api/Anion_QC_data</span>, <span class="inline-code">/ionic_liquid/api/IL_Tm_conductivity_ECW_data</span>, <span class="inline-code">/ionic_liquid/api/IL_ML_data</span></td>
+              <td><span class="endpoint-auth optional">Depends on deployment</span></td>
+              <td>Structured database-oriented API entries exposed by the Ionic Liquid module.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="api-section">
+      <span class="mini-heading">Best Practices</span>
+      <h2>6. Practical Notes</h2>
+      <ul class="api-tip-list">
+        <li>Do not expose your raw password or token in shared notebooks, screenshots, or public repositories.</li>
+        <li>Autocompute interfaces are mostly asynchronous. Receiving an <span class="inline-code">encrypted_id</span> usually means the task has been accepted, not finished.</li>
+        <li>When the API returns relative paths such as <span class="inline-code">/media/...</span>, combine them with the CEMP base URL before downloading.</li>
+        <li>For production scripts, implement timeout handling, retry logic, and status polling intervals instead of querying in a tight loop.</li>
+      </ul>
+    </section>
+  </div>
+</section>
+
+<script>
+
+  document.getElementById('btnGenerateAPI').addEventListener('click', function () {
+    const csrftoken = document.querySelector('meta[name="csrf-token"]').content;
+    const container = document.getElementById('apiKeyContainer');
+
+    container.innerText = 'Generating token...';
+
+    fetch("{% url 'home:generate_api_key' %}", {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'X-CSRFToken': csrftoken,
+      },
+    })
+    .then(function (res) {
+      if (!res.ok) {
+        throw new Error('HTTP ' + res.status);
+      }
+      return res.json();
+    })
+    .then(function (data) {
+      container.innerText = data.token;
+    })
+    .catch(function (err) {
+      container.innerText = 'Failed to generate token.';
+      alert('生成 API Key 失败：' + err.message);
+    });
+  });
+</script>
+{% endblock content %}

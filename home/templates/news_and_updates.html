@@ -1,0 +1,60 @@
+{% extends 'home_base.html'%}
+{% load static %}
+
+{% block head %} 
+
+<title>News and Updates</title>
+
+{% endblock head %}
+
+{% block content %}
+
+<div class="container my-5">
+  
+  <h1 class="mb-4 text-center">News and Updates</h1>
+
+  
+  <div class="news-list">
+      
+      {% for item in news_items %}
+      <div class="news-item mb-5">
+          
+          <h2 class="news-title">{{ item.title }}</h2>
+          
+          <p class="news-date text-muted">{{ item.date }}</p>
+          
+          <p class="news-content">{{ item.content }}</p>
+          
+          {% if item.link %}
+          <a href="{{ item.link }}" class="btn btn-primary" target="_blank">Read More</a>
+          {% endif %}
+      </div>
+      
+      <hr>
+      {% endfor %}
+  </div>
+</div>
+
+
+<style>
+  
+  .news-title {
+      font-size: 1.75rem;
+      color: #333;
+  }
+  
+  .news-date {
+      font-size: 0.9rem;
+  }
+  
+  .news-content {
+      font-size: 1.1rem;
+      line-height: 1.6;
+  }
+  
+  .btn-primary {
+      background-color: #007bff;
+      border-color: #007bff;
+  }
+</style>
+{% endblock content %}

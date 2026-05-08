@@ -1,0 +1,784 @@
+{% extends 'bms_base.html' %} {% load static %} 
+{% block header_scripts %}
+
+<script src="https://unpkg.com/vue@3.4.12/dist/vue.global.js"></script>
+
+
+
+
+<link href="{% static 'battery_manage_system/visual.css' %}" rel="stylesheet" />
+{% endblock header_scripts %} 
+{% block content %}
+
+
+<div id="app" class="container mx-auto px-4 py-8">
+  
+  
+  
+
+  
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold mt-4 mb-3 orange-underline">Query battery data</h2>
+    <button @click="showStructureModal = true" class="btn btn-primary">
+      View bat data structure
+    </button>
+  </div>
+
+  
+  <div
+    v-if="showStructureModal"
+    class="modal-backdrop"
+    @click.self="showStructureModal = false"
+  >
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="text-xl font-bold">Battery data structure</h2>
+        <button class="modal-close" @click="showStructureModal = false">
+          &times;
+        </button>
+      </div>
+      <div class="modal-body">
+        <battery-structure></battery-structure>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="grid-cols-2 mb-8">
+    
+    <div class="card">
+      <div class="card-header">Query Battery Filename</div>
+      <div class="card-body">
+        <form @submit.prevent="searchFilename">
+          {% csrf_token %}
+          <div class="flex gap-4">
+            <input
+              v-model="batKey"
+              type="text"
+              placeholder="Type in bat key "
+              class="form-input flex-grow"
+            />
+            
+            <div
+              class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"
+              style="text-shadow: 1px 1px 1px #333"
+            >
+              Hint: e.g. 1 2 3
+            </div>
+            <button type="submit" class="btn-primary">Query</button>
+          </div>
+          <input type="hidden" name="form_id" value="search_filename" />
+          <div v-if="filename" class="mt-4 p-3 bg-gray-100 rounded-md">
+            <p style="font-weight: bold; font-size: calc(1rem + 2px); margin-top: 0.5rem;">Filename:</p>
+            <p class="break-all">[% filename %]</p>
+            <p style="font-weight: bold; font-size: calc(1rem + 2px); margin-top: 0.5rem;">Battery Info:</p>
+            <p v-if="batteryInfo.self_made">Self Made: [% batteryInfo.self_made %]</p>
+            <p v-if="batteryInfo.size">Size: [% batteryInfo.size %]</p>
+            <p v-if="batteryInfo.temperature">Temperature: [% batteryInfo.temperature %]</p>
+            <p v-if="batteryInfo.specific_capacity">Specific Capacity: [% batteryInfo.specific_capacity %]</p>
+            <p v-if="batteryInfo.area_living_material">Cathode Area Loading: [% batteryInfo.area_living_material %]</p>
+            <p v-if="batteryInfo.c_rate">C Rate: [% batteryInfo.c_rate %]</p>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    
+    <div class="card">
+      <div class="card-header">Query Battery via condition</div>
+      <div class="card-body">
+        <form @submit.prevent="searchBatkey">
+          {% csrf_token %}
+          <div class="form-group">
+            <label class="form-label">Material:</label>
+            <select v-model="searchConditions.material" class="form-select">
+              \
+              <option value="">None</option>
+              <option value="LFP">LFP</option>
+              <option value="LNMO">LNMO</option>
+              <option value="NCM">NCM</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Temperature:</label>
+            <select v-model="searchConditions.temperature" class="form-select">
+              <option value="">None</option>
+              <option value="28">28°C</option>
+              <option value="50">50°C</option>
+              <option value="80">80°C</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Percent(weight):</label>
+            <select v-model="searchConditions.percent" class="form-select">
+              <option value="">None</option>
+              <option value="5">5%</option>
+              <option value="10">10%</option>
+              <option value="15">15%</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Membrane thickness</label>
+            <select v-model="searchConditions.size" class="form-select">
+              <option value="">None</option>
+              <option value="40um">40um</option>
+              <option value="45um">45um</option>
+              <option value="55um">55um</option>
+              <option value="60um">60um</option>
+              <option value="65um">65um</option>
+              <option value="75um">75um</option>
+              <option value="90um">90um</option>
+              <option value="95um">95um</option>
+              <option value="135um">135um</option>
+              <option value="145um">145um</option>
+              <option value="160um">160um</option>
+              <option value="165um">165um</option>
+              <option value="220um">220um</option>
+              <option value="275um">275um</option>
+              <option value="285um">285um</option>
+              <option value="355um">355um</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Specific Capacity(mAh/g):</label>
+            <select
+              v-model="searchConditions.specificCapacity"
+              class="form-select"
+            >
+              <option value="">None</option>
+              <option v-for="option in filteredCapacityOptions" :value="option">
+                [% option %] 
+              </option>
+            </select>
+          </div>
+          <input type="hidden" name="form_id" value="search_batkey" />
+          <button type="submit" class="btn-primary">Query</button>
+
+          <template
+            v-if="searchResults.length > 0"
+            class="mt-4"
+            delimiters="[% %]"
+          >
+            <h3 class="font-medium mb-2">Results:</h3>
+            <div class="bg-gray-100 p-3 rounded-md max-h-60 overflow-y-auto">
+              <div
+                v-for="(result, index) in searchResults"
+                :key="index"
+                class="mb-2 pb-2 border-b border-gray-200 last:border-0"
+              >
+                <p>
+                  <span class="font-medium">Battery key:</span> [%
+                  result.bat_key %]
+                </p>
+                <p>
+                  <span class="font-medium">Filename:</span> [% result.file_name
+                  %]
+                </p>
+              </div>
+            </div>
+          </template>
+        </form>
+      </div>
+    </div>
+    
+  </div>
+
+  
+  <h2 class="text-2xl font-bold mb-6 orange-underline">
+    Visualiza battery data
+  </h2>
+
+  
+  <div class="card mb-8">
+    <div class="card-header">Battery Cycle data</div>
+    <div class="card-body">
+      <form @submit.prevent="generateOverallImage">
+        {% csrf_token %}
+        <div class="grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label">Batkey:</label>
+            <input
+              v-model="overallBatKeys"
+              type="text"
+              placeholder="type in battery key,separated by number"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Plot type:</label>
+            <select v-model="overallVisualType" class="form-select">
+              <option value="qd_cycle">Discharge Capacity vs Cycle</option>
+              <option value="qc_cycle">Charge capacity vs Cycle</option>
+            </select>
+            <input type="hidden" name="form_id" value="overall_display" />
+          </div>
+        </div>
+
+        <div class="checkbox-container">
+          <input
+            v-model="overallSubplots"
+            type="checkbox"
+            id="overallSubplots"
+          />
+          <label for="overallSubplots">Enable subplots</label>
+        </div>
+        
+        <button type="submit" class="btn-primary">Generate Pictures</button>
+      </form>
+
+      <div v-if="overallImage" class="mb-3">
+        <img
+          :src="overallImage"
+          alt="电池整体循环图像"
+          class="img-fluid border rounded"
+          style="border-color: #edf2f7"
+        />
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="card">
+    <div class="card-header">Battery detailed image</div>
+    <div class="card-body">
+      <form @submit.prevent="generateConcreteImage">
+        {% csrf_token %}
+        <div class="grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label">Batkey:</label>
+            <input
+              v-model="concreteBatKeys"
+              type="text"
+              placeholder="输入电池编号，用逗号分隔"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Plot type:</label>
+            <select v-model="concreteVisualType" class="form-select">
+              <option value="qdlin_voltage">
+                Discharge capacity(interpolated) vs voltage
+              </option>
+              <option value="qclin_voltage">
+                charge capacity(interpolated) vs voltage
+              </option>
+              <option value="voltage_qdlin">
+                voltage vs discharge capacity(interpolated)
+              </option>
+              <option value="voltage_qclin">
+                voltage vs charge capacity(interpolated)
+              </option>
+              <option value="raw_qd_voltage">
+                discharge capacity(raw) vs voltage
+              </option>
+              <option value="raw_qc_voltage">
+                charge capacity(raw) vs voltage
+              </option>
+              <option value="voltage_raw_qd">
+                voltage vs discharge capacity(raw)
+              </option>
+              <option value="voltage_raw_qc">
+                voltage vs charge capacity(raw)
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="checkbox-container">
+          <input
+            v-model="concreteSubplots"
+            type="checkbox"
+            id="concreteSubplots"
+          />
+          <label for="concreteSubplots">Enable subplots</label>
+        </div>
+        <input type="hidden" name="form_id" value="concrete_display" />
+        <button type="submit" class="btn-primary">Generate</button>
+      </form>
+      <div v-if="concreteImage" class="mb-3">
+        <img
+          :src="concreteImage"
+          alt="Battery detailed image"
+          class="img-fluid border rounded"
+          style="border-color: #edf2f7"
+        />
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="card">
+    <div class="card-header">Filter battery data</div>
+    <div class="card-body">
+      <form @submit.prevent="filterBatData">
+        {% csrf_token %}
+        <div class="grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label">Lowest value for capacity</label>
+            <input
+              v-model="lowestValue"
+              type="text"
+              placeholder="Min value"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Data related:</label>
+            <select v-model="filterVisualType" class="form-select">
+              <option value="Qdlin">Discharge capctity</option>
+              <option value="Qclin">Charge capacity</option>
+            </select>
+            <input type="hidden" name="form_id" value="filter_batdata" />
+          </div>
+        </div>
+
+        
+        <button type="submit" class="btn-primary">Generate</button>
+      </form>
+
+      <template v-if="filterResults.length > 0" class="mt-4" delimiters="[% %]">
+        <div class="bg-gray-100 p-3 rounded-md max-h-60 overflow-y-auto">
+          <div
+            v-for="(result, index) in filterResults"
+            :key="index"
+            class="mb-2 pb-2 border-b border-gray-200 last:border-0"
+          >
+            <p>
+              <span class="font-medium">Bat key:</span> [% result.bat_key %]
+            </p>
+            <p>
+              <span class="font-medium">Cycle, Q<sub>discharge</sub>:</span> [%
+              result.cycle_data %]
+            </p>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+</div>
+
+
+<template id="battery-structure-template">
+  <div class="battery-structure">
+    <h3 class="font-bold mb-4">MongoDB Collections Structure</h3>
+    
+    <div class="mb-6">
+      <h4 class="font-semibold mb-2">db["battery_cycles"] (40,000+ records)</h4>
+      <ul class="list-disc pl-6">
+        <li>Qdlin</li>
+        <li>Qclin</li>
+        <li>Voltage (1000 shared points for charge/discharge)</li>
+        <li>raw_qd_voltage (raw data for reference)</li>
+        <li>Current_discharge</li>
+        <li>Current_charge (current during charge time)</li>
+        <li>raw_qc</li>
+        <li>raw_qc_voltage</li>
+        <li>raw_qd</li>
+        <li>Temperature (min/max per cycle only)</li>
+        <li>cycle_num</li>
+        <li>bat_key (foreign key)</li>
+      </ul>
+    </div>
+
+    <div>
+      <h4 class="font-semibold mb-2">db["battery_metadata"]</h4>
+      <ul class="list-disc pl-6">
+        <li>file_name</li>
+        <li>info (contains material, temperature, etc.)</li>
+        <li>bat_key (primary key)</li>
+      </ul>
+    </div>
+  </div>
+</template>
+{% endblock %} {% block scripts %}
+<script>
+      const {
+      nextTick,
+      createApp,
+      ref,
+      computed,
+      onMounted,
+      onBeforeUnmount,
+      watch,
+    } = Vue;
+
+  const opendataApp = Vue.createApp({
+    data() {
+      return {
+        datasets: [
+          {
+            name: 'CALCE',
+            cathode: 'LCO',
+            capacity: '是',
+            time: '2011-2013',
+            link: 'https://calce.umd.edu/battery-data',
+            linkText: '链接',
+            publisher: 'Center for Advanced Life Cycle Engineering'
+          },
+          {
+            name: 'OX',
+            cathode: 'LCO',
+            capacity: '是，小型pouch cell,740mAh,8个电池',
+            time: '2017',
+            link: 'https://web.archive.org/web/20220308195115/https://ora.ox.ac.uk/objects/uuid:03ba4b01-cfed-46d3-9b1a-7d4a7bdf6fac',
+            linkText: 'OX参考链接-webarchive',
+            publisher: '牛津大学'
+          },
+          {
+            name: 'MATR-1',
+            cathode: 'LFP',
+            capacity: '是',
+            time: '2017-19',
+            link: 'https://data.matr.io/1/projects/5c48dd2bc625d700019f3204',
+            linkText: 'Three batches',
+            publisher: ''
+          },
+          {
+            name: 'MATR-2',
+            cathode: 'LFP',
+            capacity: '是',
+            time: '2019',
+            link: '',
+            linkText: '',
+            publisher: '斯坦福大学'
+          },
+          {
+            name: 'HNEI',
+            cathode: 'blend of LCO and NMC',
+            capacity: '是',
+            time: '2018',
+            link: 'https://www.batteryarchive.org/index.html',
+            linkText: 'BatteryArchive.org',
+            publisher: 'HNEI'
+          },
+          {
+            name: 'SNL',
+            cathode: 'NMC & LFP',
+            capacity: '是',
+            time: '2020',
+            link: 'https://www.batteryarchive.org/index.html',
+            linkText: 'BatteryArchive.org',
+            publisher: 'SNL'
+          },
+          {
+            name: 'UL_PUR',
+            cathode: 'NCA & NCM',
+            capacity: '是',
+            time: '2020',
+            link: 'https://www.batteryarchive.org/index.html',
+            linkText: 'BatteryArchive.org',
+            publisher: 'UL_PUR'
+          },
+          {
+            name: 'RWTH',
+            cathode: 'NMC/graphite',
+            capacity: '是，约2Ah的nominal capacity',
+            time: '2021',
+            link: 'https://publications.rwth-aachen.de/record/818642/files/Rawdata.zip',
+            linkText: '链接',
+            publisher: 'RWTH'
+          },
+          {
+            name: 'HUST',
+            cathode: 'LFP',
+            capacity: '是',
+            time: '2022',
+            link: 'https://data.mendeley.com/datasets/nsc7hnsg4s/2',
+            linkText: '链接',
+            publisher: '华中科技大学'
+          }
+        ]
+      }
+    }
+  });
+
+  opendataApp.config.compilerOptions.delimiters = ["[[", "]]"];
+
+  opendataApp.mount("#app-opendata");
+
+
+  const BatteryStructure = {
+    template: "#battery-structure-template",
+  };
+
+
+  const app = Vue.createApp({
+    components: {
+      "battery-structure": BatteryStructure,
+    },
+    delimiters: ["[%", "%]"],
+        data() {
+          return {
+            capacityOptions: {
+              '': ['120', '150', '188', '200'],
+              'LFP': ['150'],
+              'LNMO': ['120'],
+              'NCM': ['188', '200']
+            },
+
+            showStructureModal: false,
+
+
+            batKey: "1",
+            filename: "",
+            batteryInfo: {
+              self_made: "",
+              size: "",
+              temperature: "",
+              specific_capacity: "",
+              area_living_material: "",
+              c_rate: ""
+            },
+
+
+        searchConditions: {
+          material: "LFP",
+          temperature: "28",
+          percent: "10",
+          size: "",
+          specificCapacity: "",
+        },
+        searchResults: [],
+
+
+        overallBatKeys: "1,2,3",
+        overallVisualType: "qd_cycle",
+        overallSubplots: true,
+        overallImage: "",
+
+
+        concreteBatKeys: "1,2,3",
+        concreteVisualType: "qdlin_voltage",
+        concreteSubplots: true,
+        concreteImage: "",
+
+
+        distilledImage: "",
+        lowestValue: "15",
+        filterVisualType: "Qdlin",
+        filterResults: [],
+      };
+    },
+    methods: {
+
+      searchFilename() {
+
+        this.filename = `LFP(1,1)_L(180)_10%_25um_0-5C_28°C_127.0.0.1-BT583-39-5-8-87`;
+
+        formData = new FormData();
+
+        formData.append("bat_key", this.batKey);
+
+        formData.append("form_id", "search_filename");
+
+        fetch("{% url 'bms:bms_visual' %}", {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]")
+              .value,
+          },
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            this.filename = data.filename;
+            this.batteryInfo = {
+              self_made: data.info?.self_made || "",
+              size: data.info?.size || "",
+              temperature: data.info?.temperature || "",
+              specific_capacity: data.info?.specific_capacity || "",
+              area_living_material: data.info?.area_living_material || "",
+              c_rate: data.info?.c_rate || ""
+            };
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      },
+
+
+      searchBatkey() {
+
+        this.searchResults = [
+          { bat_key: "Bat key", file_name: "is getting " },
+          {
+            bat_key: "b-10",
+            file_name:
+              "LFP(4,53)_L(180)_10%_25um_0-5C_28°C_127.0.0.1-BT583-39-4-2-81",
+          },
+          {
+            bat_key: "b-11",
+            file_name:
+              "LFP(4,53)_L(180)_10%_25um_2C_28°C_127.0.0.1-BT583-39-4-4-81",
+          },
+        ];
+
+
+
+        const formData = new FormData();
+
+
+        for (const [key, value] of Object.entries(this.searchConditions)) {
+          if (value !== "" && value !== null) {
+            console.log(key,value)
+            formData.append(key, value);
+          }
+        }
+
+        formData.append("form_id", "search_batkey");
+
+          for (let [key, value] of formData.entries()) {
+            console.log(key, value);
+          }
+
+        fetch("{% url 'bms:bms_visual' %}", {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]")
+              .value,
+          },
+
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((result) => {
+            data = result.bat_key;
+
+            const array = [
+              { bat_key: "Battery data", file_name: "getting" },
+              { bat_key: "Battery data2", file_name: "getting" },
+              { bat_key: "Battery data3", file_name: "getting" },
+            ];
+
+            this.searchResults = data;
+          })
+          .catch((error) => console.log("error", error));
+      },
+
+
+      generateOverallImage() {
+
+        this.overallImage =
+          "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAABkCAIAAAAnqfEgAAACOklEQVR4nO3bS26jUBRAQbvV+98yGViyaKD5JTKcqGpECPjhQY4uRDyHYXgAFPy5+gIA9hIsIEOwgAzBAjIEC8gQLCBDsIAMwQIyBAvIECwgQ7CAjL9XLfx8Pt/br/cZ53s2z30f9tqz/73I/WsB93HZhDUMw6QU8z0r525+2tHVgfvbnrDG48x8ezIcjX9cPP7x7YlmPBw9/jMrTY4ZW1l9/Zuunwt8wMaENanS4l/svFx7ts+Z3/rNZ6VxX8a/XV9985uqFVzu8C3hPEAviyF4HfCuxndSdfQKX8vtX/GTVwic82PPsCbjzMTRh+I/cjGHTlmc3Ra3gass3+X9c8TSE5zJTdPkQdL6fwD3W7kDPfQhJ65n8dkccK3tYP0Cp+e7Dw+GwLpbB2s+B52OztHTzVZwQ7cOFsCYV3OADMECMgQLyBAsIEOwgAzBAjIEC8gQLCBDsIAMwQIyBAvIECwgQ7CADMECMgQLyBAsIEOwgAzBAjIEC8gQLCBDsIAMwQIyBAvIECwgQ7CADMECMgQLyBAsIEOwgAzBAjIEC8gQLCBDsIAMwQIyBAvIECwgQ7CADMECMgQLyBAsIEOwgAzBAjIEC8gQLCBDsIAMwQIyBAvIECwgQ7CADMECMgQLyBAsIEOwgAzBAjIEC8gQLCBDsIAMwQIyBAvIECwgQ7CADMECMgQLyBAsIEOwgAzBAjIEC8gQLCBDsIAMwQIyBAvIECwgQ7CADMECMgQLyBAsIEOwgAzBAjK+ACzM533buZ5XAAAAAElFTkSuQmCC";
+
+
+        const formData = new FormData();
+        formData.append("bat_keys", this.overallBatKeys);
+        formData.append("visualtype", this.overallVisualType);
+        formData.append("subplots", this.overallSubplots);
+        formData.append("form_id", "overall_display");
+
+
+
+
+
+
+
+
+        fetch("{% url 'bms:bms_visual' %}", {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]")
+              .value,
+          },
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.overall_display) {
+              this.overallImage = data.overall_display;
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      },
+
+
+      generateConcreteImage() {
+
+        this.concreteImage =
+          "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAABkCAIAAAAnqfEgAAACSUlEQVR4nO3b0W6iQABAUdz0/3+ZfTAhLKOCdoO5es4TKjNOm/RmIPQyz/MEUPDn3QsAOEqwgAzBAjIEC8gQLCBDsIAMwQIyBAvIECwgQ7CADMECMn7evYB/XC6XaZpe+PfG68D12GenWmZ4bQHACT5khzUmZp7np7rz7PnA+fZ3WPc2L9d3lo3MZkezGbU5bTxeD1lPNX77gxWOL8f1jI7M/HjlwDl2dlhjOzbvjAc3Rx0/nlabnZvlerDCzfDNOctH6y86OPPyA66pFZzs6CXha1dM46jryyMbn8WRc3aXsUx1fLbHOQPOd/Sm+2u3w3dH3fvov98Cf6E+Ry5jgTPduNLZnvHwHtY0/GHfvPe0e1/p8eSbc+6t8KB1d25+0b1R4/KAM+0H6yP98vmJ7/ylwdvFgjXug37z0NZTw+2t4O1iwQK+2Yc8OAp8A8ECMgQLyBAsIEOwgAzBAjIEC8gQLCBDsIAMwQIyBAvIECwgQ7CADMECMgQLyBAsIEOwgAzBAjIEC8gQLCBDsIAMwQIyBAvIECwgQ7CADMECMgQLyBAsIEOwgAzBAjIEC8gQLCBDsIAMwQIyBAvIECwgQ7CADMECMgQLyBAsIEOwgAzBAjIEC8gQLCBDsIAMwQIyBAvIECwgQ7CADMECMgQLyBAsIEOwgAzBAjIEC8gQLCBDsIAMwQIyBAvIECwgQ7CADMECMgQLyBAsIEOwgAzBAjIEC8gQLCBDsIAMwQIyBAvIECwgQ7CADMECMgQLyBAsIEOwgAzBAjL+AiMy/5rKBRdDAAAAAElFTkSuQmCC";
+
+
+        const formData = new FormData();
+        formData.append("bat_keys", this.concreteBatKeys);
+        formData.append("visualtype", this.concreteVisualType);
+        formData.append("subplots", this.concreteSubplots);
+        formData.append("form_id", "concrete_display");
+
+        fetch("{% url 'bms:bms_visual' %}", {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]")
+              .value,
+          },
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.concrete_display) {
+              this.concreteImage = data.concrete_display;
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      },
+
+      filterBatData() {
+
+        this.filterResults = [{ bat_key: "Getting", search_str: "Getting" }];
+        console.log(this.filterResults);
+        console.log(this.filterResults.type);
+        const formData = new FormData();
+
+        formData.append("lowestValue", this.lowestValue);
+        formData.append("filterVisualType", this.filterVisualType);
+
+        formData.append("form_id", "filter_batdata");
+
+
+        fetch("{% url 'bms:bms_visual' %}", {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]")
+              .value,
+          },
+
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((result) => {
+            data = result.filter_batdata;
+            console.log(data);
+            const array = [{ bat_key: "Batdata", file_name: "Getting" }];
+
+            this.filterResults = data;
+
+
+          })
+          .catch((error) => console.log("error", error));
+      }
+    },
+    computed: {
+      filteredCapacityOptions() {
+        const material = this.searchConditions.material;
+        return this.capacityOptions[material] || this.capacityOptions[''];
+      }
+    },
+  });
+
+
+  const vueApp = app.mount("#app");
+
+  window.vueApp = vueApp;
+</script>
+{% endblock %}

@@ -1,0 +1,319 @@
+{% extends "home_base.html" %}
+
+{% block head %}
+<style>
+  .permission-admin-wrap {
+    padding: 40px 0 56px;
+    background: linear-gradient(180deg, #f6f8fb 0%, #ffffff 100%);
+    min-height: calc(100vh - 180px);
+  }
+  .permission-admin-card {
+    background: #ffffff;
+    border: 1px solid #e8edf5;
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+  }
+  .permission-stat-card {
+    padding: 20px 22px;
+    height: 100%;
+  }
+  .permission-stat-label {
+    font-size: 0.9rem;
+    color: #667085;
+    margin-bottom: 8px;
+  }
+  .permission-stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #101828;
+    line-height: 1.1;
+  }
+  .permission-toolbar {
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .permission-table-card {
+    padding: 24px;
+  }
+  .permission-table td,
+  .permission-table th {
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  .permission-table .form-control,
+  .permission-table .form-select {
+    min-width: 110px;
+  }
+  .permission-table .checkbox-cell {
+    text-align: center;
+  }
+  .permission-table .checkbox-cell input {
+    transform: scale(1.1);
+  }
+  .permission-focus-row {
+    outline: 2px solid #f59e0b;
+    outline-offset: -2px;
+    background: #fffaf0;
+  }
+  .permission-meta {
+    color: #667085;
+    font-size: 0.92rem;
+  }
+  .bulk-panel {
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 18px;
+  }
+  .permission-pill {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+  .permission-pill.enabled {
+    background: #ecfdf3;
+    color: #027a48;
+  }
+  .permission-pill.disabled {
+    background: #fef3f2;
+    color: #b42318;
+  }
+</style>
+{% endblock head %}
+
+{% block content %}
+<section class="permission-admin-wrap">
+  <div class="container">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end mb-4">
+      <div>
+        <h2 class="mb-2">User Permission Control</h2>
+        <p class="permission-meta mb-0">
+          在站内直接管理 Gaussian、Autocompute、Database 和 ML 相关权限，不再依赖 Django Admin 原生表格。
+        </p>
+      </div>
+      <div class="mt-3 mt-lg-0">
+        <a class="btn btn-outline-secondary" href="/admin/">Back to Django Admin</a>
+      </div>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }} mb-3">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="row mb-4">
+      <div class="col-md-6 col-xl-2 mb-3">
+        <div class="permission-admin-card permission-stat-card">
+          <div class="permission-stat-label">Total Users</div>
+          <div class="permission-stat-value">{{ stats.total_users }}</div>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-2 mb-3">
+        <div class="permission-admin-card permission-stat-card">
+          <div class="permission-stat-label">Autocompute</div>
+          <div class="permission-stat-value">{{ stats.auto_compute_users }}</div>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-2 mb-3">
+        <div class="permission-admin-card permission-stat-card">
+          <div class="permission-stat-label">Gaussian</div>
+          <div class="permission-stat-value">{{ stats.gaussian_users }}</div>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-3 mb-3">
+        <div class="permission-admin-card permission-stat-card">
+          <div class="permission-stat-label">Database Access</div>
+          <div class="permission-stat-value">{{ stats.database_users }}</div>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-3 mb-3">
+        <div class="permission-admin-card permission-stat-card">
+          <div class="permission-stat-label">ML Prediction</div>
+          <div class="permission-stat-value">{{ stats.ml_prediction_users }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="permission-admin-card permission-toolbar">
+      <form method="get" class="row g-3 align-items-end">
+        <div class="col-lg-4">
+          <label class="form-label">Search</label>
+          <input
+            type="text"
+            name="q"
+            value="{{ filter_form.q.value|default:'' }}"
+            class="form-control"
+            placeholder="Search by username or email"
+          >
+        </div>
+        <div class="col-sm-6 col-lg-2">
+          <label class="form-label">Autocompute</label>
+          <select name="auto_compute_permission" class="form-select">
+            {% for value, label in filter_form.fields.auto_compute_permission.choices %}
+            <option value="{{ value }}" {% if filter_form.auto_compute_permission.value|default:'all' == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-sm-6 col-lg-2">
+          <label class="form-label">Gaussian</label>
+          <select name="gaussian_permission" class="form-select">
+            {% for value, label in filter_form.fields.gaussian_permission.choices %}
+            <option value="{{ value }}" {% if filter_form.gaussian_permission.value|default:'all' == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-sm-6 col-lg-2">
+          <label class="form-label">Database</label>
+          <select name="database_permission" class="form-select">
+            {% for value, label in filter_form.fields.database_permission.choices %}
+            <option value="{{ value }}" {% if filter_form.database_permission.value|default:'all' == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-sm-6 col-lg-2">
+          <label class="form-label">ML Prediction</label>
+          <select name="ml_prediction_permission" class="form-select">
+            {% for value, label in filter_form.fields.ml_prediction_permission.choices %}
+            <option value="{{ value }}" {% if filter_form.ml_prediction_permission.value|default:'all' == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-12 d-flex flex-wrap gap-2">
+          <button type="submit" class="btn btn-primary">Apply Filters</button>
+          <a href="{% url 'register:user_profile_admin' %}" class="btn btn-outline-secondary">Reset</a>
+        </div>
+      </form>
+    </div>
+
+    <div class="permission-admin-card permission-table-card">
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="return_query" value="{{ current_query }}">
+
+        <div class="bulk-panel">
+          <div class="row g-3 align-items-end">
+            <div class="col-lg-4">
+              <label class="form-label">Batch Permission Field</label>
+              <select name="permission_field" class="form-select">
+                <option value="auto_compute_permission">Autocompute</option>
+                <option value="gaussian_permission">Gaussian</option>
+                <option value="database_permission">Database</option>
+                <option value="ml_prediction_permission">ML Prediction</option>
+              </select>
+            </div>
+            <div class="col-lg-3">
+              <label class="form-label">Target Value</label>
+              <select name="permission_value" class="form-select">
+                <option value="enable">Enable</option>
+                <option value="disable">Disable</option>
+              </select>
+            </div>
+            <div class="col-lg-3">
+              <label class="form-label">Batch Daily Task Limit</label>
+              <input type="number" min="0" name="batch_daily_task_limit" class="form-control" placeholder="e.g. 5">
+            </div>
+            <div class="col-lg-2 d-grid gap-2">
+              <button type="submit" name="action_type" value="batch_permission" class="btn btn-dark">Apply Permission</button>
+              <button type="submit" name="action_type" value="batch_daily_limit" class="btn btn-outline-dark">Set Limit</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover permission-table">
+            <thead>
+              <tr>
+                <th style="width: 48px;">
+                  <input type="checkbox" id="select-all">
+                </th>
+                <th>User</th>
+                <th>Email</th>
+                <th>Date Joined</th>
+                <th>Tasks</th>
+                <th>Autocompute</th>
+                <th>Gaussian</th>
+                <th>Database</th>
+                <th>ML</th>
+                <th>Daily Limit</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for profile in profiles %}
+              <tr id="profile-{{ profile.id }}" class="{% if focus_profile == profile.id|stringformat:'s' %}permission-focus-row{% endif %}">
+                <td class="checkbox-cell">
+                  <input type="checkbox" name="selected_profiles" value="{{ profile.id }}">
+                </td>
+                <td>
+                  <strong>{{ profile.user.username }}</strong><br>
+                  <span class="permission-meta">ID {{ profile.user_id }}</span>
+                </td>
+                <td>{{ profile.user.email|default:"-" }}</td>
+                <td>{{ profile.user.date_joined|date:"Y-m-d H:i" }}</td>
+                <td>
+                  <span class="permission-pill {% if profile.task_count %}enabled{% else %}disabled{% endif %}">
+                    {{ profile.task_count }} tasks
+                  </span>
+                </td>
+                <td class="checkbox-cell"><input form="single-update-{{ profile.id }}" type="checkbox" name="auto_compute_permission" {% if profile.auto_compute_permission %}checked{% endif %}></td>
+                <td class="checkbox-cell"><input form="single-update-{{ profile.id }}" type="checkbox" name="gaussian_permission" {% if profile.gaussian_permission %}checked{% endif %}></td>
+                <td class="checkbox-cell"><input form="single-update-{{ profile.id }}" type="checkbox" name="database_permission" {% if profile.database_permission %}checked{% endif %}></td>
+                <td class="checkbox-cell"><input form="single-update-{{ profile.id }}" type="checkbox" name="ml_prediction_permission" {% if profile.ml_prediction_permission %}checked{% endif %}></td>
+                <td>
+                  <input
+                    form="single-update-{{ profile.id }}"
+                    type="number"
+                    name="daily_task_limit"
+                    min="0"
+                    value="{{ profile.daily_task_limit }}"
+                    class="form-control"
+                  >
+                </td>
+                <td>
+                  <button form="single-update-{{ profile.id }}" type="submit" class="btn btn-sm btn-primary">Save</button>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="11" class="text-center py-5">
+                  No users matched the current search and filters.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </form>
+
+      {% for profile in profiles %}
+      <form id="single-update-{{ profile.id }}" method="post" action="{% url 'register:user_profile_admin' %}" class="d-none">
+        {% csrf_token %}
+        <input type="hidden" name="action_type" value="single_update">
+        <input type="hidden" name="profile_id" value="{{ profile.id }}">
+        <input type="hidden" name="return_query" value="{{ current_query }}">
+      </form>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock content %}
+
+{% block script %}
+<script>
+  (function () {
+    const selectAll = document.getElementById('select-all');
+    if (!selectAll) {
+      return;
+    }
+    selectAll.addEventListener('change', function () {
+      document.querySelectorAll('input[name="selected_profiles"]').forEach(function (checkbox) {
+        checkbox.checked = selectAll.checked;
+      });
+    });
+  })();
+</script>
+{% endblock script %}

@@ -1,0 +1,175 @@
+{% extends 'autocompute/autocompute_base.html'%}
+{% load static %}
+
+{% block head %} 
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.4.0/css/buttons.dataTables.min.css" />
+
+<script type="text/javascript" src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.flash.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.colVis.min.js"></script>
+
+{% endblock head %}
+
+{% block navbar %} 
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Database' %}">Database</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:QcCompute_base' %}">QcCompute</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:MDCompute' %}">MDCompute</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:SMILESDrawer' %}">SMILESDrawer</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Visualization' %}">Visualization</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:from_smiles_get_name' %}">GetName</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'home:homepage' %}">Home</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:index' %}">Return</a>
+</li>
+{% endblock navbar %}
+
+{% block content %}
+
+<div class="container-fluid">
+    
+    {% if error_message %}
+        <div class="alert alert-danger">{{ error_message }}</div>
+    {% endif %}
+    {% if success_message %}
+        <div class="alert alert-success">{{ success_message }}</div>
+    {% endif %}
+
+    <div class="row">
+        
+        <div class="col-md-6">
+            
+            <div id="div_left" class="border p-3">
+                
+                <div id="div_left_up" class="mb-3 border p-3">
+                    
+                    
+                    <form method="post" enctype="multipart/form-data" action="{% url 'autocompute:molecule_visualization_upload' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="fileUpload" class="font-weight-bold">Upload Your Structure File (.mol2, .xyz, .pdb, .out, et al):</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="fileUpload" name="file">
+                                <label class="custom-file-label" for="fileUpload">Choose file</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success mt-3">Upload</button>
+                    </form>
+                </div>
+                
+                <div id="div_left_down" class="border p-3">
+                    
+                    <div id="jsmolContainer">
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            
+            <div id="div_right" class="border p-3">
+                
+                <h3>Molecular Properties</h3>
+                <table class="table table-bordered">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Property</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if molecular_properties %}
+                            {% for prop, value in molecular_properties.items %}
+                                <tr>
+                                    <td>{{ prop }}</td>
+                                    <td>{{ value }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="2">No properties to display.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block script %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bs-custom-file-input/1.3.2/bs-custom-file-input.min.js"></script>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function() {
+        bsCustomFileInput.init();
+
+    var jmol;
+
+
+    var JmolInfo = {
+        width: '100%',
+        height: 400,
+        debug: false,
+        color: "white",
+        use: "HTML5",
+        jarPath: "{% static 'jsmol/java' %}",
+        jarFile: "JmolAppletSigned.jar",
+        j2sPath: "{% static 'jsmol/j2s' %}",
+        console: "none",
+        isSigned: true,
+        script: "",
+    };
+
+
+    {% if file_url %}
+
+        var fileUrl = "{{ file_url|escapejs }}";
+
+
+        JmolInfo.script = "load '" + fileUrl + "';";
+
+
+        if (jmol) {
+            Jmol._destroy(jmol);
+        }
+
+
+        jmol = Jmol.getApplet("jmolApplet0", JmolInfo);
+
+
+        document.getElementById('jsmolContainer').innerHTML = Jmol.getAppletHtml(jmol);
+    {% endif %}
+    });
+    
+</script>
+
+{% endblock script %}
+

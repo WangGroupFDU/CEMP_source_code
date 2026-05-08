@@ -1,0 +1,67 @@
+{% extends 'crystals_base.html' %}
+{% load static %}
+{% block content%}
+<section class="service_section layout_padding ">
+  <div class="nft-shop">
+
+    <div class="nft-list">
+        <div class="item" data-url="{% url 'crystals:crystal_selected' %}">
+            <div class="info">
+                <div>
+                    <h5>Crystal Design</h5>
+                      <div class="btc">
+                        <p>1. Element</p>
+                        <img class="btc_img" src="{% static 'images/Crystal/Element.png' %}" alt=""/>
+                      </div>
+                      <div class="btc">
+                        <p>2. Crystal space Group</p>
+                        <img class="btc_img" src="{% static 'images/Crystal/space group.png' %}" alt=""/>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="item" data-url="#">
+                  <div class="info">
+                    <div>
+                      <h5>Crystal Application</h5>
+                      <div class="btc">
+                        <p>1. Cathode</p>
+                        <img class="btc_img" src="{% static 'images/Crystal/Cathode_anode.png' %}" alt=""/>
+                      </div>
+                      <div class="btc">
+                        <p>2. Anode</p>
+                      </div>
+                      <div class="btc">
+                        <p>3. Electrolyte</p>
+                        <img class="btc_img" src="{% static 'images/Crystal/Crystal_electrolyte.png' %}" alt=""/>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="item" data-url="{% url 'crystals:crystal_visualize' %}">
+                  <div class="info">
+                    <div>
+                      <h5>Crystal Visulization</h5>
+                      <div class="btc">
+                        <p>1. Support .cif format</p>
+                        <img class="btc_img" src="{% static 'images/Crystal/Crystal_display.png' %}" alt=""/>
+                      </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+{% endblock %}
+
+{% block script %}
+<script>
+  document.querySelectorAll('.item').forEach(item => {
+    item.addEventListener('click', function() {
+        const url = this.getAttribute('data-url');
+        window.location.href = url;
+    });
+});
+</script>
+{% endblock script %}

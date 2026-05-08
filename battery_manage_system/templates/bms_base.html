@@ -1,0 +1,191 @@
+<!doctype html>
+{% load static %}
+<html>
+  <head>
+    
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Battery Management System</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.1.3/assets/owl.carousel.min.css"
+    />
+
+    
+    
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/bootstrap.css' %}"
+    />
+    <link href="{% static 'css/responsive.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/style.css' %}" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="{% static 'battery_manage_system/home.css'%}"
+    />
+
+    
+    <script
+      type="text/javascript"
+      src="{% static 'js/jquery-3.4.1.min.js' %}"
+    ></script>
+    <script
+      type="text/javascript"
+      src="{% static 'js/bootstrap.js' %}"
+    ></script>
+    <script
+      type="text/javascript"
+      src="{% static 'js/bootstrap.bundle.min.js' %}"
+    ></script>
+    
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.datatables.net/v/dt/dt-1.12.1/datatables.min.css"
+    />
+    <script
+      type="text/javascript"
+      src="https://cdn.datatables.net/v/dt/dt-1.12.1/datatables.min.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.datatables.net/fixedheader/3.2.3/js/dataTables.fixedHeader.min.js"
+    ></script>
+
+    
+    {% block header_scripts %} {% endblock header_scripts %}
+
+    
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: "Noto Sans SC", "Poppins", sans-serif;
+      }
+      #navbarSupportedContent {
+        background-color: #343434 !important;
+      }
+      #navbarSupportedContent .nav-link:hover {
+        color: orange !important;
+      }
+      
+    </style>
+  </head>
+
+  <body>
+    
+    <div class="hero_area">
+      <header class="header_section">
+        <div class="container">
+          <nav class="navbar navbar-expand-lg custom_nav-container pt-3">
+            <a class="navbar-brand" href="">
+              <img src="{% static 'images/dlogo.png' %}" alt="" /><span>
+                Battery Manage System
+              </span>
+            </a>
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-toggle="collapse"
+              data-target="#navbarSupportedContent"
+              aria-controls="navbarSupportedContent"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+            >
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <div class="ms-auto justify-content-end">
+                <ul class="navbar-nav">
+                  <li class="nav-item active">
+                    <a class="nav-link" href="{% url 'bms:bms_visual' %}"
+                      >Li Metal battery</a
+                    >
+                  </li>
+                  
+                  
+                  
+                  <li class="nav-item">
+                    <a
+                      class="nav-link"
+                      href="{% url 'bms:bms_short_prediction' %}"
+                      >Rate Prediction</a
+                    >
+                  </li>
+                  
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'bms:pattern_recognition' %}"
+                      >Pattern recognition</a
+                    >
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'home:homepage' %}"
+                      >Home</a
+                    >
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </nav>
+        </div>
+      </header>
+    </div>
+    
+
+    
+    <div class="container mt-3">
+      {% with request.resolver_match.url_name as current %}
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb bg-transparent px-0">
+            <li class="breadcrumb-item">
+              <a href="{% url 'home:homepage' %}">Home</a>
+            </li>
+            {% if current == 'visual' %}
+              <li class="breadcrumb-item active" aria-current="page">PolymerDatabase</li>
+            {% elif current == 'generate_polymer_display' %}
+              <li class="breadcrumb-item active" aria-current="page">PolymerGenerator</li>
+            {% elif current == 'polymer_predict_page' %}
+              <li class="breadcrumb-item active" aria-current="page">Predict</li>
+            {% elif current == 'visualization_structure' %}
+              <li class="breadcrumb-item active" aria-current="page">Visualization</li>
+            {% else %}
+              <li class="breadcrumb-item active" aria-current="page">{{ current }}</li>
+            {% endif %}
+          </ol>
+        </nav>
+      {% endwith %}
+    </div>
+
+    {% block content %} {% endblock content %} 
+    {% block scripts %} {% endblock scripts %}
+    
+    <section class="container-fluid footer_section">
+      <p>
+        Copyright &copy; 2022 All Rights Reserved By
+        <a href="https://yingwanggroup/">Ying Wang Group</a>
+      </p>
+    </section>
+    
+  </body>
+</html>

@@ -1,0 +1,1101 @@
+{% extends 'bms_base.html' %} {% load static %} {% block header_scripts %}
+
+<script
+  crossorigin
+  src="https://unpkg.com/react@18/umd/react.development.js"
+></script>
+<script
+  crossorigin
+  src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+></script>
+
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<link
+  rel="stylesheet"
+  href="{% static 'battery_manage_system/style_add.css'%}"
+/>
+{% endblock header_scripts %} {% block content %}
+<div class="container">
+  
+  
+  {{ template_dict|json_script:"django-data" }}
+  <script>
+    window.djangoVars = JSON.parse(
+      document.getElementById("django-data").textContent,
+    );
+  </script>
+  <div id="battery_structure"></div>
+</div>
+{% endblock content %} {% block scripts %}
+<script type="text/babel">
+
+
+
+
+
+
+  const buttonStyle = {
+    padding: "0 10px",
+    background: "#f0f0f0",
+    border: "1px solid #ddd",
+    borderRadius: "4px",
+    cursor: "pointer",
+  };
+
+
+  console.log(window.djangoVars.cathode_options);
+  console.log(window.djangoVars.anode_options);
+
+  const BatteryStructureModal = () => {
+
+    const [formData, setFormData] = React.useState({
+
+      cathode_anode: {
+        cathode: "",
+        cathode_active_material: "",
+        anode: "",
+        li_metal_thickness: "",
+      },
+
+      electrolyte: {
+        polymer: "",
+        polymer_percentage: "",
+        ionic_liquid: "",
+        ionic_liquid_electrolyte: "",
+        li_concentration: "",
+        intristic_viscosity: "",
+      },
+
+      policy: {
+        temperature: "",
+        charge_rate: "",
+        pressure: "",
+        thickness: "",
+        temperature: "",
+        magnetic_field_direction: "",
+      },
+
+      remark: "",
+      file: null,
+    });
+
+    const [showHint, setShowHint] = React.useState(false);
+
+    const [expanded, setExpanded] = React.useState({
+      cathode_anode: true,
+      electrolyte: true,
+      policy: true,
+    });
+
+    const handleHintClick = () => {
+      setShowHint(true);
+    };
+
+    const handleClose = () => {
+      setShowHint(false);
+    };
+
+
+    const [customInputs, setCustomInputs] = React.useState({
+      li_metal_thickness: false,
+      polymer_percentage: false,
+      charge_rate: false,
+      intristic_viscosity: false,
+      li_concentration: false,
+      thickness: false,
+      temperature: false,
+      pressure: false,
+    });
+
+
+    const toggleExpand = (section) => {
+      setExpanded((prev) => ({
+        ...prev,
+        [section]: !prev[section],
+      }));
+    };
+
+
+    const toggleCustomInput = (field) => {
+      setCustomInputs((prev) => ({
+        ...prev,
+        [field]: !prev[field],
+      }));
+    };
+
+
+    const handleChange = (section, field, value) => {
+      setFormData((prev) => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [field]: value,
+        },
+      }));
+    };
+
+
+    const handleFileChange = (e) => {
+      setFormData((prev) => ({
+        ...prev,
+        file: e.target.files[0],
+      }));
+    };
+
+
+    const validateForm = () => {
+      const requiredFields = {
+        cathode_anode: [
+          "cathode",
+          "cathode_active_material",
+          "anode",
+          "li_metal_thickness",
+        ],
+        electrolyte: [
+          "polymer",
+          "polymer_percentage",
+          "ionic_liquid",
+          "ionic_liquid_electrolyte",
+          "li_concentration",
+          "intristic_viscosity",
+        ],
+        policy: [
+          "charge_rate",
+          "temperature",
+          "pressure",
+          "thickness",
+          "magnetic_field_direction",
+        ],
+      };
+
+      const errors = {};
+      let isValid = true;
+
+      Object.entries(requiredFields).forEach(([section, fields]) => {
+        fields.forEach((field) => {
+          if (!formData[section][field]) {
+            errors[field] = "This field is required";
+            isValid = false;
+          }
+        });
+      });
+
+      return { isValid, errors };
+    };
+
+
+    const handleSubmit = (e) => {
+      e.preventDefault();
+
+
+      const { isValid, errors } = validateForm();
+      if (!isValid) {
+        alert("Please fill all required fields");
+        console.log("Validation errors:", errors);
+        return;
+      }
+
+
+      const formDataObj = new FormData();
+      console.log("start handleSubmit!");
+
+
+      if (formData.file) {
+        formDataObj.append("bms_rawfile", formData.file);
+      }
+      formDataObj.append("remark", formData.remark);
+
+
+      Object.entries(formData.cathode_anode).forEach(([key, value]) => {
+        formDataObj.append(key, value);
+      });
+
+
+      formDataObj.append("polymer", formData.electrolyte.polymer);
+      formDataObj.append(
+        "polymer_percentage",
+        formData.electrolyte.polymer_percentage,
+      );
+      formDataObj.append(
+        "intristic_viscosity",
+        formData.electrolyte.intristic_viscosity,
+      );
+      formDataObj.append("ionic_liquid", formData.electrolyte.ionic_liquid);
+      formDataObj.append(
+        "ionic_liquid_electrolyte",
+        formData.electrolyte.ionic_liquid_electrolyte,
+      );
+      formDataObj.append("li_conc", formData.electrolyte.li_concentration);
+
+
+      formDataObj.append("charge_rate", formData.policy.charge_rate);
+      formDataObj.append("temperature", formData.policy.temperature);
+      formDataObj.append("pressure", formData.policy.pressure);
+      formDataObj.append("thickness", formData.policy.thickness);
+      formDataObj.append(
+        "magnetic_field_direction",
+        formData.policy.magnetic_field_direction,
+      );
+
+
+      const csrfToken = document.querySelector(
+        "[name=csrfmiddlewaretoken]",
+      ).value;
+      console.log(csrfToken);
+
+      fetch("{% url 'bms:add_data' %}", {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": csrfToken,
+        },
+        body: formDataObj,
+      })
+        .then((response) => {
+          if (!response.ok) {
+            return response.json().then((err) => {
+              throw new Error(err.error || "Network response was not ok");
+            });
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log("Success:", data);
+          alert("数据提交成功！");
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("提交失败: " + error.message);
+        });
+    };
+
+
+    const isSectionComplete = (section) => {
+      console.log(section);
+      const sectionData = Object(formData[section]);
+
+
+      return Object.values(sectionData).every((value) => value !== "");
+    };
+
+
+    const isFieldComplete = (section, field) => {
+      return formData[section][field] !== "";
+    };
+
+
+    const isDefaultValue = (section, field, value) => {
+      const defaultValues = {
+        cathode_anode: {
+          cathode: "LFP",
+          cathode_active_material: "50",
+          anode: "5",
+          li_metal_thickness: "C2mimFSI-LiFSI",
+        },
+        electrolyte: {
+          polymer: "Li",
+          polymer_percentage: "PBDT",
+          ionic_liquid: "",
+          ionic_liquid_electrolyte: "",
+          li_concentration: "",
+          intristic_viscosity: "",
+        },
+        policy: {
+          temperature: "",
+          charge_rate: "",
+          pressure: "",
+          thickness: "",
+          temperature: "",
+          magnetic_field_direction: "",
+        },
+
+        remark: "",
+        file: null,
+      };
+      console.log(formData);
+      console.log(section);
+      return (
+        Object(formData[section])[field] ===
+        Object(defaultValues[section])[field]
+      );
+    };
+
+
+
+
+    return (
+      <div className="container">
+        <div className="header-row">
+          <h1>Add BMS Experiment Data</h1>
+          <button onClick={handleHintClick}>Hint</button>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="hidden"
+            name="csrfmiddlewaretoken"
+            value={window.djangoVars.csrf_token}
+          />
+          <div className="form-grid">
+            {}
+            <div
+              className={`card ${isSectionComplete("cathode_anode") ? "completed" : ""}`}
+            >
+              <div
+                className="card-header"
+                onClick={() => toggleExpand("cathode_anode")}
+              >
+                <div className="card-title">
+                  Cathode & Anode
+                  {isSectionComplete("cathode_anode") && (
+                    <i className="fas fa-check check-icon"></i>
+                  )}
+                </div>
+                <i
+                  className={`fas fa-chevron-${expanded.cathode_anode ? "up" : "down"}`}
+                ></i>
+              </div>
+              <div
+                className={`card-content ${expanded.cathode_anode ? "expanded" : ""}`}
+              >
+                <div className="form-group">
+                  <label>Cathode</label>
+                  <div className="select-wrapper">
+                    <select
+                      className={`custom-select ${isFieldComplete("cathode_anode", "cathode") ? "completed" : ""} ${isDefaultValue("cathode_anode", "cathode", formData.cathode_anode.cathode) ? "default" : ""}`}
+                      value={formData.cathode_anode.cathode}
+                      onChange={(e) =>
+                        handleChange("cathode_anode", "cathode", e.target.value)
+                      }
+                    >
+                      <option value="">Select type</option>
+                      {window.djangoVars &&
+                        window.djangoVars.cathode_options &&
+                        window.djangoVars.cathode_options.map(
+                          (cathode_option) => (
+                            <option key={cathode_option} value={cathode_option}>
+                              {cathode_option}
+                            </option>
+                          ),
+                        )}
+                    </select>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>Cathode Active Materials Concentration</label>
+                  <div className="select-wrapper">
+                    <select
+                      className={`custom-select ${isFieldComplete("cathode_anode", "cathode_active_material") ? "completed" : ""} ${isDefaultValue("cathode_anode", "cathode_active_material", formData.cathode_anode.cathode_active_material) ? "default" : ""}`}
+                      value={formData.cathode_anode.cathode_active_material}
+                      onChange={(e) =>
+                        handleChange(
+                          "cathode_anode",
+                          "cathode_active_material",
+                          e.target.value,
+                        )
+                      }
+                    >
+                      <option value="">Select type</option>
+                      {window.djangoVars &&
+                        window.djangoVars.cathode_active_material_options &&
+                        window.djangoVars.cathode_active_material_options.map(
+                          (cathode_active_material_option) => (
+                            <option
+                              key={cathode_active_material_option}
+                              value={cathode_active_material_option}
+                            >
+                              {cathode_active_material_option}
+                            </option>
+                          ),
+                        )}
+                    </select>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>Anode</label>
+                  <div className="select-wrapper">
+                    <select
+                      className={`custom-select ${isFieldComplete("cathode_anode", "anode") ? "completed" : ""} ${isDefaultValue("cathode_anode", "anode", formData.cathode_anode.anode) ? "default" : ""}`}
+                      value={formData.cathode_anode.anode}
+                      onChange={(e) =>
+                        handleChange("cathode_anode", "anode", e.target.value)
+                      }
+                    >
+                      <option value="">Select type</option>
+                      {window.djangoVars &&
+                        window.djangoVars.anode_options &&
+                        window.djangoVars.anode_options.map((anode_option) => (
+                          <option key={anode_option} value={anode_option}>
+                            {anode_option}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>Li Metal Thickness</label>
+                  <div className="dual-input">
+                    <div className="select-wrapper">
+                      <select
+                        className={`custom-select ${isFieldComplete("cathode_anode", "li_metal_thickness") ? "completed" : ""} ${isDefaultValue("cathode_anode", "li_metal_thickness", formData.cathode_anode.li_metal_thickness) ? "default" : ""}`}
+                        value={formData.cathode_anode.li_metal_thickness}
+                        onChange={(e) =>
+                          handleChange(
+                            "cathode_anode",
+                            "li_metal_thickness",
+                            e.target.value,
+                          )
+                        }
+                        disabled={customInputs.li_metal_thickness}
+                      >
+                        <option value="">Select Li metal thickness</option>
+                        {window.djangoVars &&
+                          window.djangoVars.li_metal_thickness_options &&
+                          window.djangoVars.li_metal_thickness_options.map(
+                            (li_metal_thickness_option) => (
+                              <option
+                                key={li_metal_thickness_option}
+                                value={li_metal_thickness_option}
+                              >
+                                {li_metal_thickness_option}
+                              </option>
+                            ),
+                          )}
+                      </select>
+                    </div>
+                    <input
+                      type="number"
+                      placeholder="Custom value"
+                      value={
+                        customInputs.li_metal_thickness
+                          ? formData.cathode_anode.li_metal_thickness
+                          : ""
+                      }
+                      onChange={(e) =>
+                        handleChange(
+                          "cathode_anode",
+                          "li_metal_thickness",
+                          e.target.value,
+                        )
+                      }
+                      disabled={!customInputs.li_metal_thickness}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleCustomInput("li_metal_thickness")}
+                      style={buttonStyle}
+                    >
+                      <i
+                        className={`fas fa-${customInputs.li_metal_thickness ? "list" : "keyboard"}`}
+                      ></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {}
+            <div
+              className={`card ${isSectionComplete("electrolyte") ? "completed" : ""}`}
+            >
+              <div
+                className="card-header"
+                onClick={() => toggleExpand("electrolyte")}
+              >
+                <div className="card-title">
+                  Electrolyte Section
+                  {isSectionComplete("electrolyte") && (
+                    <i className="fas fa-check check-icon"></i>
+                  )}
+                </div>
+                <i
+                  className={`fas fa-chevron-${expanded.electrolyte ? "up" : "down"}`}
+                ></i>
+              </div>
+              <div
+                className={`card-content ${expanded.electrolyte ? "expanded" : ""}`}
+              >
+                <div className="form-group">
+                  <label>Polymer</label>
+                  <div className="dual-input">
+                    <div className="select-wrapper">
+                      <select
+                        className={`custom-select ${isFieldComplete("electrolyte", "polymer") ? "completed" : ""} ${isDefaultValue("electrolyte", "polymer", formData.electrolyte.polymer) ? "default" : ""}`}
+                        value={formData.electrolyte.type}
+                        onChange={(e) =>
+                          handleChange("electrolyte", "polymer", e.target.value)
+                        }
+                      >
+                        <option value="">Select Polymer</option>
+                        {window.djangoVars &&
+                          window.djangoVars.polymer_options &&
+                          window.djangoVars.polymer_options.map(
+                            (polymer_option) => (
+                              <option
+                                key={polymer_option}
+                                value={polymer_option}
+                              >
+                                {polymer_option}
+                              </option>
+                            ),
+                          )}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Polymer percentage</label>
+                  <div className="dual-input">
+                    <div className="select-wrapper">
+                      <select
+                        className={`custom-select ${isFieldComplete("electrolyte", "polymer_percentage") ? "completed" : ""} ${isDefaultValue("electrolyte", "polymer_percentage", formData.electrolyte.polymer_percentage) ? "default" : ""}`}
+                        value={formData.electrolyte.polymer_percentage}
+                        onChange={(e) =>
+                          handleChange(
+                            "electrolyte",
+                            "polymer_percentage",
+                            e.target.value,
+                          )
+                        }
+                      >
+                        <option value="">Select Polymer percentage</option>
+                        {window.djangoVars &&
+                          window.djangoVars.polymer_percentage_options &&
+                          window.djangoVars.polymer_percentage_options.map(
+                            (polymer_percentage_option) => (
+                              <option
+                                key={polymer_percentage_option}
+                                value={polymer_percentage_option}
+                              >
+                                {polymer_percentage_option}
+                              </option>
+                            ),
+                          )}
+                      </select>
+                    </div>
+                    <input
+                      type="number"
+                      placeholder="Custom value"
+                      value={
+                        customInputs.polymer_percentage
+                          ? formData.electrolyte.polymer_percentage
+                          : ""
+                      }
+                      onChange={(e) =>
+                        handleChange(
+                          "electrolyte",
+                          "polymer_percentage",
+                          e.target.value,
+                        )
+                      }
+                      disabled={!customInputs.polymer_percentage}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleCustomInput("polymer_percentage")}
+                      style={buttonStyle}
+                    >
+                      <i
+                        className={`fas fa-${customInputs.polymer_percentage ? "list" : "keyboard"}`}
+                      ></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Ionic Liquid</label>
+                  <div className="select-wrapper">
+                    <select
+                      className={`custom-select ${isFieldComplete("electrolyte", "ionic_liquid") ? "completed" : ""} ${isDefaultValue("electrolyte", "ionic_liquid", formData.electrolyte.ionic_liquid) ? "default" : ""}`}
+                      value={formData.electrolyte.ionic_liquid}
+                      onChange={(e) =>
+                        handleChange(
+                          "electrolyte",
+                          "ionic_liquid",
+                          e.target.value,
+                        )
+                      }
+                    >
+                      <option value="">Select ionic liquid</option>
+                      {window.djangoVars &&
+                        window.djangoVars.ionic_liquid_options &&
+                        window.djangoVars.ionic_liquid_options.map(
+                          (ionic_liquid_option) => (
+                            <option
+                              key={ionic_liquid_option}
+                              value={ionic_liquid_option}
+                            >
+                              {ionic_liquid_option}
+                            </option>
+                          ),
+                        )}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Ionic Liquid Electrolyte</label>
+                  <div className="select-wrapper">
+                    <select
+                      className={`custom-select ${isFieldComplete("electrolyte", "ionic_liquid_electrolyte") ? "completed" : ""} ${isDefaultValue("electrolyte", "ionic_liquid_electrolyte", formData.electrolyte.ionic_liquid_electrolyte) ? "default" : ""}`}
+                      value={formData.electrolyte.ionic_liquid_electrolyte}
+                      onChange={(e) =>
+                        handleChange(
+                          "electrolyte",
+                          "ionic_liquid_electrolyte",
+                          e.target.value,
+                        )
+                      }
+                    >
+                      <option value="">Select ionic liquid</option>
+                      {window.djangoVars &&
+                        window.djangoVars.ILE_options &&
+                        window.djangoVars.ILE_options.map((ILE_option) => (
+                          <option key={ILE_option} value={ILE_option}>
+                            {ILE_option}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>Li Concentration</label>
+                  <div className="dual-input">
+                    <div className="select-wrapper">
+                      <select
+                        className={`custom-select ${isFieldComplete("electrolyte", "li_concentration") ? "completed" : ""} ${isDefaultValue("electrolyte", "li_concentration", formData.electrolyte.li_concentration) ? "default" : ""}`}
+                        value={formData.electrolyte.li_concentration}
+                        onChange={(e) =>
+                          handleChange(
+                            "electrolyte",
+                            "li_concentration",
+                            e.target.value,
+                          )
+                        }
+                        disabled={customInputs.li_concentration}
+                      >
+                        <option value="">Select Li concentration</option>
+                        {window.djangoVars &&
+                          window.djangoVars.li_conc_options &&
+                          window.djangoVars.li_conc_options.map(
+                            (li_conc_option) => (
+                              <option
+                                key={li_conc_option}
+                                value={li_conc_option}
+                              >
+                                {li_conc_option}
+                              </option>
+                            ),
+                          )}
+                      </select>
+                    </div>
+                    <input
+                      type="number"
+                      step="0.1"
+                      placeholder="Custom value"
+                      value={
+                        customInputs.li_concentration
+                          ? formData.electrolyte.li_concentration
+                          : ""
+                      }
+                      onChange={(e) =>
+                        handleChange(
+                          "electrolyte",
+                          "li_concentration",
+                          e.target.value,
+                        )
+                      }
+                      disabled={!customInputs.li_concentration}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleCustomInput("li_concentration")}
+                      style={buttonStyle}
+                    >
+                      <i
+                        className={`fas fa-${customInputs.li_concentration ? "list" : "keyboard"}`}
+                      ></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Intristic Viscosity</label>
+                  <div className="dual-input">
+                    <div className="select-wrapper">
+                      <select
+                        className={`custom-select ${isFieldComplete("electrolyte", "intristic_viscosity") ? "completed" : ""} ${isDefaultValue("electrolyte", "intristic_viscosity", formData.electrolyte.intristic_viscosity) ? "default" : ""}`}
+                        value={formData.electrolyte.intristic_viscosity}
+                        onChange={(e) =>
+                          handleChange(
+                            "electrolyte",
+                            "intristic_viscosity",
+                            e.target.value,
+                          )
+                        }
+                        disabled={customInputs.intristic_viscosity}
+                      >
+                        <option value="">Select viscosity</option>
+                        {window.djangoVars &&
+                          window.djangoVars.intristic_viscosity_options &&
+                          window.djangoVars.intristic_viscosity_options.map(
+                            (intristic_viscosity_option) => (
+                              <option
+                                key={intristic_viscosity_option}
+                                value={intristic_viscosity_option}
+                              >
+                                {intristic_viscosity_option}
+                              </option>
+                            ),
+                          )}
+                      </select>
+                    </div>
+                    <input
+                      type="number"
+                      placeholder="Custom value"
+                      value={
+                        customInputs.intristic_viscosity
+                          ? formData.electrolyte.intristic_viscosity
+                          : ""
+                      }
+                      onChange={(e) =>
+                        handleChange(
+                          "electrolyte",
+                          "intristic_viscosity",
+                          e.target.value,
+                        )
+                      }
+                      disabled={!customInputs.intristic_viscosity}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleCustomInput("intristic_viscosity")}
+                      style={buttonStyle}
+                    >
+                      <i
+                        className={`fas fa-${customInputs.intristic_viscosity ? "list" : "keyboard"}`}
+                      ></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {}
+            <div
+              className={`card ${isSectionComplete("policy") ? "completed" : ""}`}
+            >
+              <div
+                className="card-header"
+                onClick={() => toggleExpand("policy")}
+              >
+                <div className="card-title">
+                  Cycle Policy
+                  {isSectionComplete("policy") && (
+                    <i className="fas fa-check check-icon"></i>
+                  )}
+                </div>
+                <i
+                  className={`fas fa-chevron-${expanded.policy ? "up" : "down"}`}
+                ></i>
+              </div>
+              <div
+                className={`card-content ${expanded.policy ? "expanded" : ""}`}
+              >
+                <div className="form-group">
+                  <label>Temperature</label>
+                  <div className="dual-input">
+                    <div className="select-wrapper">
+                      <select
+                        className={`custom-select ${isFieldComplete("policy", "temperature") ? "completed" : ""} ${isDefaultValue("policy", "temperature", formData.policy.temperature) ? "default" : ""}`}
+                        value={formData.policy.temperature}
+                        onChange={(e) =>
+                          handleChange("policy", "temperature", e.target.value)
+                        }
+                        disabled={customInputs.temperature}
+                      >
+                        <option value="">Select temperature</option>
+                        {window.djangoVars &&
+                          window.djangoVars.temperature_options &&
+                          window.djangoVars.temperature_options.map(
+                            (temperature_option) => (
+                              <option
+                                key={temperature_option}
+                                value={temperature_option}
+                              >
+                                {temperature_option}
+                              </option>
+                            ),
+                          )}
+                      </select>
+                    </div>
+                    <input
+                      type="number"
+                      placeholder="Custom value"
+                      value={
+                        customInputs.temperature
+                          ? formData.policy.temperature
+                          : ""
+                      }
+                      onChange={(e) =>
+                        handleChange("policy", "temperature", e.target.value)
+                      }
+                      disabled={!customInputs.temperature}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleCustomInput("temperature")}
+                      style={buttonStyle}
+                    >
+                      <i
+                        className={`fas fa-${customInputs.temperature ? "list" : "keyboard"}`}
+                      ></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Charge Rate</label>
+                  <div className="dual-input">
+                    <div className="select-wrapper">
+                      <select
+                        className={`custom-select ${isFieldComplete("policy", "charge_rate") ? "completed" : ""} ${isDefaultValue("policy", "charge_rate", formData.policy.charge_rate) ? "default" : ""}`}
+                        value={formData.policy.charge_rate}
+                        onChange={(e) =>
+                          handleChange("policy", "charge_rate", e.target.value)
+                        }
+                        disabled={customInputs.charge_rate}
+                      >
+                        <option value="">Select rate</option>
+                        {window.djangoVars &&
+                          window.djangoVars.charge_rate_options &&
+                          window.djangoVars.charge_rate_options.map(
+                            (charge_rate_option) => (
+                              <option
+                                key={charge_rate_option}
+                                value={charge_rate_option}
+                              >
+                                {charge_rate_option}
+                              </option>
+                            ),
+                          )}
+                      </select>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Custom value"
+                      value={
+                        customInputs.charge_rate
+                          ? formData.policy.charge_rate
+                          : ""
+                      }
+                      onChange={(e) =>
+                        handleChange("policy", "charge_rate", e.target.value)
+                      }
+                      disabled={!customInputs.charge_rate}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleCustomInput("charge_rate")}
+                      style={buttonStyle}
+                    >
+                      <i
+                        className={`fas fa-${customInputs.charge_rate ? "list" : "keyboard"}`}
+                      ></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Pressure</label>
+                  <div className="dual-input">
+                    <div className="select-wrapper">
+                      <select
+                        className={`custom-select ${isFieldComplete("policy", "pressure") ? "completed" : ""} ${isDefaultValue("policy", "pressure", formData.policy.pressure) ? "default" : ""}`}
+                        value={formData.policy.pressure}
+                        onChange={(e) =>
+                          handleChange("policy", "pressure", e.target.value)
+                        }
+                        disabled={customInputs.pressure}
+                      >
+                        <option value="">Select pressure</option>
+                        {window.djangoVars &&
+                          window.djangoVars.pressure_options &&
+                          window.djangoVars.pressure_options.map(
+                            (pressure_option) => (
+                              <option
+                                key={pressure_option}
+                                value={pressure_option}
+                              >
+                                {pressure_option}
+                              </option>
+                            ),
+                          )}
+                      </select>
+                    </div>
+                    <input
+                      type="number"
+                      step="0.1"
+                      placeholder="Custom value"
+                      value={
+                        customInputs.pressure ? formData.policy.pressure : ""
+                      }
+                      onChange={(e) =>
+                        handleChange("policy", "pressure", e.target.value)
+                      }
+                      disabled={!customInputs.pressure}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleCustomInput("pressure")}
+                      style={buttonStyle}
+                    >
+                      <i
+                        className={`fas fa-${customInputs.pressure ? "list" : "keyboard"}`}
+                      ></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Thickness</label>
+                  <div className="dual-input">
+                    <div className="select-wrapper">
+                      <select
+                        className={`custom-select ${isFieldComplete("policy", "thickness") ? "completed" : ""} ${isDefaultValue("policy", "thickness", formData.policy.thickness) ? "default" : ""}`}
+                        value={formData.policy.thickness}
+                        onChange={(e) =>
+                          handleChange("policy", "thickness", e.target.value)
+                        }
+                        disabled={customInputs.thickness}
+                      >
+                        <option value="">Select thickness</option>
+                        {window.djangoVars &&
+                          window.djangoVars.thickness_options &&
+                          window.djangoVars.thickness_options.map(
+                            (thickness_option) => (
+                              <option
+                                key={thickness_option}
+                                value={thickness_option}
+                              >
+                                {thickness_option}
+                              </option>
+                            ),
+                          )}
+                      </select>
+                    </div>
+                    <input
+                      type="number"
+                      placeholder="Custom value"
+                      value={
+                        customInputs.thickness ? formData.policy.thickness : ""
+                      }
+                      onChange={(e) =>
+                        handleChange("policy", "thickness", e.target.value)
+                      }
+                      disabled={!customInputs.thickness}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleCustomInput("thickness")}
+                      style={buttonStyle}
+                    >
+                      <i
+                        className={`fas fa-${customInputs.thickness ? "list" : "keyboard"}`}
+                      ></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Magnetic Field Direction</label>
+                  <div className="select-wrapper">
+                    <select
+                      className={`custom-select ${isFieldComplete("policy", "magnetic_field_direction") ? "completed" : ""} ${isDefaultValue("policy", "magnetic_field_direction", formData.policy.magnetic_field_direction) ? "default" : ""}`}
+                      value={formData.policy.magnetic_field_direction}
+                      onChange={(e) =>
+                        handleChange(
+                          "policy",
+                          "magnetic_field_direction",
+                          e.target.value,
+                        )
+                      }
+                    >
+                      <option value="">Select direction</option>
+                      {window.djangoVars &&
+                        window.djangoVars.magnetic_field_direction_options &&
+                        window.djangoVars.magnetic_field_direction_options.map(
+                          (magnetic_field_direction_option) => (
+                            <option
+                              key={magnetic_field_direction_option}
+                              value={magnetic_field_direction_option}
+                            >
+                              {magnetic_field_direction_option}
+                            </option>
+                          ),
+                        )}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {}
+          <div className="card">
+            <div className="card-content expanded">
+              <div className="form-group">
+                <label>Remark</label>
+                <textarea
+                  placeholder="输入文本"
+                  value={formData.remark}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, remark: e.target.value }))
+                  }
+                ></textarea>
+              </div>
+
+              <div className="form-group">
+                <label>File Input</label>
+                <input
+                  type="file"
+                  className="file-input"
+                  onChange={handleFileChange}
+                />
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" className="submit-btn">
+            Add
+          </button>
+        </form>
+        {}
+        {showHint && (
+          <div className="hint-modal" onClick={handleClose}>
+            <div className="hint-content" onClick={(e) => e.stopPropagation()}>
+              <span className="hint-close" onClick={handleClose}>
+                ×
+              </span>
+              <h2>提示信息</h2>
+              <p>
+                Charge
+                Rate如果是倍率循环，可以按照倍率1(循环数1)-倍率2(循环数2)之类的方式填写倍率，
+                <br />
+                例如1C(10)-2C(10)-3C(10)-4C(10)
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+
+  const root = ReactDOM.createRoot(
+    document.getElementById("battery_structure"),
+  );
+  root.render(<BatteryStructureModal />);
+</script>
+
+{% endblock scripts %}

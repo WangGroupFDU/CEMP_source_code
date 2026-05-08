@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+  
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  
+  <meta name="keywords" content="" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <title>Ionic Liquid</title>
+
+  
+  <link href="{% static 'css/style.css' %}" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'battery_manage_system/bootstrap_501.css'%}"/>
+  <link rel="stylesheet" href="{% static 'battery_manage_system/style_fu.css'%}"/>
+
+  <script type="text/javascript" src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
+
+  
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.12.1/datatables.min.css"/>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.12.1/datatables.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/fixedheader/3.2.3/js/dataTables.fixedHeader.min.js"></script>
+  <style>
+    #navbarSupportedContent {
+      background-color: #343434;
+    }
+    #navbarSupportedContent .nav-link:hover {
+    color: orange;
+  }
+  </style>
+  
+  {% block head %} {% endblock head %}
+</head>
+
+<body>
+  
+  <div class="hero_area">
+  <header class="header_section">
+    <div class="container">
+      <nav class="navbar navbar-expand-lg custom_nav-container pt-3">
+        <a class="navbar-brand" href="">
+          <img src="{% static 'images/dlogo.png' %}" alt=""/><span>
+            Ionic Liquid
+          </span>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          
+          {% with request.resolver_match.url_name as current %}
+          <div class="navbar-nav ms-auto justify-content-end">
+            <ul class="navbar-nav">
+              <li class="nav-item active">
+                <a class="nav-link {% if current == 'ionic_liquid_database_card_page' %}active{% endif %}" 
+                href="https://example.com/ionic_liquid/database">ILdatabase</a>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link {% if current == 'XGBoost_predict_page' %}active{% endif %}" 
+                href="https://example.com/ionic_liquid/prediction">ILprediction</a>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link {% if current == 'search' %}active{% endif %}" 
+                href="https://example.com/ionic_liquid/generation">ILGeneration</a>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link {% if current == 'search' %}active{% endif %}" 
+                href="https://example.com/ionic_liquid/search">Search</a>
+              </li>
+                <li class="nav-item active">
+                <a class="nav-link {% if current == 'homepage' %}active{% endif %}" 
+                href="{% url 'home:homepage' %}">Home</a>
+              </li>
+            </ul>
+            {% endwith %}
+          </div>
+        </div>
+      </div>
+
+      </nav>
+    
+  </header>
+  </div>
+  
+
+  
+  <div class="container mt-3">
+    {% with request.resolver_match.url_name as current %}
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-transparent px-0">
+          <li class="breadcrumb-item">
+            <a href="{% url 'home:homepage' %}">Home</a>
+          </li>
+          {% if current == 'ionic_liquid_database_card_page' %}
+            <li class="breadcrumb-item active" aria-current="page">ILdatabase</li>
+          {% elif current == 'XGBoost_predict_page' %}
+            <li class="breadcrumb-item active" aria-current="page">ILprediction</li>
+          {% elif current == 'search' %}
+            <li class="breadcrumb-item active" aria-current="page">Search</li>
+          {% else %}
+            <li class="breadcrumb-item active" aria-current="page">{{ current }}</li>
+          {% endif %}
+        </ol>
+      </nav>
+    {% endwith %}
+  </div>
+
+  {% block content %}
+  {% endblock content %}
+
+  
+{% block script %}{% endblock script %}
+  
+  <section class="container-fluid footer_section">
+    <p>
+      Copyright &copy; 2022 All Rights Reserved By
+      <a href="https://ywangpolymer.fudan.edu.cn/_upload/tpl/12/df/4831/template4831/index.html">Ying Wang Group</a>
+    </p>
+    <p>
+      example.com
+    </p>
+  </section>
+  
+</body>
+</html>

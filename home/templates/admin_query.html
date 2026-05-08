@@ -1,0 +1,2031 @@
+{% extends 'home_base.html'%}
+{% load static %}
+
+{% block head %}
+<title>Admin Query</title>
+
+<script
+type="text/javascript"
+src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.js"
+></script>
+
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.4.0/css/buttons.dataTables.min.css" />
+
+<script type="text/javascript" src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.flash.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.colVis.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/fixedheader/3.2.3/js/dataTables.fixedHeader.min.js"></script>
+{% endblock head %}
+
+{% block content %}
+<style>
+    
+    .query-page {
+        background:
+            radial-gradient(circle at top left, rgba(34, 92, 146, 0.10), transparent 26%),
+            linear-gradient(180deg, #f5f8fc 0%, #edf3f9 100%);
+        padding: 34px 18px 56px;
+    }
+
+    .query-shell {
+        max-width: 1320px;
+        margin: 0 auto;
+    }
+
+    .query-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 34px 36px;
+        border-radius: 28px;
+        background: linear-gradient(135deg, #12314f 0%, #1f578c 56%, #3f8bc8 100%);
+        color: #ffffff;
+        box-shadow: 0 24px 48px rgba(18, 49, 79, 0.16);
+        margin-bottom: 24px;
+    }
+
+    .query-hero::before,
+    .query-hero::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        pointer-events: none;
+    }
+
+    .query-hero::before {
+        width: 240px;
+        height: 240px;
+        right: -70px;
+        top: -120px;
+    }
+
+    .query-hero::after {
+        width: 160px;
+        height: 160px;
+        bottom: -80px;
+        right: 180px;
+    }
+
+    .query-hero-content {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: minmax(0, 1.6fr) minmax(260px, 0.9fr);
+        gap: 22px;
+        align-items: end;
+    }
+
+    .query-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 14px;
+    }
+
+    .query-hero h1 {
+        margin: 0 0 12px;
+        font-size: 36px;
+        font-weight: 700;
+        color: #ffffff;
+    }
+
+    .query-hero p {
+        margin: 0;
+        max-width: 780px;
+        font-size: 16px;
+        line-height: 1.8;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .query-tip-card {
+        padding: 18px 20px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(255, 255, 255, 0.11);
+        backdrop-filter: blur(10px);
+    }
+
+    .query-tip-card h2 {
+        margin: 0 0 10px;
+        font-size: 16px;
+        color: #ffffff;
+    }
+
+    .query-tip-card p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.8;
+        color: rgba(255, 255, 255, 0.86);
+    }
+
+    .query-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+
+    .query-card,
+    .history-card,
+    .overview-card,
+    .task-result-panel {
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid rgba(19, 53, 86, 0.08);
+        box-shadow: 0 16px 32px rgba(24, 56, 89, 0.08);
+    }
+
+    .query-card,
+    .history-card,
+    .overview-card,
+    .task-result-panel {
+        padding: 28px;
+    }
+
+    .query-card h2,
+    .overview-card h2,
+    .history-card h2 {
+        margin: 0 0 10px;
+        font-size: 24px;
+        color: #173450;
+    }
+
+    .query-card p,
+    .overview-card p,
+    .history-card p {
+        margin: 0;
+        color: #526273;
+        line-height: 1.8;
+        text-align: left;
+    }
+
+    .query-warning {
+        margin-top: 16px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: linear-gradient(90deg, rgba(255, 242, 226, 0.95), rgba(255, 248, 238, 0.95));
+        border: 1px solid rgba(224, 145, 54, 0.2);
+        color: #955415;
+        font-weight: 600;
+    }
+
+    .query-form {
+        margin-top: 22px;
+    }
+
+    .query-label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #1d3d5b;
+    }
+
+    .query-input-row {
+        display: flex;
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    .query-input-row input,
+    .admin-filter-control input,
+    .admin-filter-control select {
+        width: 100%;
+        min-width: 0;
+        padding: 14px 16px;
+        border-radius: 16px;
+        border: 1px solid #d3dfeb;
+        background: #f8fbfe;
+        color: #18324b;
+        font-size: 15px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .query-input-row input {
+        flex: 1;
+    }
+
+    .query-input-row input:focus,
+    .admin-filter-control input:focus,
+    .admin-filter-control select:focus,
+    .priority-input:focus {
+        outline: none;
+        border-color: #4f8fca;
+        background: #ffffff;
+        box-shadow: 0 0 0 4px rgba(79, 143, 202, 0.12);
+    }
+
+    .query-submit-btn,
+    .admin-reset-btn {
+        padding: 0 22px;
+        border: none;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #1f578c 0%, #2d79c1 100%);
+        color: #ffffff;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .query-submit-btn:hover,
+    .admin-reset-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 22px rgba(45, 121, 193, 0.24);
+    }
+
+    .admin-directory-box {
+        display: none;
+        margin-top: 16px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        border: 1px solid rgba(31, 87, 140, 0.16);
+        background: #f1f7fc;
+        color: #254762;
+        line-height: 1.7;
+        word-break: break-all;
+    }
+
+    .admin-directory-label {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #1f578c;
+    }
+
+    .query-helper-list {
+        list-style: none;
+        padding: 0;
+        margin: 22px 0 0;
+        display: grid;
+        gap: 12px;
+    }
+
+    .query-helper-list li {
+        position: relative;
+        padding: 12px 14px 12px 40px;
+        border-radius: 16px;
+        background: #f6f9fc;
+        color: #334b63;
+        line-height: 1.7;
+    }
+
+    .query-helper-list li::before {
+        content: "";
+        position: absolute;
+        top: 18px;
+        left: 16px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1f578c 0%, #63a4df 100%);
+        box-shadow: 0 0 0 5px rgba(79, 143, 202, 0.12);
+    }
+
+    .query-escalation-note {
+        margin-top: 18px;
+        padding: 16px 18px;
+        border-radius: 18px;
+        border: 1px solid rgba(170, 82, 24, 0.22);
+        background: linear-gradient(135deg, rgba(255, 245, 232, 0.98) 0%, rgba(255, 250, 242, 0.98) 100%);
+        color: #6f3e10;
+        line-height: 1.8;
+        font-weight: 600;
+    }
+
+    .query-escalation-note strong {
+        color: #8d4610;
+    }
+
+    .query-escalation-note a {
+        color: #8d4610;
+        font-weight: 700;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+
+    .stat-grid {
+        display: grid;
+        gap: 14px;
+        margin-top: 18px;
+    }
+
+    .stat-item {
+        padding: 16px 18px;
+        border-radius: 18px;
+        background: linear-gradient(180deg, #f7fbfe 0%, #eef4fb 100%);
+        border: 1px solid rgba(31, 87, 140, 0.08);
+    }
+
+    .stat-label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+        color: #5d6d7d;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .stat-value {
+        display: block;
+        font-size: 28px;
+        font-weight: 700;
+        color: #14314b;
+        line-height: 1.2;
+    }
+
+    .stat-note {
+        margin-top: 16px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: #f8fafc;
+        color: #607182;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .server-dashboard {
+        margin-bottom: 24px;
+    }
+
+    .server-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin: 18px 0 20px;
+    }
+
+    .server-summary-item {
+        padding: 18px 20px;
+        border-radius: 18px;
+        background: linear-gradient(180deg, #f7fbfe 0%, #eef4fb 100%);
+        border: 1px solid rgba(31, 87, 140, 0.08);
+    }
+
+    .server-summary-label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #5d6d7d;
+    }
+
+    .server-summary-value {
+        display: block;
+        font-size: 28px;
+        line-height: 1.15;
+        font-weight: 700;
+        color: #14314b;
+    }
+
+    .server-card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 16px;
+    }
+
+    .server-card {
+        padding: 22px;
+        border-radius: 22px;
+        border: 1px solid rgba(19, 53, 86, 0.08);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 250, 253, 0.98) 100%);
+        box-shadow: 0 14px 28px rgba(24, 56, 89, 0.07);
+    }
+
+    .server-card-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .server-card-head h3 {
+        margin: 0 0 6px;
+        font-size: 18px;
+        line-height: 1.4;
+        color: #173450;
+    }
+
+    .server-card-head p {
+        margin: 0;
+        color: #607182;
+        font-size: 13px;
+        line-height: 1.7;
+        word-break: break-all;
+    }
+
+    .server-state-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .server-state-pill.online {
+        background: #e8f6ee;
+        color: #1d7b47;
+    }
+
+    .server-state-pill.warning {
+        background: #fff4df;
+        color: #a76400;
+    }
+
+    .server-state-pill.offline {
+        background: #fde9e9;
+        color: #b23a3a;
+    }
+
+    .server-state-pill.disabled {
+        background: #edf1f5;
+        color: #5d6772;
+    }
+
+    .server-scheduler-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-top: 14px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: #f7fafc;
+        border: 1px solid #e4ebf2;
+    }
+
+    .server-scheduler-meta {
+        min-width: 0;
+    }
+
+    .server-scheduler-label {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #667789;
+    }
+
+    .server-scheduler-note {
+        display: block;
+        font-size: 13px;
+        color: #607182;
+        line-height: 1.6;
+    }
+
+    .server-scheduler-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 11px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .server-scheduler-pill.enabled {
+        background: #e8f6ee;
+        color: #1d7b47;
+    }
+
+    .server-scheduler-pill.disabled {
+        background: #edf1f5;
+        color: #5d6772;
+    }
+
+    .server-toggle-btn {
+        border: none;
+        border-radius: 14px;
+        padding: 10px 14px;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.3;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .server-toggle-btn.disable-node {
+        background: linear-gradient(135deg, #ef6a5c 0%, #d94b3d 100%);
+        color: #ffffff;
+    }
+
+    .server-toggle-btn.enable-node {
+        background: linear-gradient(135deg, #2f76b7 0%, #3f8bc8 100%);
+        color: #ffffff;
+    }
+
+    .server-toggle-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 18px rgba(24, 56, 89, 0.16);
+    }
+
+    .server-toggle-btn:disabled {
+        cursor: wait;
+        opacity: 0.7;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .server-metric-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .server-metric {
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: #f7fafc;
+        border: 1px solid #e4ebf2;
+    }
+
+    .server-metric span {
+        display: block;
+    }
+
+    .server-metric-label {
+        margin-bottom: 4px;
+        font-size: 12px;
+        color: #667789;
+    }
+
+    .server-metric-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: #18324b;
+    }
+
+    .server-load-bar {
+        position: relative;
+        height: 10px;
+        border-radius: 999px;
+        background: #e6edf4;
+        overflow: hidden;
+        margin: 12px 0 8px;
+    }
+
+    .server-load-fill {
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #2f76b7 0%, #68addf 100%);
+    }
+
+    .server-load-text,
+    .server-detail-text {
+        font-size: 13px;
+        color: #607182;
+        line-height: 1.7;
+    }
+
+    .server-detail-text {
+        margin-top: 8px;
+    }
+
+    .server-capability-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+    }
+
+    .server-capability-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 7px 11px;
+        border-radius: 999px;
+        background: #edf4fb;
+        color: #225b8f;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.4;
+    }
+
+    #result {
+        margin-top: 18px;
+        padding: 16px 18px;
+        border-radius: 18px;
+        background: #f7fafc;
+        border: 1px solid #e2ebf3;
+        color: #36506a;
+        line-height: 1.8;
+    }
+
+    #result p {
+        text-align: left;
+        margin-bottom: 8px;
+    }
+
+    .download-link {
+        display: inline-flex;
+        align-items: center;
+        margin: 8px 10px 0 0;
+        padding: 10px 14px;
+        border-radius: 12px;
+        background: #e9f3fb;
+        color: #165995;
+        text-decoration: none;
+        font-weight: 700;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .download-link:hover {
+        text-decoration: none;
+        background: #dcecf9;
+        color: #0e4679;
+    }
+
+    .failure-box {
+        width: 100%;
+        max-width: 100%;
+        max-height: 420px;
+        overflow: auto;
+        margin-top: 10px;
+        padding: 14px;
+        border: 1px solid #ead2d2;
+        border-radius: 16px;
+        background: #fff7f7;
+        color: #7f3030;
+    }
+
+    .failure-box pre {
+        min-width: max-content;
+        margin: 0;
+        white-space: pre;
+        font-family: monospace;
+        font-size: 13px;
+        line-height: 1.55;
+    }
+
+    .task-result-panel {
+        display: none;
+        flex-direction: column;
+        gap: 18px;
+        width: 100%;
+        margin: 0 0 24px;
+    }
+
+    .task-result-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .task-result-head h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #173450;
+    }
+
+    .task-result-head p {
+        margin: 0;
+        color: #5a6a7a;
+    }
+
+    .result-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: #e9f6ef;
+        color: #1f7a48;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .table-scroll,
+    .history-table-wrap {
+        overflow-x: auto;
+        overflow-y: auto;
+        border: 1px solid #e0e8ef;
+        border-radius: 18px;
+        background: #ffffff;
+    }
+
+    .table-scroll {
+        max-height: 420px;
+        padding: 10px;
+    }
+
+    .table-scroll table {
+        width: 100%;
+        min-width: 640px;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+
+    .table-scroll th,
+    .table-scroll td {
+        border: 1px solid #e5edf4;
+        padding: 8px 10px;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .table-scroll thead th {
+        position: sticky;
+        top: 0;
+        background: #f3f7fb;
+        color: #163550;
+        z-index: 1;
+    }
+
+    .image-grid {
+        display: none;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 14px;
+    }
+
+    .image-grid figure {
+        margin: 0;
+        padding: 12px;
+        border-radius: 18px;
+        border: 1px solid #e2eaf2;
+        background: #f8fbfe;
+        text-align: center;
+    }
+
+    .image-grid img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        margin: 0 auto;
+        border-radius: 12px;
+    }
+
+    .image-grid figcaption {
+        margin-top: 8px;
+        font-size: 13px;
+        color: #516476;
+        line-height: 1.5;
+    }
+
+    .preview-meta {
+        display: block;
+        margin-top: 4px;
+        font-size: 11px;
+        color: #7c8fa1;
+    }
+
+    .preview-empty {
+        display: block;
+        grid-column: 1 / -1;
+        padding: 18px;
+        border: 1px dashed #c7d5e3;
+        border-radius: 16px;
+        background: #f8fbfe;
+        color: #5f7285;
+        text-align: center;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .task-status-overview {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 18px 0 18px;
+    }
+
+    .status-badge,
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        font-weight: 700;
+        text-transform: capitalize;
+    }
+
+    .status-badge {
+        padding: 8px 14px;
+        font-size: 13px;
+    }
+
+    .status-pill {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .status-badge.success,
+    .status-pill.success {
+        background: #e8f6ee;
+        color: #1d7b47;
+    }
+
+    .status-badge.pending,
+    .status-pill.pending {
+        background: #fff3d9;
+        color: #976400;
+    }
+
+    .status-badge.failed,
+    .status-pill.failed {
+        background: #fde9e9;
+        color: #b23a3a;
+    }
+
+    .status-badge.queuing,
+    .status-pill.queuing {
+        background: #edf1f5;
+        color: #5d6772;
+    }
+
+    .admin-filter-panel {
+        display: grid;
+        grid-template-columns: minmax(220px, 1.4fr) repeat(3, minmax(160px, 0.8fr)) auto;
+        gap: 12px;
+        align-items: end;
+        margin: 20px 0 16px;
+        padding: 18px;
+        border-radius: 20px;
+        background: #f6f9fc;
+        border: 1px solid #e1eaf2;
+    }
+
+    .admin-filter-control label,
+    .admin-filter-toggle label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #536a80;
+    }
+
+    .admin-filter-toggle {
+        align-self: center;
+        min-width: 180px;
+    }
+
+    .admin-filter-toggle label {
+        margin-bottom: 0;
+        letter-spacing: normal;
+        text-transform: none;
+        cursor: pointer;
+    }
+
+    .admin-filter-toggle input {
+        margin-right: 8px;
+        transform: translateY(1px);
+    }
+
+    .admin-filter-summary {
+        display: block;
+        margin: 0 0 14px;
+        color: #607182;
+        font-size: 14px;
+    }
+
+    .admin-pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-top: 18px;
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: #f6f9fc;
+        border: 1px solid #e1eaf2;
+    }
+
+    .admin-pagination-info {
+        color: #536a80;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .admin-pagination-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .admin-page-link,
+    .admin-page-current {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .admin-page-link {
+        border: 1px solid rgba(31, 87, 140, 0.16);
+        background: #ffffff;
+        color: #1f578c;
+        text-decoration: none;
+    }
+
+    .admin-page-link:hover {
+        background: #e9f3fb;
+        color: #0e4679;
+        text-decoration: none;
+    }
+
+    .admin-page-current {
+        background: #1f578c;
+        color: #ffffff;
+    }
+
+    .history-table-wrap {
+        height: 560px;
+    }
+
+    .query-history-table {
+        width: 100%;
+        min-width: 1620px;
+        table-layout: fixed;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .query-history-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        padding: 14px 16px;
+        background: #f3f7fb;
+        color: #173450;
+        font-size: 14px;
+        text-align: left;
+        border-bottom: 1px solid #dfe7ee;
+        white-space: nowrap;
+    }
+
+    .query-history-table tbody td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #edf2f7;
+        color: #405567;
+        vertical-align: middle;
+        background: #ffffff;
+    }
+
+    .query-history-table tbody tr:hover td {
+        background: #f8fbfe;
+    }
+
+    .task-id-cell,
+    .task-path-cell {
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        font-size: 12px;
+        color: #294662;
+    }
+
+    .task-path-cell {
+        max-width: 280px;
+    }
+
+    .task-long-box {
+        position: relative;
+        border-radius: 12px;
+        background: #f6f9fc;
+    }
+
+    .task-long-scroll {
+        display: block;
+        max-height: 4.6em;
+        overflow: auto;
+        padding: 8px 58px 8px 10px;
+        line-height: 1.45;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .task-long-scroll::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    .task-long-scroll::-webkit-scrollbar-thumb {
+        border-radius: 999px;
+        background: #b7c8d8;
+    }
+
+    .task-copy-btn {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        border: 1px solid rgba(31, 87, 140, 0.16);
+        border-radius: 999px;
+        background: #ffffff;
+        color: #1f578c;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1;
+        padding: 6px 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(24, 56, 89, 0.08);
+        transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+
+    .task-copy-btn:hover {
+        background: #e9f3fb;
+        color: #0e4679;
+        transform: translateY(-1px);
+    }
+
+    .task-id-cell {
+        min-width: 220px;
+    }
+
+    .priority-input {
+        width: 5.4em;
+        padding: 8px 10px;
+        border: 1px solid #d3dfeb;
+        border-radius: 12px;
+        background: #f8fbfe;
+        color: #18324b;
+    }
+
+    .btn-cancel {
+        border: none;
+        padding: 8px 14px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .btn-cancel.enabled {
+        background: #f05d52;
+        color: #ffffff;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-cancel.enabled:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 18px rgba(240, 93, 82, 0.22);
+    }
+
+    .btn-cancel.disabled {
+        background: #eef2f5;
+        color: #9ba7b1;
+        cursor: not-allowed;
+        opacity: 1;
+    }
+
+    #resultDiv {
+        display: none;
+    }
+
+    @media (max-width: 1180px) {
+        .admin-filter-panel {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .server-summary-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 991px) {
+        .query-hero-content,
+        .query-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .query-page {
+            padding: 24px 14px 40px;
+        }
+
+        .query-hero,
+        .query-card,
+        .overview-card,
+        .history-card,
+        .task-result-panel {
+            border-radius: 20px;
+        }
+
+        .query-hero {
+            padding: 26px 22px;
+        }
+
+        .query-hero h1 {
+            font-size: 28px;
+        }
+
+        .query-card,
+        .overview-card,
+        .history-card,
+        .task-result-panel {
+            padding: 22px;
+        }
+
+        .query-input-row,
+        .admin-filter-panel {
+            grid-template-columns: 1fr;
+            flex-direction: column;
+        }
+
+        .server-summary-grid,
+        .server-metric-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .query-submit-btn,
+        .admin-reset-btn {
+            min-height: 48px;
+        }
+    }
+</style>
+
+<section class="query-page">
+    <div class="query-shell">
+        <section class="query-hero">
+            <div class="query-hero-content">
+                <div>
+                    <span class="query-eyebrow">Admin Task Query Center</span>
+                    <h1>Inspect platform-wide computation tasks</h1>
+                    <p>
+                        Use encrypted task identifiers to inspect results, view server-side task directories,
+                        tune queue priority, and filter all user submissions from a single administrator panel.
+                    </p>
+                </div>
+                <div class="query-tip-card">
+                    <h2>Administrator tools</h2>
+                    <p>
+                        The table below is rendered from the current all-task queryset. Filters are local to this page
+                        and do not change the backend query.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="query-grid">
+            <div class="query-card">
+                <h2>Admin Task Status Checker</h2>
+                <p>Enter an encrypted task ID to inspect status, result files, preview data, and the server directory.</p>
+
+                <div class="query-form">
+                    <label class="query-label" for="encrypted-id-input">Encrypted task ID</label>
+                    <div class="query-input-row">
+                        <input type="text" id="encrypted-id-input" placeholder="Enter your encrypted ID">
+                        <button type="button" class="query-submit-btn" onclick="submitEncryptedID()">Submit</button>
+                    </div>
+                </div>
+
+                <div id="directory-result" class="admin-directory-box" aria-live="polite">
+                    <span class="admin-directory-label">Task directory</span>
+                    <span id="directory-result-text"></span>
+                </div>
+
+                <ul class="query-helper-list">
+                    <li>Successful tasks render returned tables and MD preview figures directly in this page.</li>
+                    <li>Failed tasks show the recorded failure log for troubleshooting.</li>
+                    <li>Administrator-only directory lookup is displayed separately from public result links.</li>
+                </ul>
+
+                <div class="query-escalation-note">
+                    <strong>Important troubleshooting note:</strong>
+                    If an error is encountered, users should first consult the
+                    <a href="https://cempagent.vip.cpolar.cn" target="_blank" rel="noopener noreferrer">Agent</a>
+                    for an initial interpretation and troubleshooting guidance. If the issue cannot be resolved there,
+                    a <a href="{% url 'tickets:create' %}">ticket</a> should be submitted so that the administrators may
+                    review the case in detail.
+                </div>
+
+                <div id="result"></div>
+            </div>
+
+            <aside class="overview-card">
+                <h2>Current Queue Overview</h2>
+                <p>These values summarize all platform tasks that are still being processed or waiting.</p>
+
+                <div class="stat-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">Pending Tasks</span>
+                        <span class="stat-value">{{ pending_tasks_count }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Queuing Tasks</span>
+                        <span class="stat-value">{{ queuing_tasks_count }}</span>
+                    </div>
+                </div>
+
+                <div class="stat-note">
+                    The task table loads records from the latest {{ admin_query_days }} days, {{ admin_page_size }} rows per page.
+                    Filtering below only changes the rows currently visible in the browser.
+                </div>
+            </aside>
+        </section>
+
+        <section class="history-card server-dashboard">
+            <h2>Live Server Status</h2>
+            <p>
+                The cards below summarize the currently registered execution nodes, including live SSH reachability,
+                scheduler load, and the capability scope available on each machine.
+            </p>
+
+            <div class="server-summary-grid">
+                <div class="server-summary-item">
+                    <span class="server-summary-label">Online / Enabled Nodes</span>
+                    <span class="server-summary-value">{{ server_summary.online_count }} / {{ server_summary.enabled_count }}</span>
+                </div>
+                <div class="server-summary-item">
+                    <span class="server-summary-label">Pending Load / Online Capacity</span>
+                    <span class="server-summary-value">{{ server_summary.total_pending_load }} / {{ server_summary.total_capacity }}</span>
+                </div>
+                <div class="server-summary-item">
+                    <span class="server-summary-label">Free Slots</span>
+                    <span class="server-summary-value">{{ server_summary.free_slots }}</span>
+                </div>
+            </div>
+
+            <div class="server-card-grid">
+                {% for server in server_cards %}
+                <article class="server-card">
+                    <div class="server-card-head">
+                        <div>
+                            <h3>{{ server.server_name }}</h3>
+                            <p>{{ server.remote_login }} · SSH {{ server.ssh_port }}</p>
+                        </div>
+                        <span class="server-state-pill {{ server.status }}">{{ server.status_label }}</span>
+                    </div>
+
+                    <div class="server-metric-grid">
+                        <div class="server-metric">
+                            <span class="server-metric-label">Scheduler Load</span>
+                            <span class="server-metric-value">{{ server.pending_count }} / {{ server.task_limit }}</span>
+                        </div>
+                        <div class="server-metric">
+                            <span class="server-metric-label">CPU Load Avg</span>
+                            <span class="server-metric-value">
+                                {% if server.load_avg %}
+                                {{ server.load_avg.0|floatformat:2 }} / {{ server.load_avg.1|floatformat:2 }} / {{ server.load_avg.2|floatformat:2 }}
+                                {% else %}
+                                N/A
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="server-load-bar" aria-label="Server scheduler utilization">
+                        <div class="server-load-fill" style="width: {% if server.utilization_percent > 100 %}100{% else %}{{ server.utilization_percent }}{% endif %}%"></div>
+                    </div>
+                    <div class="server-load-text">
+                        Utilization {{ server.utilization_percent }}% · Available slots {{ server.available_slots }}
+                        {% if server.cpu_count %} · {{ server.cpu_count }} CPU cores{% endif %}
+                    </div>
+
+                    <div class="server-detail-text">
+                        Target directory: {{ server.remote_target_dir }}<br>
+                        {{ server.status_detail }}
+                    </div>
+
+                    <div class="server-scheduler-row">
+                        <div class="server-scheduler-meta">
+                            <span class="server-scheduler-label">Scheduler Membership</span>
+                            {% if server.scheduler_enabled %}
+                            <span class="server-scheduler-pill enabled">Included in future scheduling</span>
+                            {% else %}
+                            <span class="server-scheduler-pill disabled">Removed from future scheduling</span>
+                            {% endif %}
+                            <span class="server-scheduler-note">
+                                Running tasks on this node will continue to completion even after removal.
+                            </span>
+                        </div>
+                        {% if server.scheduler_enabled %}
+                        <button
+                            type="button"
+                            class="server-toggle-btn disable-node"
+                            onclick="toggleServerEnabled('{{ server.server_name|escapejs }}', false, this)"
+                        >
+                            Remove from Scheduler
+                        </button>
+                        {% else %}
+                        <button
+                            type="button"
+                            class="server-toggle-btn enable-node"
+                            onclick="toggleServerEnabled('{{ server.server_name|escapejs }}', true, this)"
+                        >
+                            Enable for Scheduler
+                        </button>
+                        {% endif %}
+                    </div>
+
+                    <div class="server-capability-list">
+                        {% for capability_label in server.capability_labels %}
+                        <span class="server-capability-pill">{{ capability_label }}</span>
+                        {% empty %}
+                        <span class="server-capability-pill">No registered capability</span>
+                        {% endfor %}
+                    </div>
+                </article>
+                {% empty %}
+                <article class="server-card">
+                    <div class="server-card-head">
+                        <div>
+                            <h3>No registered server</h3>
+                            <p>The remote server pool is currently empty.</p>
+                        </div>
+                        <span class="server-state-pill offline">Unavailable</span>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section id="task-result-panel-1" class="task-result-panel">
+            <div class="task-result-head">
+                <div>
+                    <h2>Result Preview</h2>
+                    <p>Rendered directly from the returned table and figure files.</p>
+                </div>
+                <span class="result-badge">Task Completed</span>
+            </div>
+
+            <div class="table-scroll">
+                <table id="task-table-1"></table>
+            </div>
+
+            <div class="image-grid" id="image-grid-1"></div>
+        </section>
+
+        <div id="resultDiv"></div>
+
+        <section class="history-card">
+            <h2>All Task History</h2>
+            <p>
+                Review recent submissions from the latest {{ admin_query_days }} days. This page shows
+                {{ admin_task_total }} matching tasks in total, with {{ admin_page_size }} rows per page.
+            </p>
+
+            <div class="task-status-overview">
+                <span class="status-badge success">Success: Task successful</span>
+                <span class="status-badge pending">Pending: Task in progress</span>
+                <span class="status-badge failed">Failed: Task failed</span>
+                <span class="status-badge queuing">Queuing: Task in queue</span>
+            </div>
+
+            <div class="admin-filter-panel" aria-label="Admin task filters">
+                <div class="admin-filter-control">
+                    <label for="admin-task-search">Search</label>
+                    <input type="text" id="admin-task-search" placeholder="User, task ID, path, PID, task type...">
+                </div>
+                <div class="admin-filter-control">
+                    <label for="admin-status-filter">Status</label>
+                    <select id="admin-status-filter">
+                        <option value="">All statuses</option>
+                        <option value="success">Success</option>
+                        <option value="pending">Pending</option>
+                        <option value="failed">Failed</option>
+                        <option value="queuing">Queuing</option>
+                    </select>
+                </div>
+                <div class="admin-filter-control">
+                    <label for="admin-task-type-filter">Task type</label>
+                    <select id="admin-task-type-filter">
+                        <option value="">All task types</option>
+                    </select>
+                </div>
+                <div class="admin-filter-control">
+                    <label for="admin-remote-type-filter">Remote type</label>
+                    <select id="admin-remote-type-filter">
+                        <option value="">All remote types</option>
+                    </select>
+                </div>
+                <div class="admin-filter-toggle">
+                    <label for="only-inprogress">
+                        <input type="checkbox" id="only-inprogress">
+                        Only show Pending/Queuing
+                    </label>
+                </div>
+                <button type="button" id="admin-filter-reset" class="admin-reset-btn">Reset</button>
+            </div>
+            <span id="task-filter-summary" class="admin-filter-summary"></span>
+
+            <div class="history-table-wrap">
+                <table id="task-history-table" class="query-history-table">
+                    <colgroup>
+                        <col style="width: 140px;">
+                        <col style="width: 110px;">
+                        <col style="width: 180px;">
+                        <col style="width: 105px;">
+                        <col style="width: 110px;">
+                        <col style="width: 105px;">
+                        <col style="width: 170px;">
+                        <col style="width: 110px;">
+                        <col style="width: 280px;">
+                        <col style="width: 90px;">
+                        <col style="width: 110px;">
+                        <col style="width: 220px;">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Created At</th>
+                            <th>User</th>
+                            <th>Task Type</th>
+                            <th>Status</th>
+                            <th>Cancel Task</th>
+                            <th>Remote Type</th>
+                            <th>Server Name</th>
+                            <th>Task Priority</th>
+                            <th>Task Folder Path</th>
+                            <th>PID</th>
+                            <th>Send Email</th>
+                            <th>Task ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr
+                            class="admin-task-row"
+                            data-status="{{ task.status|default:''|lower }}"
+                            data-task-type="{{ task.task_type|default:'' }}"
+                            data-remote-type="{{ task.remote_type|default:'' }}"
+                            data-search="{{ task.created_at|date:'Y-m-d H:i:s' }} {{ task.user }} {{ task.task_type }} {{ task.status }} {{ task.remote_type }} {{ task.server_name }} {{ task.folder_path }} {{ task.pid }} {{ task.statusemail }} {{ task.task_id }}"
+                        >
+                            <td>{{ task.created_at|date:"Y-m-d H:i:s" }}</td>
+                            <td>{{ task.user }}</td>
+                            <td>{{ task.task_type }}</td>
+                            <td>
+                                {% if task.status == 'success' %}
+                                <span class="status-pill success">{{ task.status }}</span>
+                                {% elif task.status == 'pending' %}
+                                <span class="status-pill pending">{{ task.status }}</span>
+                                {% elif task.status == 'failed' %}
+                                <span class="status-pill failed">{{ task.status }}</span>
+                                {% elif task.status == 'queuing' %}
+                                <span class="status-pill queuing">{{ task.status }}</span>
+                                {% else %}
+                                <span class="status-pill queuing">{{ task.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if task.status == 'pending' or task.status == 'queuing' %}
+                                <button
+                                    type="button"
+                                    class="btn-cancel enabled"
+                                    onclick="confirmCancel('{{ task.task_id }}')"
+                                >Cancel</button>
+                                {% else %}
+                                <button type="button" class="btn-cancel disabled" disabled>Cancel</button>
+                                {% endif %}
+                            </td>
+                            <td>{{ task.remote_type }}</td>
+                            <td>{{ task.server_name|default:"-" }}</td>
+                            <td>
+                                <input
+                                    type="number"
+                                    class="priority-input"
+                                    data-task-id="{{ task.task_id }}"
+                                    value="{{ task.priority }}"
+                                    min="0"
+                                >
+                            </td>
+                            <td class="task-path-cell">
+                                <div class="task-long-box">
+                                    <button type="button" class="task-copy-btn" onclick="copyLongCellValue(this)">Copy</button>
+                                    <span class="task-long-scroll">{{ task.folder_path }}</span>
+                                </div>
+                            </td>
+                            <td>{{ task.pid }}</td>
+                            <td>{{ task.statusemail }}</td>
+                            <td class="task-id-cell">
+                                <div class="task-long-box">
+                                    <button type="button" class="task-copy-btn" onclick="copyLongCellValue(this)">Copy</button>
+                                    <span class="task-long-scroll">{{ task.task_id }}</span>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="12">No tasks found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if page_obj and page_obj.paginator.num_pages > 1 %}
+            <nav class="admin-pagination" aria-label="Admin task pagination">
+                <div class="admin-pagination-info">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} ·
+                    {{ admin_page_size }} rows per page ·
+                    {{ admin_task_total }} tasks in the latest {{ admin_query_days }} days
+                </div>
+                <div class="admin-pagination-links">
+                    {% if page_obj.has_previous %}
+                    <a class="admin-page-link" href="?page=1">First</a>
+                    <a class="admin-page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    {% endif %}
+                    <span class="admin-page-current">{{ page_obj.number }}</span>
+                    {% if page_obj.has_next %}
+                    <a class="admin-page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    <a class="admin-page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                    {% endif %}
+                </div>
+            </nav>
+            {% endif %}
+        </section>
+    </div>
+</section>
+
+<script>
+
+    function toggleServerEnabled(serverName, enabled, button) {
+        const actionLabel = enabled ? 'enable' : 'remove';
+        const confirmMessage = enabled
+            ? `Enable ${serverName} for future scheduling?`
+            : `Remove ${serverName} from future scheduling?\n\nRunning tasks already assigned to this node will continue to completion.`;
+
+        if (!window.confirm(confirmMessage)) {
+            return;
+        }
+
+        const originalText = button ? button.textContent : '';
+        if (button) {
+            button.disabled = true;
+            button.textContent = enabled ? 'Enabling...' : 'Disabling...';
+        }
+
+        fetch("{% url 'home:toggle_server_enabled' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                server_name: serverName,
+                enabled: enabled,
+            })
+        })
+        .then(resp => {
+            if (!resp.ok) {
+                return resp.text().then(text => {
+                    throw new Error(text || `Failed to ${actionLabel} server.`);
+                });
+            }
+            return resp.json();
+        })
+        .then(json => {
+            if (!json.success) {
+                throw new Error(json.message || `Failed to ${actionLabel} server.`);
+            }
+            alert(json.message);
+            window.location.reload();
+        })
+        .catch(err => {
+            console.error(err);
+            alert(`Error: ${err.message}`);
+            if (button) {
+                button.disabled = false;
+                button.textContent = originalText;
+            }
+        });
+    }
+
+
+    function copyLongCellValue(button) {
+        const box = button.closest('.task-long-box');
+        const source = box ? box.querySelector('.task-long-scroll') : null;
+        const text = source ? source.textContent.trim() : '';
+
+        if (!text) return;
+
+        const setCopiedState = () => {
+            const oldText = button.textContent;
+            button.textContent = 'Copied';
+            button.disabled = true;
+            window.setTimeout(() => {
+                button.textContent = oldText;
+                button.disabled = false;
+            }, 1200);
+        };
+
+        const fallbackCopy = () => {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.setAttribute('readonly', '');
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            textarea.style.top = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                setCopiedState();
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
+                alert('Copy failed. Please copy the text manually.');
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text)
+                .then(setCopiedState)
+                .catch(err => {
+                    console.warn('Clipboard API failed, using fallback:', err);
+                    fallbackCopy();
+                });
+        } else {
+            fallbackCopy();
+        }
+    }
+
+
+    function confirmCancel(taskId) {
+        const msg = 'Are you sure you want to cancel this task?';
+        if (window.confirm(msg)) {
+            cancelTask(taskId);
+        }
+    }
+
+
+    function cancelTask(taskId) {
+        fetch("{% url 'home:cancel_task' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ task_id: taskId })
+        })
+        .then(resp => {
+            if (!resp.ok) throw new Error('Network response was not ok');
+            return resp.json();
+        })
+        .then(json => {
+            if (json.success) {
+                alert('Task ' + json.task_id + ' has been terminated');
+                window.location.reload();
+            } else {
+                alert('Cancellation failed');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Error: ' + err.message);
+        });
+    }
+</script>
+
+<script>
+
+    function resetTaskPanels() {
+        document.querySelectorAll('[id^="task-result-panel-"]').forEach(panel => {
+            panel.querySelectorAll('table').forEach(tbl => {
+                tbl.innerHTML = '';
+            });
+            panel.querySelectorAll('.image-grid').forEach(grid => {
+                grid.innerHTML = '';
+                grid.style.display = 'none';
+            });
+            panel.style.display = 'none';
+        });
+    }
+
+
+    function getFigurePreviews(data) {
+        if (Array.isArray(data.figure_previews) && data.figure_previews.length) {
+            return data.figure_previews;
+        }
+
+        if (data.figure_data_url_dict && Object.keys(data.figure_data_url_dict).length) {
+            return Object.entries(data.figure_data_url_dict).map(([caption, url]) => ({
+                key: caption,
+                label: caption,
+                url: url,
+                source_filename: '',
+                group: ''
+            }));
+        }
+
+        return [];
+    }
+
+
+    function isMdTask(taskType) {
+        return ["MDCoumpute", "MDCoumpute_ORCA", "MDCompute", "MDCompute_ORCA"].includes(taskType);
+    }
+
+
+    function createPreviewFigure(preview) {
+        const fig = document.createElement("figure");
+        const img = document.createElement("img");
+        const caption = document.createElement("figcaption");
+
+        img.src = preview.url;
+        img.alt = preview.label || "Preview figure";
+        img.addEventListener("error", () => {
+            console.error("Failed to load MD preview:", preview.url);
+            fig.innerHTML = `
+                <div class="preview-empty">
+                    Failed to load preview image.
+                    <span class="preview-meta">${preview.label || "Unknown figure"}</span>
+                </div>
+            `;
+        });
+
+        caption.textContent = preview.label || "Preview";
+        if (preview.group || preview.source_filename) {
+            const meta = document.createElement("span");
+            meta.className = "preview-meta";
+            const metaParts = [];
+            if (preview.group) metaParts.push(preview.group);
+            if (preview.source_filename) metaParts.push(preview.source_filename);
+            meta.textContent = metaParts.join(" | ");
+            caption.appendChild(meta);
+        }
+
+        fig.appendChild(img);
+        fig.appendChild(caption);
+        return fig;
+    }
+
+
+    function renderTaskResult(data, panelSuffix = "1") {
+        const panel = document.getElementById(`task-result-panel-${panelSuffix}`);
+        const tableEl = document.getElementById(`task-table-${panelSuffix}`);
+        const gridEl = document.getElementById(`image-grid-${panelSuffix}`);
+
+        if (!panel || !tableEl || !gridEl) return;
+
+        if (!data.table_data_url) {
+            tableEl.innerHTML = '<tr><td style="color:red;">No table file was returned for this task.</td></tr>';
+        } else {
+            fetch(data.table_data_url)
+                .then(resp => resp.arrayBuffer())
+                .then(buf => {
+                    const wb = XLSX.read(new Uint8Array(buf), {type: 'array'});
+                    const html = XLSX.utils.sheet_to_html(wb.Sheets[wb.SheetNames[0]]);
+                    tableEl.innerHTML = html;
+                })
+                .catch(err => {
+                    console.error("Load table failed:", err);
+                    tableEl.innerHTML = '<tr><td style="color:red;">Failed to load table.</td></tr>';
+                });
+        }
+
+        const previews = getFigurePreviews(data);
+        if (previews.length) {
+            gridEl.style.display = "grid";
+            gridEl.innerHTML = "";
+            previews.forEach(preview => gridEl.appendChild(createPreviewFigure(preview)));
+        } else if (isMdTask(data.task_type)) {
+            gridEl.style.display = "grid";
+            gridEl.innerHTML = '<div class="preview-empty">No preview figures available for this task.</div>';
+        } else {
+            gridEl.style.display = "none";
+        }
+
+        panel.style.display = "flex";
+    }
+</script>
+
+<script>
+
+    function submitEncryptedID() {
+        const encryptedId = document.getElementById('encrypted-id-input').value;
+        const resultDiv = document.getElementById('result');
+        const directoryDiv = document.getElementById('directory-result');
+        const directoryText = document.getElementById('directory-result-text');
+
+        resetTaskPanels();
+        resultDiv.innerHTML = '';
+        if (directoryDiv && directoryText) {
+            directoryText.textContent = '';
+            directoryDiv.style.display = 'none';
+        }
+
+        if (!encryptedId) {
+            resultDiv.innerHTML = '<p style="color: red;">Please enter a valid encrypted ID.</p>';
+            return;
+        }
+
+        fetch("{% url 'home:get_task_directory' %}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 'encrypted_id': encryptedId })
+        })
+        .then(resp => resp.json())
+        .then(dirData => {
+            if (dirData && dirData.success && dirData.directory && directoryDiv && directoryText) {
+                directoryText.textContent = dirData.directory;
+                directoryDiv.style.display = 'block';
+            } else {
+                console.warn("get_task_directory failed:", dirData);
+            }
+        })
+        .catch(err => {
+            console.error("get_task_directory error:", err);
+        });
+
+        fetch("{% url 'home:check_task_status' %}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 'encrypted_id': encryptedId })
+        })
+        .then(response => {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json();
+            }
+            return response.text().then(text => {
+                throw new Error(`Expected JSON but got: ${text}`);
+            });
+        })
+        .then(data => {
+            if (data.status === 'not_finished') {
+                resultDiv.innerHTML = '<p style="color: #b87400;">Task is still processing. Please check again later.</p>';
+            } else if (data.status === 'success') {
+                let downloadLinks = '';
+                data.download_urls.forEach(url => {
+                    downloadLinks += `<a href="${url}" class="download-link">Download File</a>`;
+                });
+                resultDiv.innerHTML =
+                    `<p style="color: #1c7a47;">Task completed successfully! You can download your files:</p>${downloadLinks}`;
+
+                renderTaskResult(data, "1");
+            } else if (data.status === 'failed') {
+                const failureContent = data.failure_content;
+                resultDiv.innerHTML = `
+                    <p style="color: #b23a3a;">Task failed. Please review the error details below:</p>
+                    <div class="failure-box">
+                        <pre>${failureContent}</pre>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = '<p style="color: red;">Unknown task status returned by the server.</p>';
+            }
+        })
+        .catch(async error => {
+            console.error('Error:', error);
+            const responseClone = error.response ? await error.response.clone().text() : "No response available";
+            console.error('Response status:', error.status || 'Unknown status');
+            console.error('Response body:', responseClone);
+            resultDiv.innerHTML = '<p style="color: red;">An error occurred while checking the task status. Please try again later.</p>';
+        });
+    }
+</script>
+
+<script>
+
+    function populateAdminFilterOptions() {
+        const taskTypeSelect = document.getElementById('admin-task-type-filter');
+        const remoteTypeSelect = document.getElementById('admin-remote-type-filter');
+        const rows = document.querySelectorAll('#task-history-table tbody tr.admin-task-row');
+        const taskTypes = new Set();
+        const remoteTypes = new Set();
+
+        rows.forEach(row => {
+            const taskType = (row.dataset.taskType || '').trim();
+            const remoteType = (row.dataset.remoteType || '').trim();
+            if (taskType) taskTypes.add(taskType);
+            if (remoteType) remoteTypes.add(remoteType);
+        });
+
+        taskTypes.forEach(value => {
+            const option = document.createElement('option');
+            option.value = value.toLowerCase();
+            option.textContent = value;
+            taskTypeSelect.appendChild(option);
+        });
+
+        remoteTypes.forEach(value => {
+            const option = document.createElement('option');
+            option.value = value.toLowerCase();
+            option.textContent = value;
+            remoteTypeSelect.appendChild(option);
+        });
+    }
+
+
+    function applyAdminTaskFilters() {
+        const searchValue = (document.getElementById('admin-task-search')?.value || '').toLowerCase().trim();
+        const statusValue = (document.getElementById('admin-status-filter')?.value || '').toLowerCase().trim();
+        const taskTypeValue = (document.getElementById('admin-task-type-filter')?.value || '').toLowerCase().trim();
+        const remoteTypeValue = (document.getElementById('admin-remote-type-filter')?.value || '').toLowerCase().trim();
+        const onlyInProgress = Boolean(document.getElementById('only-inprogress')?.checked);
+        const rows = document.querySelectorAll('#task-history-table tbody tr.admin-task-row');
+        let total = 0;
+        let shown = 0;
+
+        rows.forEach(row => {
+            const status = (row.dataset.status || '').toLowerCase().trim();
+            const taskType = (row.dataset.taskType || '').toLowerCase().trim();
+            const remoteType = (row.dataset.remoteType || '').toLowerCase().trim();
+            const searchText = (row.dataset.search || '').toLowerCase();
+            let keep = true;
+
+            total++;
+            if (searchValue && !searchText.includes(searchValue)) keep = false;
+            if (statusValue && status !== statusValue) keep = false;
+            if (taskTypeValue && taskType !== taskTypeValue) keep = false;
+            if (remoteTypeValue && remoteType !== remoteTypeValue) keep = false;
+            if (onlyInProgress && !(status === 'pending' || status === 'queuing')) keep = false;
+
+            row.style.display = keep ? '' : 'none';
+            if (keep) shown++;
+        });
+
+        const summaryEl = document.getElementById('task-filter-summary');
+        if (summaryEl) {
+            summaryEl.textContent = `Showing ${shown} of ${total} tasks on this page`;
+        }
+    }
+
+
+    function resetAdminTaskFilters() {
+        const searchInput = document.getElementById('admin-task-search');
+        const statusSelect = document.getElementById('admin-status-filter');
+        const taskTypeSelect = document.getElementById('admin-task-type-filter');
+        const remoteTypeSelect = document.getElementById('admin-remote-type-filter');
+        const onlyInProgress = document.getElementById('only-inprogress');
+
+        if (searchInput) searchInput.value = '';
+        if (statusSelect) statusSelect.value = '';
+        if (taskTypeSelect) taskTypeSelect.value = '';
+        if (remoteTypeSelect) remoteTypeSelect.value = '';
+        if (onlyInProgress) onlyInProgress.checked = false;
+        applyAdminTaskFilters();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const encryptedInput = document.getElementById('encrypted-id-input');
+        if (encryptedInput) {
+            encryptedInput.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    submitEncryptedID();
+                }
+            });
+        }
+
+        document.querySelectorAll('.priority-input').forEach(input => {
+            input.addEventListener('change', function() {
+                const taskId = this.dataset.taskId;
+                const newPriority = this.value;
+                fetch("{% url 'home:update_task_priority' %}", {
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        task_id: taskId,
+                        priority: newPriority
+                    })
+                })
+                .then(resp => resp.json())
+                .then(data => {
+                    if (!data.success) {
+                        alert("Save error: " + data.error);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Network error, save failed");
+                });
+            });
+        });
+
+        populateAdminFilterOptions();
+        ['admin-task-search', 'admin-status-filter', 'admin-task-type-filter', 'admin-remote-type-filter', 'only-inprogress'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener(id === 'admin-task-search' ? 'input' : 'change', applyAdminTaskFilters);
+        });
+
+        const resetBtn = document.getElementById('admin-filter-reset');
+        if (resetBtn) resetBtn.addEventListener('click', resetAdminTaskFilters);
+        applyAdminTaskFilters();
+    });
+</script>
+{% endblock content %}

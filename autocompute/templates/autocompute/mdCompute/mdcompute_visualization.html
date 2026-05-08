@@ -1,0 +1,193 @@
+{% extends 'autocompute/autocompute_base.html' %}
+{% load static %}
+
+{% block navbar %} 
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Database' %}">Database</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:QcCompute_base' %}">QcCompute</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:SMILESDrawer' %}">SMILESDrawer</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'home:homepage' %}">Home</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:index' %}">Return</a>
+  </li>
+{% endblock navbar %}
+
+{% block content %}
+
+
+<style>
+    
+    #div_left, #div_middle, #div_right {
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
+    
+    .table-container {
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+    }
+
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 600px; 
+    }
+
+    
+    th, td {
+        border: 1px solid #dee2e6;
+        padding: 12px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #e9ecef;
+    }
+
+    
+    .table-container::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    .table-container::-webkit-scrollbar-thumb {
+        background: #ced4da;
+        border-radius: 4px;
+    }
+
+    
+    #submit_key {
+        margin-top: 10px;
+        padding: 8px 16px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+    }
+
+    
+    #image_list {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    #image_list li {
+        margin-bottom: 10px;
+    }
+
+    #image_list a {
+        text-decoration: none;
+        color: #007bff;
+        cursor: pointer;
+    }
+
+    
+    #md_simulation_video, #display_image {
+        width: 100%;
+        height: auto;
+        border: 1px solid #dee2e6;
+    }
+</style>
+
+
+<div class="container">
+    
+    <div id="div_left">
+        
+        <div id="div_left_up">
+            <h2>Input Key</h2>
+            <input type="text" id="key_input" placeholder="Enter your key" style="width: 100%; padding: 8px;">
+            <button type="button" id="submit_key">Submit</button>
+        </div>
+        
+        <div id="div_left_down">
+            <h2>MD Simulation Visualization</h2>
+            <video id="md_simulation_video" controls>
+                <source src="{{ video_path }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+    
+    
+    <div id="div_middle">
+        <div id="div_middle_up">
+            <h2>MD Overview</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>SMILES</th>
+                            <th>Number</th>
+                            <th>T</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in md_overview %}
+                        <tr>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.smiles }}</td>
+                            <td>{{ item.number }}</td>
+                            <td>{{ item.t }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div id="div_middle_down">
+            <h2>MD Properties</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            {% for header in md_properties_headers %}
+                            <th>{{ header }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in md_properties %}
+                        <tr>
+                            {% for value in row %}
+                            <td>{{ value }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    
+    <div id="div_right">
+        <div id="div_right_up">
+            <h2>Visualization Images</h2>
+            <ul id="image_list">
+                {% for image in image_list %}
+                <li><a href="#" data-image-path="{{ image.path }}">{{ image.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div id="div_right_down">
+            <h2>Image Display</h2>
+            <img id="display_image" src="" alt="Selected Image">
+        </div>
+    </div>
+</div>
+
+{% endblock %}

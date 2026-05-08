@@ -1,0 +1,14 @@
+
+{% extends "bms_base.html" %}
+
+{% block title %} 错误信息提示 {% endblock title %}
+
+{% block content %}
+    
+    <div class="container">
+        <div class="row">
+            
+            {{ error|safe }}
+        </div>
+    </div>
+{% endblock %}

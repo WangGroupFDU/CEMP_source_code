@@ -1,0 +1,1104 @@
+{% extends 'home_base.html'%}
+{% load static %}
+
+{% block head %} 
+
+
+
+
+<script
+type="text/javascript"
+src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.js"
+></script>
+
+
+
+<link rel="stylesheet" type="text/css"  href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" type="text/css"  href="https://cdn.datatables.net/buttons/1.4.0/css/buttons.dataTables.min.css" />
+
+<script type="text/javascript" src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.flash.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.colVis.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+
+<script type="text/javascript"
+src="https://cdn.datatables.net/fixedheader/3.2.3/js/dataTables.fixedHeader.min.js"></script>
+{% endblock head %}
+
+{% block content %}
+<style>
+    
+    .query-page {
+        background:
+            radial-gradient(circle at top left, rgba(34, 92, 146, 0.10), transparent 26%),
+            linear-gradient(180deg, #f5f8fc 0%, #edf3f9 100%);
+        padding: 34px 18px 56px;
+    }
+
+    .query-shell {
+        max-width: 1220px;
+        margin: 0 auto;
+    }
+
+    
+    .query-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 34px 36px;
+        border-radius: 28px;
+        background: linear-gradient(135deg, #12314f 0%, #1f578c 56%, #3f8bc8 100%);
+        color: #ffffff;
+        box-shadow: 0 24px 48px rgba(18, 49, 79, 0.16);
+        margin-bottom: 24px;
+    }
+
+    .query-hero::before,
+    .query-hero::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        pointer-events: none;
+    }
+
+    .query-hero::before {
+        width: 240px;
+        height: 240px;
+        right: -70px;
+        top: -120px;
+    }
+
+    .query-hero::after {
+        width: 160px;
+        height: 160px;
+        bottom: -80px;
+        right: 180px;
+    }
+
+    .query-hero-content {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: minmax(0, 1.6fr) minmax(260px, 0.9fr);
+        gap: 22px;
+        align-items: end;
+    }
+
+    .query-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 14px;
+    }
+
+    .query-hero h1 {
+        margin: 0 0 12px;
+        font-size: 36px;
+        font-weight: 700;
+        color: #ffffff;
+    }
+
+    .query-hero p {
+        margin: 0;
+        max-width: 760px;
+        font-size: 16px;
+        line-height: 1.8;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .query-tip-card {
+        padding: 18px 20px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(255, 255, 255, 0.11);
+        backdrop-filter: blur(10px);
+    }
+
+    .query-tip-card h2 {
+        margin: 0 0 10px;
+        font-size: 16px;
+        color: #ffffff;
+    }
+
+    .query-tip-card p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.8;
+        color: rgba(255, 255, 255, 0.86);
+    }
+
+    .query-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+
+    .query-card,
+    .history-card,
+    .overview-card,
+    .task-result-panel {
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid rgba(19, 53, 86, 0.08);
+        box-shadow: 0 16px 32px rgba(24, 56, 89, 0.08);
+    }
+
+    
+    .query-card {
+        padding: 28px 28px 26px;
+    }
+
+    .query-card h2,
+    .overview-card h2,
+    .history-card h2 {
+        margin: 0 0 10px;
+        font-size: 24px;
+        color: #173450;
+    }
+
+    .query-card p,
+    .overview-card p,
+    .history-card p {
+        margin: 0;
+        color: #526273;
+        line-height: 1.8;
+        text-align: left;
+    }
+
+    .query-warning {
+        margin-top: 16px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: linear-gradient(90deg, rgba(255, 242, 226, 0.95), rgba(255, 248, 238, 0.95));
+        border: 1px solid rgba(224, 145, 54, 0.2);
+        color: #955415;
+        font-weight: 600;
+    }
+
+    .query-form {
+        margin-top: 22px;
+    }
+
+    .query-label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #1d3d5b;
+    }
+
+    .query-input-row {
+        display: flex;
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    .query-input-row input {
+        flex: 1;
+        min-width: 0;
+        padding: 14px 16px;
+        border-radius: 16px;
+        border: 1px solid #d3dfeb;
+        background: #f8fbfe;
+        color: #18324b;
+        font-size: 15px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .query-input-row input:focus {
+        outline: none;
+        border-color: #4f8fca;
+        background: #ffffff;
+        box-shadow: 0 0 0 4px rgba(79, 143, 202, 0.12);
+    }
+
+    .query-submit-btn {
+        padding: 0 22px;
+        border: none;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #1f578c 0%, #2d79c1 100%);
+        color: #ffffff;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .query-submit-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 22px rgba(45, 121, 193, 0.24);
+    }
+
+    .query-helper-list {
+        list-style: none;
+        padding: 0;
+        margin: 22px 0 0;
+        display: grid;
+        gap: 12px;
+    }
+
+    .query-helper-list li {
+        position: relative;
+        padding: 12px 14px 12px 40px;
+        border-radius: 16px;
+        background: #f6f9fc;
+        color: #334b63;
+        line-height: 1.7;
+    }
+
+    .query-helper-list li::before {
+        content: "";
+        position: absolute;
+        top: 18px;
+        left: 16px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1f578c 0%, #63a4df 100%);
+        box-shadow: 0 0 0 5px rgba(79, 143, 202, 0.12);
+    }
+
+    .query-escalation-note {
+        margin-top: 18px;
+        padding: 16px 18px;
+        border-radius: 18px;
+        border: 1px solid rgba(170, 82, 24, 0.22);
+        background: linear-gradient(135deg, rgba(255, 245, 232, 0.98) 0%, rgba(255, 250, 242, 0.98) 100%);
+        color: #6f3e10;
+        line-height: 1.8;
+        font-weight: 600;
+    }
+
+    .query-escalation-note strong {
+        color: #8d4610;
+    }
+
+    .query-escalation-note a {
+        color: #8d4610;
+        font-weight: 700;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+
+    
+    .overview-card {
+        padding: 28px;
+    }
+
+    .stat-grid {
+        display: grid;
+        gap: 14px;
+        margin-top: 18px;
+    }
+
+    .stat-item {
+        padding: 16px 18px;
+        border-radius: 18px;
+        background: linear-gradient(180deg, #f7fbfe 0%, #eef4fb 100%);
+        border: 1px solid rgba(31, 87, 140, 0.08);
+    }
+
+    .stat-label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+        color: #5d6d7d;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .stat-value {
+        display: block;
+        font-size: 28px;
+        font-weight: 700;
+        color: #14314b;
+        line-height: 1.2;
+    }
+
+    .stat-note {
+        margin-top: 16px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: #f8fafc;
+        color: #607182;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    
+    #result {
+        margin-top: 18px;
+        padding: 16px 18px;
+        border-radius: 18px;
+        background: #f7fafc;
+        border: 1px solid #e2ebf3;
+        color: #36506a;
+        line-height: 1.8;
+    }
+
+    #result p {
+        text-align: left;
+        margin-bottom: 8px;
+    }
+
+    .download-link {
+        display: inline-flex;
+        align-items: center;
+        margin: 8px 10px 0 0;
+        padding: 10px 14px;
+        border-radius: 12px;
+        background: #e9f3fb;
+        color: #165995;
+        text-decoration: none;
+        font-weight: 700;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .download-link:hover {
+        text-decoration: none;
+        background: #dcecf9;
+        color: #0e4679;
+    }
+
+    .failure-box {
+        width: 100%;
+        max-width: 100%;
+        max-height: 420px;
+        overflow: auto;
+        margin-top: 10px;
+        padding: 14px;
+        border: 1px solid #ead2d2;
+        border-radius: 16px;
+        background: #fff7f7;
+        color: #7f3030;
+    }
+
+    .failure-box pre {
+        min-width: max-content;
+        margin: 0;
+        white-space: pre;
+        font-family: monospace;
+        font-size: 13px;
+        line-height: 1.55;
+    }
+
+    .task-result-panel {
+        display: none;
+        flex-direction: column;
+        gap: 18px;
+        width: 100%;
+        margin: 0 0 24px;
+        padding: 24px;
+    }
+
+    .task-result-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .task-result-head h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #173450;
+    }
+
+    .task-result-head p {
+        margin: 0;
+        color: #5a6a7a;
+    }
+
+    .result-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: #e9f6ef;
+        color: #1f7a48;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .table-scroll,
+    .history-table-wrap {
+        overflow-x: auto;
+        overflow-y: auto;
+        border: 1px solid #e0e8ef;
+        border-radius: 18px;
+        background: #ffffff;
+    }
+
+    .table-scroll {
+        max-height: 420px;
+        padding: 10px;
+    }
+
+    .table-scroll table {
+        width: 100%;
+        min-width: 640px;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+
+    .table-scroll th,
+    .table-scroll td {
+        border: 1px solid #e5edf4;
+        padding: 8px 10px;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .table-scroll thead th {
+        position: sticky;
+        top: 0;
+        background: #f3f7fb;
+        color: #163550;
+        z-index: 1;
+    }
+
+    .image-grid {
+        display: none;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 14px;
+    }
+
+    .image-grid figure {
+        margin: 0;
+        padding: 12px;
+        border-radius: 18px;
+        border: 1px solid #e2eaf2;
+        background: #f8fbfe;
+        text-align: center;
+    }
+
+    .image-grid img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        margin: 0 auto;
+        border-radius: 12px;
+    }
+
+    .image-grid figcaption {
+        margin-top: 8px;
+        font-size: 13px;
+        color: #516476;
+        line-height: 1.5;
+    }
+
+    .preview-meta {
+        display: block;
+        margin-top: 4px;
+        font-size: 11px;
+        color: #7c8fa1;
+    }
+
+    .preview-empty {
+        display: block;
+        grid-column: 1 / -1;
+        padding: 18px;
+        border: 1px dashed #c7d5e3;
+        border-radius: 16px;
+        background: #f8fbfe;
+        color: #5f7285;
+        text-align: center;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    
+    .history-card {
+        padding: 28px;
+    }
+
+    .task-status-overview {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 18px 0 18px;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .status-badge.success {
+        background: #e8f6ee;
+        color: #1d7b47;
+    }
+
+    .status-badge.pending {
+        background: #fff3d9;
+        color: #976400;
+    }
+
+    .status-badge.failed {
+        background: #fde9e9;
+        color: #b23a3a;
+    }
+
+    .status-badge.queuing {
+        background: #edf1f5;
+        color: #5d6772;
+    }
+
+    .history-table-wrap {
+        max-height: 480px;
+    }
+
+    .query-history-table {
+        width: 100%;
+        min-width: 980px;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .query-history-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        padding: 14px 16px;
+        background: #f3f7fb;
+        color: #173450;
+        font-size: 14px;
+        text-align: left;
+        border-bottom: 1px solid #dfe7ee;
+    }
+
+    .query-history-table tbody td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #edf2f7;
+        color: #405567;
+        vertical-align: middle;
+        background: #ffffff;
+    }
+
+    .query-history-table tbody tr:hover td {
+        background: #f8fbfe;
+    }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: capitalize;
+    }
+
+    .status-pill.success {
+        background: #e8f6ee;
+        color: #1d7b47;
+    }
+
+    .status-pill.pending {
+        background: #fff3d9;
+        color: #976400;
+    }
+
+    .status-pill.failed {
+        background: #fde9e9;
+        color: #b23a3a;
+    }
+
+    .status-pill.queuing {
+        background: #edf1f5;
+        color: #5d6772;
+    }
+
+    .task-id-cell {
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        font-size: 12px;
+        color: #294662;
+        word-break: break-all;
+    }
+
+    .btn-cancel {
+        border: none;
+        padding: 8px 14px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .btn-cancel.enabled {
+        background: #f05d52;
+        color: #ffffff;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-cancel.enabled:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 18px rgba(240, 93, 82, 0.22);
+    }
+
+    .btn-cancel.disabled {
+        background: #eef2f5;
+        color: #9ba7b1;
+        cursor: not-allowed;
+        opacity: 1;
+    }
+
+    #resultDiv {
+        display: none;
+    }
+
+    @media (max-width: 991px) {
+        .query-hero-content,
+        .query-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .query-tip-card {
+            max-width: none;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .query-page {
+            padding: 24px 14px 40px;
+        }
+
+        .query-hero,
+        .query-card,
+        .overview-card,
+        .history-card,
+        .task-result-panel {
+            border-radius: 20px;
+        }
+
+        .query-hero {
+            padding: 26px 22px;
+        }
+
+        .query-hero h1 {
+            font-size: 28px;
+        }
+
+        .query-card,
+        .overview-card,
+        .history-card,
+        .task-result-panel {
+            padding: 22px;
+        }
+
+        .query-input-row {
+            flex-direction: column;
+        }
+
+        .query-submit-btn {
+            min-height: 48px;
+        }
+    }
+</style>
+
+<section class="query-page">
+    <div class="query-shell">
+        <section class="query-hero">
+            <div class="query-hero-content">
+                <div>
+                    <span class="query-eyebrow">Task Query Center</span>
+                    <h1>Track computation progress and retrieve your results</h1>
+                    <p>
+                        Enter the encrypted task identifier to check running status, preview generated tables and figures,
+                        and download finished results from the current CEMP workflow.
+                    </p>
+                </div>
+                <div class="query-tip-card">
+                    <h2>Before you query</h2>
+                    <p>
+                        Keep your encrypted ID intact so the same task can be revisited later when needed.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="query-grid">
+            <div class="query-card">
+                <h2>Task Status Checker</h2>
+                <p>Use your encrypted task ID to retrieve the latest execution status and available outputs.</p>
+
+                <div class="query-form">
+                    <label class="query-label" for="encrypted-id-input">Encrypted task ID</label>
+                    <div class="query-input-row">
+                        <input type="text" id="encrypted-id-input" placeholder="Enter your encrypted ID">
+                        <button type="button" class="query-submit-btn" onclick="submitEncryptedID()">Submit</button>
+                    </div>
+                </div>
+
+                <ul class="query-helper-list">
+                    <li>Finished tasks will return downloadable result links.</li>
+                    <li>Pending or queuing tasks can be revisited later using the same encrypted ID.</li>
+                    <li>Failed tasks will show the recorded error log for troubleshooting.</li>
+                </ul>
+
+                <div class="query-escalation-note">
+                    <strong>Important troubleshooting note:</strong>
+                    If an error is encountered, you are strongly encouraged to first consult the
+                    <a href="https://cempagent.vip.cpolar.cn" target="_blank" rel="noopener noreferrer">Agent</a>
+                    for an initial interpretation and troubleshooting guidance. If the issue remains unresolved,
+                    please submit a <a href="{% url 'tickets:create' %}">ticket</a> so that the administrators may
+                    investigate the case in detail.
+                </div>
+
+                <div id="result"></div>
+            </div>
+
+            <aside class="overview-card">
+                <h2>Current Queue Overview</h2>
+                <p>These values summarize tasks that are still being processed on the platform.</p>
+
+                <div class="stat-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">Pending Tasks</span>
+                        <span class="stat-value">{{ pending_tasks_count|default:"N/A" }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Queuing Tasks</span>
+                        <span class="stat-value">{{ queuing_tasks_count|default:"N/A" }}</span>
+                    </div>
+                </div>
+
+                <div class="stat-note">
+                    A larger queue may increase result turnaround time. You can still use the history table below to track
+                    previous submissions and cancel tasks that have not yet finished.
+                </div>
+            </aside>
+        </section>
+
+        <section id="task-result-panel-1" class="task-result-panel">
+            <div class="task-result-head">
+                <div>
+                    <h2>Result Preview</h2>
+                    <p>Rendered directly from the returned table and figure files.</p>
+                </div>
+                <span class="result-badge">Task Completed</span>
+            </div>
+
+            <div class="table-scroll">
+                <table id="task-table-1"></table>
+            </div>
+
+            <div class="image-grid" id="image-grid-1"></div>
+        </section>
+
+        <div id="resultDiv"></div>
+
+        <section class="history-card">
+            <h2>Your Task History</h2>
+            <p>Review previous submissions, inspect their status, and cancel tasks that are still running or waiting.</p>
+
+            <div class="task-status-overview">
+                <span class="status-badge success">Success: Task successful</span>
+                <span class="status-badge pending">Pending: Task in progress</span>
+                <span class="status-badge failed">Failed: Task failed</span>
+                <span class="status-badge queuing">Queuing: Task in queue</span>
+            </div>
+
+            <div class="history-table-wrap">
+                <table class="query-history-table">
+                    <thead>
+                        <tr>
+                            <th>Created At</th>
+                            <th>Task Type</th>
+                            <th>Status</th>
+                            <th>Cancel Task</th>
+                            <th>Send Email</th>
+                            <th>Task ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr>
+                            <td>{{ task.created_at|date:"Y-m-d H:i:s" }}</td>
+                            <td>{{ task.task_type }}</td>
+                            <td>
+                                {% if task.status == 'success' %}
+                                <span class="status-pill success">{{ task.status }}</span>
+                                {% elif task.status == 'pending' %}
+                                <span class="status-pill pending">{{ task.status }}</span>
+                                {% elif task.status == 'failed' %}
+                                <span class="status-pill failed">{{ task.status }}</span>
+                                {% elif task.status == 'queuing' %}
+                                <span class="status-pill queuing">{{ task.status }}</span>
+                                {% else %}
+                                <span class="status-pill queuing">{{ task.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if task.status == 'pending' or task.status == 'queuing' %}
+                                <button
+                                    type="button"
+                                    class="btn-cancel enabled"
+                                    onclick="confirmCancel('{{ task.task_id }}')"
+                                >Cancel</button>
+                                {% else %}
+                                <button type="button" class="btn-cancel disabled" disabled>Cancel</button>
+                                {% endif %}
+                            </td>
+                            <td>{{ task.statusemail }}</td>
+                            <td class="task-id-cell">{{ task.task_id }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6">No tasks found for the current user.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</section>
+
+<script>
+
+    function confirmCancel(taskId) {
+        const msg = 'Are you sure you want to cancel this task?';
+        if (window.confirm(msg)) {
+            cancelTask(taskId);
+        }
+    }
+
+
+    function cancelTask(taskId) {
+        fetch("{% url 'home:cancel_task' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ task_id: taskId })
+        })
+        .then(resp => {
+            if (!resp.ok) throw new Error('Network response was not ok');
+            return resp.json();
+        })
+        .then(json => {
+            if (json.success) {
+                alert('Task ' + json.task_id + ' has been terminated');
+                window.location.reload();
+            } else {
+                alert('Cancellation failed');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Error: ' + err.message);
+        });
+    }
+</script>
+
+<script>
+
+    function resetTaskPanels() {
+        document.querySelectorAll('[id^="task-result-panel-"]').forEach(panel => {
+            panel.querySelectorAll('table').forEach(tbl => {
+                tbl.innerHTML = '';
+            });
+            panel.querySelectorAll('.image-grid').forEach(grid => {
+                grid.innerHTML = '';
+                grid.style.display = 'none';
+            });
+            panel.style.display = 'none';
+        });
+    }
+
+
+    function getFigurePreviews(data) {
+        if (Array.isArray(data.figure_previews) && data.figure_previews.length) {
+            return data.figure_previews;
+        }
+
+        if (data.figure_data_url_dict && Object.keys(data.figure_data_url_dict).length) {
+            return Object.entries(data.figure_data_url_dict).map(([caption, url]) => ({
+                key: caption,
+                label: caption,
+                url: url,
+                source_filename: '',
+                group: ''
+            }));
+        }
+
+        return [];
+    }
+
+
+    function isMdTask(taskType) {
+        return ["MDCoumpute", "MDCoumpute_ORCA", "MDCompute", "MDCompute_ORCA"].includes(taskType);
+    }
+
+
+    function createPreviewFigure(preview) {
+        const fig = document.createElement("figure");
+        const img = document.createElement("img");
+        const caption = document.createElement("figcaption");
+
+        img.src = preview.url;
+        img.alt = preview.label || "Preview figure";
+        img.addEventListener("error", () => {
+            console.error("Failed to load MD preview:", preview.url);
+            fig.innerHTML = `
+                <div class="preview-empty">
+                    Failed to load preview image.
+                    <span class="preview-meta">${preview.label || "Unknown figure"}</span>
+                </div>
+            `;
+        });
+
+        caption.textContent = preview.label || "Preview";
+        if (preview.group || preview.source_filename) {
+            const meta = document.createElement("span");
+            meta.className = "preview-meta";
+            const metaParts = [];
+            if (preview.group) metaParts.push(preview.group);
+            if (preview.source_filename) metaParts.push(preview.source_filename);
+            meta.textContent = metaParts.join(" | ");
+            caption.appendChild(meta);
+        }
+
+        fig.appendChild(img);
+        fig.appendChild(caption);
+        return fig;
+    }
+
+
+    function renderTaskResult(data, panelSuffix = "1") {
+        const panel = document.getElementById(`task-result-panel-${panelSuffix}`);
+        const tableEl = document.getElementById(`task-table-${panelSuffix}`);
+        const gridEl = document.getElementById(`image-grid-${panelSuffix}`);
+
+        if (!panel || !tableEl || !gridEl) return;
+
+        fetch(data.table_data_url)
+            .then(resp => resp.arrayBuffer())
+            .then(buf => {
+                const wb = XLSX.read(new Uint8Array(buf), {type: 'array'});
+                const html = XLSX.utils.sheet_to_html(wb.Sheets[wb.SheetNames[0]]);
+                tableEl.innerHTML = html;
+            })
+            .catch(err => {
+                console.error("Load table failed:", err);
+                tableEl.innerHTML = '<tr><td style="color:red;">Failed to load table.</td></tr>';
+            });
+
+        const previews = getFigurePreviews(data);
+        if (previews.length) {
+            gridEl.style.display = "grid";
+            gridEl.innerHTML = "";
+            previews.forEach(preview => gridEl.appendChild(createPreviewFigure(preview)));
+        } else if (isMdTask(data.task_type)) {
+            gridEl.style.display = "grid";
+            gridEl.innerHTML = '<div class="preview-empty">No preview figures available for this task.</div>';
+        } else {
+            gridEl.style.display = "none";
+        }
+
+        panel.style.display = "flex";
+    }
+</script>
+
+<script>
+
+    function submitEncryptedID() {
+        const encryptedId = document.getElementById('encrypted-id-input').value;
+        const resultDiv = document.getElementById('result');
+
+        resetTaskPanels();
+        resultDiv.innerHTML = '';
+
+        if (!encryptedId) {
+            resultDiv.innerHTML = '<p style="color: red;">Please enter a valid encrypted ID.</p>';
+            return;
+        }
+
+        fetch("{% url 'home:check_task_status' %}", {
+            method: 'POST',
+            body: JSON.stringify({ 'encrypted_id': encryptedId })
+        })
+        .then(response => {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json();
+            } else {
+                return response.text().then(text => {
+                    throw new Error(`Expected JSON but got: ${text}`);
+                });
+            }
+        })
+        .then(data => {
+            if (data.status === 'not_finished') {
+                resultDiv.innerHTML = '<p style="color: #b87400;">Task is still processing. Please check again later.</p>';
+            } else if (data.status === 'success') {
+                let downloadLinks = '';
+                data.download_urls.forEach(url => {
+                    downloadLinks += `<a href="${url}" class="download-link">Download File</a>`;
+                });
+                resultDiv.innerHTML =
+                    `<p style="color: #1c7a47;">Task completed successfully! You can download your files:</p>${downloadLinks}`;
+
+                renderTaskResult(data, "1");
+            } else if (data.status === 'failed') {
+                const failureContent = data.failure_content;
+                resultDiv.innerHTML = `
+                    <p style="color: #b23a3a;">Task failed. Please review the error details below:</p>
+                    <div class="failure-box">
+                        <pre>${failureContent}</pre>
+                    </div>
+                `;
+            }
+        })
+        .catch(async error => {
+            console.error('Error:', error);
+
+            if (error instanceof SyntaxError) {
+                console.error("There was a SyntaxError. Response could not be parsed as JSON.");
+            } else {
+                console.error("An unexpected error occurred:", error.message);
+            }
+
+            const responseClone = error.response ? await error.response.clone().text() : "No response available";
+            console.error('Response status:', error.status || 'Unknown status');
+            console.error('Response body:', responseClone);
+
+            resultDiv.innerHTML = '<p style="color: red;">An error occurred while checking the task status. Please try again later.</p>';
+        });
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const encryptedInput = document.getElementById('encrypted-id-input');
+        if (!encryptedInput) return;
+        encryptedInput.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                submitEncryptedID();
+            }
+        });
+    });
+</script>
+{% endblock content %}

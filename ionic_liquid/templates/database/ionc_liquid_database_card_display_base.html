@@ -1,0 +1,170 @@
+{% extends 'ionic_base.html'%}
+{% load static %}
+
+{% block content %}
+
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    
+    .card-container {
+        display: flex; 
+        flex-wrap: wrap; 
+        justify-content: space-around; 
+        align-items: flex-start; 
+        padding: 20px;
+         
+    }
+
+    
+    .card {
+        background-color: white; 
+        border-radius: 10px; 
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+        width: 200px; 
+        padding: 20px; 
+        text-align: center; 
+        transition: transform 0.2s; 
+        cursor: pointer; 
+        height: 300px; 
+        overflow: hidden; 
+    }
+
+    
+    .card:hover {
+        transform: translateY(-5px); 
+    }
+
+    .card img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .card h3 {
+        margin: 20px 0 10px;
+        font-size: 1.0rem;
+        color: #333;
+    }
+
+    .card p {
+        color: #666;
+        font-size: 0.8rem;
+        line-height: 1.5;
+    }
+
+    
+    @media (max-width: 768px) {
+        .card-container {
+            flex-direction: column;
+        }
+    }
+    
+    .reference-section {
+        margin: 40px 20px;
+        padding: 20px;
+        background-color: #f9f9f9; 
+        border: 1px solid #e0e0e0; 
+        border-radius: 5px; 
+    }
+
+    .reference-section h3, .reference-section h4 {
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .reference-section p {
+        color: #666;
+        margin-bottom: 15px;
+    }
+
+    .reference-section ol {
+        margin-left: 20px;
+    }
+
+    .reference-section li {
+        margin-bottom: 10px;
+        line-height: 1.6;
+        color: #444;
+    }
+</style>
+
+
+<body>
+    
+    <div class="card-container">
+        <div class="card" id="card1">
+            <img src="{% static 'images/Cation logo.jpg' %}" alt="Cation Database (QC)" style="width: 100px; height: auto; display: block; margin: auto;">
+            <h3>Cation Database (QC) (3774)</h3>
+            <p></p>
+        </div>
+
+        <div class="card" id="card2">
+            <img src="{% static 'images/Anion logo.jpg' %}" alt="Anion Database (QC)" style="width: 100px; height: auto; display: block; margin: auto;">
+            <h3>Anion Database (QC) (2220)</h3>
+            <p></p>
+        </div>
+        
+        <div class="card" id="card3">
+            <img src="{% static 'images/Generated IL Database Logo.png' %}" alt="Generated IL Database (ML)" style="width: 100px; height: auto; display: block; margin: auto;">
+            <h3>Generated IL Database (ML) (100k)</h3>
+            <p></p>
+        </div>
+
+        <div class="card" id="card4">
+            <img src="{% static 'images/Experiment IL Database Logo.png' %}" alt="Experiment IL Database (EXP+QC)" style="width: 100px; height: auto; display: block; margin: auto;">
+            <h3>Experiment IL Database (EXP+QC) (~3600)</h3>
+            <p></p>
+        </div>
+
+    </div>
+
+    
+    <script>
+
+        document.getElementById('card1').addEventListener('click', function() {
+            window.location.href = "{% url 'ionic_liquid:Cation_QC_data' %}";
+        });
+
+        document.getElementById('card2').addEventListener('click', function() {
+            window.location.href = "{% url 'ionic_liquid:Anion_QC_data' %}";
+        });
+
+        document.getElementById('card3').addEventListener('click', function() {
+            window.location.href = "{% url 'ionic_liquid:IL_ML_data' %}";
+        });
+
+        document.getElementById('card4').addEventListener('click', function() {
+            window.location.href = "{% url 'ionic_liquid:IL_Tm_conductivity_ECW_data' %}";
+        });
+        
+    </script>
+</body>
+
+
+<div class="reference-section">
+    <h3>Notice:</h3>
+    <p>Users can explore three curated databases by selecting the cards above. Each database provides access to comprehensive IL-related data.</p>
+    <ul>
+        <li><strong>Cation Database</strong>: Comprises quantum‐chemical properties for 3,774 distinct cation species.</li>
+        <li><strong>Anion Database</strong>: Comprises quantum‐chemical properties for 2,220 distinct anion species.</li>
+        <li><strong>Generated IL Database</strong>: Contains machine‐learning–predicted conductivity, melting point, and electrochemical window for 100,000 in silico–generated ionic liquids.</li>
+        <li><strong>Experimental IL Database</strong>: Contains experimentally measured or quantum‐chemistry–computed conductivity, melting point, and electrochemical window for approximately 3,600 real ionic liquids.</li>
+      </ul>
+    <h4>References:</h4>
+    <ol>
+        <li>Wang, J.; Wang, Y. Strategies to Improve the Quantum Computation Accuracy for Electrochemical Windows of Ionic Liquids. <em>J. Phys. Chem. B</em> 2024, <strong>128</strong>, 1943-1952.</li>
+        <li>Li, K.; Wang, J.; Song, Y.; Wang, Y. Machine learning-guided discovery of ionic polymer electrolytes for lithium metal batteries. <em>Nat. Commun.</em> 2023, <strong>14</strong>, 2789.</li>
+    </ol>
+</div>
+
+{% endblock content %}

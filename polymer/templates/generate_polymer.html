@@ -1,0 +1,604 @@
+{% extends 'polymer_base.html' %}
+{% load static %}
+
+{% block content%}
+<head>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+
+<style>
+  
+  body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+  }
+  h1 {
+      color: #333;
+  }
+  .section {
+      margin-bottom: 30px;
+  }
+  table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10px;
+  }
+  table, th, td {
+      border: 1px solid #aaa;
+  }
+  th, td {
+      padding: 8px;
+      text-align: left;
+  }
+  .explanation {
+      font-style: italic;
+      color: #555;
+  }
+  .hidden {
+      display: none;
+  }
+  .btn {
+      padding: 8px 16px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+  }
+  .btn-add {
+      background-color: #28A745;
+  }
+  .btn-remove {
+      background-color: #DC3545;
+  }
+  .input-group {
+      margin-bottom: 10px;
+  }
+  .input-label {
+      display: inline-block;
+      width: 150px;
+  }
+  input[type="text"], input[type="number"] {
+      padding: 6px;
+      width: 200px;
+  }
+    
+    #message-container {
+        margin-top: 20px; 
+        padding: 15px; 
+        border: 1px solid #28A745; 
+        background-color: #E6FFED; 
+        border-radius: 5px; 
+    }
+    #message-container p {
+        margin: 10px 0; 
+        color: #155724; 
+    }
+    #message-container a {
+        color: #28A745; 
+        text-decoration: none; 
+    }
+    #message-container a:hover {
+        text-decoration: underline; 
+    }
+</style>
+
+<body>
+  
+  <h1>Polymer Generator</h1>
+
+
+  <div class="section">
+    
+    <label for="polymer-topology">Polymer Topology:</label>
+    <select id="polymer-topology" name="polymer_topology" aria-label="Select polymer topology">
+      <option value="linear" selected>Linear</option>        
+      <option value="cyclic">Ring (Cyclic)</option>          
+    </select>
+  </div>
+
+  
+  <div class="section">
+      
+      <label for="polymerization-method">Polymerization Method:</label>
+      <select id="polymerization-method">
+          <option value="homopolymer">Homopolymer</option>
+          <option value="random-copolymer">Random Copolymer</option>
+          <option value="block-copolymer">Block Copolymer</option>
+      </select>
+  </div>
+
+
+<form id="polymer-form" method="post" action="/generate_polymer/">
+    
+    <div id="homopolymer-form" class="section">
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>SMILES</th>
+                    <th>Repeating Unit Number</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    
+                    <td><input type="text" name="name" required></td>
+                    
+                    <td><input type="text" name="smiles" required></td>
+                    
+                    <td><input type="number" name="repeating_unit_number" min="1" required></td>
+                </tr>
+            </tbody>
+        </table>
+      
+      <div class="explanation">
+          The total number of repeating units in the final polymer equals the number filled in, and it's a homopolymer, like A-A-A-A-A-A.
+      </div>
+  </div>
+
+  
+  <div id="random-copolymer-form" class="section hidden">
+      
+      <table id="random-copolymer-table">
+          <thead>
+              <tr>
+                  <th>Name</th>
+                  <th>SMILES</th>
+                  <th>Repeating Unit Number</th>
+                  <th>Actions</th>
+              </tr>
+          </thead>
+          <tbody>
+              
+          </tbody>
+      </table>
+      
+      <button type="button" class="btn btn-add" onclick="addRow('random-copolymer-table')">Add Row</button>
+      
+      <div class="input-group">
+          <label class="input-label" for="random-polymer-name">Polymer Name:</label>
+          <input type="text" id="random-polymer-name" name="polymer_name" required>
+      </div>
+      
+      <div class="explanation">
+          The polymer is composed of copolymer units randomly, but the total number of copolymer units is determined by the Repeating Unit Number, like A-B-B-A-B-A-A.
+      </div>
+  </div>
+
+  
+  <div id="block-copolymer-form" class="section hidden">
+      
+      <table id="block-copolymer-table">
+          <thead>
+              <tr>
+                  <th>Name</th>
+                  <th>SMILES</th>
+                  <th>Repeating Unit Number</th>
+                  <th>Actions</th>
+              </tr>
+          </thead>
+          <tbody>
+              
+          </tbody>
+      </table>
+      
+      <button type="button" class="btn btn-add" onclick="addRow('block-copolymer-table')">Add Row</button>
+      
+      <div class="input-group">
+          <label class="input-label" for="block-polymer-name">Polymer Name:</label>
+          <input type="text" id="block-polymer-name" name="polymer_name" required>
+      </div>
+      
+      <div class="input-group">
+          <label class="input-label" for="number-of-blocks">Number of Blocks:</label>
+          <input type="number" id="number-of-blocks" name="number_of_blocks" min="1" required>
+      </div>
+      
+      <div class="explanation">
+          The table represents the composition and number of repeating units within one block of the polymer, the Number of Blocks represents how many blocks in total the polymer has, like A-A-B-B-A-A-B-B-A-A-B-B.<br>
+          Chain Length = (Σ Repeating Unit Numbers) × Number of Blocks
+      </div>
+  </div>
+
+
+  
+  <button type="button" class="btn" id="predict-button" onclick="predictPolymer()">Predict Property</button>
+
+  
+  <div id="property-table-container" class="mt-4 table-responsive" style="display: none;">
+    <table id="property-table" class="table table-bordered table-striped">
+      
+    </table>
+  </div>
+
+  
+  <button type="button" class="btn" id="generate-button" onclick="generatePolymer()">Generate Polymer</button>
+
+  
+  <div id="message-container"></div>
+
+  <figure>
+    <img src="{% static 'images/polymergenerator_tutorial.png' %}" alt="polymergenerator_tutorial" style="width: 600px; height: auto; display: block; margin: auto;">
+    <figcaption><b>Figure 1</b>: Polymer Generator Usage Tutorial.</figcaption>
+    </figure>
+
+  
+  <div style="border: 1px solid #ccc; border-radius: 10px; padding: 20px; margin: 20px 0; background-color: #f9f9f9; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6;">
+    <h2 style="text-align: center; color: #2c3e50; font-size: 18px; margin-bottom: 15px;">Functional Overview</h2>
+    <p><strong>Note:</strong> When using this functionality in scientific publications, please cite the following references:<br>
+    [1] Wang, J.; Ju, J.; Wang, Y. CEMP: a platform unifying high-throughput online calculation, databases and predictive models for clean energy materials. <em>arXiv preprint</em> arXiv:2507.04423, 2025.<br>
+    [2] Lu, T. A comprehensive electron wavefunction analysis toolbox for chemists, <em>Multiwfn</em> [J]. <em>The Journal of Chemical Physics</em>, 2024, <strong>161</strong>(8).<br>
+    </p>
+    
+    <p><strong>Polymer Design Interface:</strong>  
+      Users can design polymers by selecting the desired <em>polymerization method</em> from four supported types: <u>homopolymer, alternating copolymer, block copolymer,</u> and <u>random copolymer</u>. For each component, users are required to provide the monomer name, corresponding SMILES notation, and the number of repeating units. This information forms the foundation for polymer construction and downstream modeling.
+    </p>
+  
+    <p><strong>1. Predict Polymer:</strong>  
+      Property prediction is performed based on the methodology proposed in the paper 
+      <em><b>"OpenPoly: A Literature-Derived Polymer Database Empowering Benchmarking and Multi-Property Prediction"</b></em>. For homopolymers, the entire SMILES is evaluated directly. For copolymers, a component-contribution approach is adopted: the model first predicts properties for each individual monomer unit, then computes a weighted average according to the number of repeating units of each component, thereby estimating the final properties of the copolymer.
+    </p>
+  
+    <p><strong>2. Generate Polymer:</strong>  
+      Polymer chains with arbitrary degrees of polymerization are constructed using atomic-level editing techniques. The structural files are generated in multiple formats, including <code>.pdb</code>, <code>.xyz</code>, and <code>.mol2</code>, based on adjacency and node matrices. Additionally, the topology of the polymer is defined using <strong>sobtop</strong>, and atomic charges are assigned using the RESP scheme. This ensures compatibility with molecular dynamics simulations and facilitates high-fidelity polymer modeling.
+    </p>
+  </div>
+  
+
+  <script>
+
+      var polymerizationMethodSelect = document.getElementById('polymerization-method');
+      var polymerizationTopologySelect = document.getElementById('polymer-topology');
+      var homopolymerForm = document.getElementById('homopolymer-form');
+      var randomCopolymerForm = document.getElementById('random-copolymer-form');
+      var blockCopolymerForm = document.getElementById('block-copolymer-form');
+      var generatePolymerUrl = "{% url 'polymer:generate_polymer' %}";
+      var predictPolymerUrl = "{% url 'polymer:copolymer_property_predict' %}";
+
+
+      polymerizationMethodSelect.addEventListener('change', function() {
+
+          homopolymerForm.classList.add('hidden');
+          randomCopolymerForm.classList.add('hidden');
+          blockCopolymerForm.classList.add('hidden');
+
+
+          var selectedValue = this.value;
+          if (selectedValue === 'homopolymer') {
+              homopolymerForm.classList.remove('hidden');
+          } else if (selectedValue === 'random-copolymer') {
+              randomCopolymerForm.classList.remove('hidden');
+          } else if (selectedValue === 'block-copolymer') {
+              blockCopolymerForm.classList.remove('hidden');
+          }
+      });
+
+
+      function addRow(tableId) {
+          var table = document.getElementById(tableId);
+          var tbody = table.getElementsByTagName('tbody')[0];
+          var newRow = tbody.insertRow();
+
+
+          var cell1 = newRow.insertCell(0);
+          var cell2 = newRow.insertCell(1);
+          var cell3 = newRow.insertCell(2);
+          var cell4 = newRow.insertCell(3);
+
+
+          cell1.innerHTML = '<input type="text" name="name" required>';
+          cell2.innerHTML = '<input type="text" name="smiles" required>';
+          cell3.innerHTML = '<input type="number" name="repeating_unit_number" min="1" required>';
+          cell4.innerHTML = '<button type="button" class="btn btn-remove" onclick="removeRow(this)">Remove</button>';
+        }
+
+
+
+      function removeRow(button) {
+          var row = button.parentNode.parentNode;
+          row.parentNode.removeChild(row);
+      }
+
+
+       function validateForm() {
+
+            var illegalChars = [',', ';', '.', '/', '\\', ':', '*', '?', '"', '<', '>', '|'];
+
+
+            var nameInputs = document.querySelectorAll('input[name="name"]');
+
+            var polymerNameInput = document.querySelector('input[name="polymer_name"]');
+
+
+            for (var i = 0; i < nameInputs.length; i++) {
+                var nameValue = nameInputs[i].value;
+                for (var j = 0; j < illegalChars.length; j++) {
+                    if (nameValue.indexOf(illegalChars[j]) !== -1) {
+                        alert('Name contains illegal character: ' + illegalChars[j]);
+                        return false;
+                    }
+                }
+            }
+
+
+            if (polymerNameInput) {
+                var polymerNameValue = polymerNameInput.value;
+                for (var j = 0; j < illegalChars.length; j++) {
+                    if (polymerNameValue.indexOf(illegalChars[j]) !== -1) {
+                        alert('Polymer Name contains illegal character: ' + illegalChars[j]);
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+
+        function generatePolymer() {
+
+            if (!validateForm()) {
+                return;
+            }
+
+
+            var data = {};
+            data.polymerization_method = polymerizationMethodSelect.value;
+            data.polymer_topology = polymerizationTopologySelect.value;
+            data.table_data = [];
+            data.polymer_name = '';
+            data.number_of_blocks = '';
+
+            if (data.polymerization_method === 'homopolymer') {
+
+                var name = homopolymerForm.querySelector('input[name="name"]').value;
+                var smiles = homopolymerForm.querySelector('input[name="smiles"]').value;
+                var repeatingUnitNumber = homopolymerForm.querySelector('input[name="repeating_unit_number"]').value;
+
+                data.table_data.push({
+                    'name': name,
+                    'smiles': smiles,
+                    'repeating_unit_number': repeatingUnitNumber
+                });
+
+            } else if (data.polymerization_method === 'random-copolymer') {
+
+                var table = document.getElementById('random-copolymer-table');
+                var tbody = table.getElementsByTagName('tbody')[0];
+                var rows = tbody.getElementsByTagName('tr');
+                data.polymer_name = document.getElementById('random-polymer-name').value;
+
+
+                for (var i = 0; i < rows.length; i++) {
+                    var row = rows[i];
+                    var name = row.querySelector('input[name="name"]').value;
+                    var smiles = row.querySelector('input[name="smiles"]').value;
+                    var repeatingUnitNumber = row.querySelector('input[name="repeating_unit_number"]').value;
+                    data.table_data.push({
+                        'name': name,
+                        'smiles': smiles,
+                        'repeating_unit_number': repeatingUnitNumber
+                    });
+                }
+
+            } else if (data.polymerization_method === 'block-copolymer') {
+
+                var table = document.getElementById('block-copolymer-table');
+                var tbody = table.getElementsByTagName('tbody')[0];
+                var rows = tbody.getElementsByTagName('tr');
+                data.polymer_name = document.getElementById('block-polymer-name').value;
+                data.number_of_blocks = document.getElementById('number-of-blocks').value;
+
+
+                for (var i = 0; i < rows.length; i++) {
+                    var row = rows[i];
+                    var name = row.querySelector('input[name="name"]').value;
+                    var smiles = row.querySelector('input[name="smiles"]').value;
+                    var repeatingUnitNumber = row.querySelector('input[name="repeating_unit_number"]').value;
+                    data.table_data.push({
+                        'name': name,
+                        'smiles': smiles,
+                        'repeating_unit_number': repeatingUnitNumber
+                    });
+                }
+            }
+                
+
+            console.log("发送的数据：", data);
+
+
+            var generateButton = document.getElementById('generate-button');
+
+            generateButton.disabled = true;
+
+
+            $.ajax({
+                url: generatePolymerUrl,
+                type: "POST",
+                dataType: "json",
+                data: JSON.stringify(data),
+                contentType: "application/json; charset=utf-8",
+                success: function(response) {
+
+
+                    var encryptedId = response.encrypted_id;
+
+
+                    var messageDiv = document.createElement('div');
+                    messageDiv.className = 'message';
+
+
+                    messageDiv.innerHTML = `
+                        <p>Your request has been submitted successfully.</p>
+                        <p>Your key is: <strong>${encryptedId}</strong></p>
+                        <p>You can check the progress of polymer generation in the <a href="{% url 'home:query' %}">Query</a> interface.</p>
+                        <p>The result files include: Polymer structure information files (.pdb, .xyz, .mol2) and Polymer topology and charge information files (.chg, .itp, .top).</p>
+                    `;
+
+
+                    var messageContainer = document.getElementById('message-container');
+                    messageContainer.appendChild(messageDiv);
+                },
+                error: function(xhr, status, error) {
+
+                    alert('An error occurred while generating the polymer.');
+
+                    generateButton.disabled = false;
+                }
+            });
+        }
+
+
+    function predictPolymer() {
+
+      if (!validateForm()) {
+                return;
+        }
+
+
+    var data = {};
+    data.polymerization_method = polymerizationMethodSelect.value;
+    data.table_data = [];
+    data.polymer_name = '';
+    data.number_of_blocks = '';
+
+    if (data.polymerization_method === 'homopolymer') {
+
+        var name = homopolymerForm.querySelector('input[name="name"]').value;
+        var smiles = homopolymerForm.querySelector('input[name="smiles"]').value;
+        var repeatingUnitNumber = homopolymerForm.querySelector('input[name="repeating_unit_number"]').value;
+
+        data.table_data.push({
+            'name': name,
+            'smiles': smiles,
+            'repeating_unit_number': repeatingUnitNumber
+        });
+
+    } else if (data.polymerization_method === 'random-copolymer') {
+
+        var table = document.getElementById('random-copolymer-table');
+        var tbody = table.getElementsByTagName('tbody')[0];
+        var rows = tbody.getElementsByTagName('tr');
+        data.polymer_name = document.getElementById('random-polymer-name').value;
+
+
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            var name = row.querySelector('input[name="name"]').value;
+            var smiles = row.querySelector('input[name="smiles"]').value;
+            var repeatingUnitNumber = row.querySelector('input[name="repeating_unit_number"]').value;
+            data.table_data.push({
+                'name': name,
+                'smiles': smiles,
+                'repeating_unit_number': repeatingUnitNumber
+            });
+        }
+
+    } else if (data.polymerization_method === 'block-copolymer') {
+
+        var table = document.getElementById('block-copolymer-table');
+        var tbody = table.getElementsByTagName('tbody')[0];
+        var rows = tbody.getElementsByTagName('tr');
+        data.polymer_name = document.getElementById('block-polymer-name').value;
+        data.number_of_blocks = document.getElementById('number-of-blocks').value;
+
+
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            var name = row.querySelector('input[name="name"]').value;
+            var smiles = row.querySelector('input[name="smiles"]').value;
+            var repeatingUnitNumber = row.querySelector('input[name="repeating_unit_number"]').value;
+            data.table_data.push({
+                'name': name,
+                'smiles': smiles,
+                'repeating_unit_number': repeatingUnitNumber
+            });
+        }
+    }
+
+    var btn = document.getElementById('predict-button');
+    var container = document.getElementById('property-table-container');
+    var table = document.getElementById('property-table');
+
+
+    btn.disabled = true;
+    container.style.display = 'none';
+    table.innerHTML = '';
+
+    $.ajax({
+        url: predictPolymerUrl,
+        type: "POST",
+        dataType: "json",
+        data: JSON.stringify(data),
+        contentType: "application/json; charset=utf-8",
+        beforeSend: function() {
+
+        $('#predict-button').prop('disabled', true);
+
+        $('#property-table-container').hide();
+        $('#property-table').empty();
+        },
+        success: function(response) {
+
+        var downloadUrl = response.download_url;
+        if (!downloadUrl) {
+            alert('后端未返回 download_url');
+            $('#predict-button').prop('disabled', false);
+            return;
+        }
+
+
+        fetch(downloadUrl, { credentials: 'same-origin' })
+            .then(function(res) { return res.arrayBuffer(); })
+            .then(function(buffer) {
+
+            var workbook = XLSX.read(buffer, { type: 'array' });
+            var sheetName = workbook.SheetNames[0];
+            var worksheet = workbook.Sheets[sheetName];
+
+            var rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+
+            var $table = $('#property-table');
+            rows.forEach(function(row, rowIndex) {
+                var $tr = $('<tr></tr>');
+                row.forEach(function(cell) {
+                var cellTag = rowIndex === 0 ? 'th' : 'td';
+                $tr.append( $('<' + cellTag + '></' + cellTag + '>').text(cell) );
+                });
+                $table.append($tr);
+            });
+
+
+            $('#property-table-container').slideDown();
+            })
+            .catch(function(err) {
+            alert('加载/解析表格失败：' + err.message);
+            })
+            .finally(function() {
+
+            $('#predict-button').prop('disabled', false);
+            });
+        },
+        error: function(xhr, status, error) {
+
+        var msg;
+        try {
+            var errJson = JSON.parse(xhr.responseText);
+            msg = errJson.error || JSON.stringify(errJson);
+        } catch (e) {
+            msg = xhr.responseText || error;
+        }
+        alert('请求失败：' + msg);
+        $('#predict-button').prop('disabled', false);
+        }
+    });
+        }
+  </script>
+</body>
+
+{% endblock %}

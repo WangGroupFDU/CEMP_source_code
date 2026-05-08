@@ -1,0 +1,132 @@
+
+
+
+.nft-shop .nft-list .item{
+    padding: 20px;
+    background: #fff ;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.nft-shop .nft-list .item:hover,
+.sellers .item:hover{
+    box-shadow: none;
+}
+
+.nft-shop{
+  padding: 0 80px;
+  margin-top: 30px;
+}
+
+
+.nft-shop .nft-list{
+  padding: 40px 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.nft-list .item{
+  flex: 1; 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: flex-start; 
+  gap: 10px; 
+  min-width: 0; 
+}
+
+
+
+
+
+.nft-shop .nft-list .item .info{
+  flex: 1; 
+  display: flex; 
+  flex-direction: column; 
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #edecec;
+}
+
+.nft-shop .nft-list .item .info h5{
+  text-align: center; 
+  margin-bottom: 20px; 
+  color: #FC623B;
+}
+
+
+.nft-shop .nft-list .item .info .btc{
+  margin-top: 10px;
+  align-items: center;
+  gap: 5px;
+  text-align: center; 
+  margin-bottom: 20px; 
+}
+
+  
+.nft-shop .nft-list .item .btc i{
+  font-size: 22px;
+  color: #304ffe;
+}
+
+.nft-shop .nft-list .item .btc p{
+  font-size: 22px;
+}
+
+.nft-shop .nft-list .item .info > p{
+  font-size: 12px;
+  color: #989898;
+}
+
+.nft-shop .nft-list .item .bid{
+  padding: 14px 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nft-shop .nft-list .item .btc .btc_img {
+  display: block; 
+  margin: 0 auto; 
+  max-width: 50%; 
+}
+
+
+.nft-shop .nft-list .item .bid p,
+.nft-shop .nft-list .item .bid a{
+  background-color: #edecec;
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 10px;
+}
+
+.nft-shop .nft-list .item .bid a{
+  color: #304ffe;
+  background: transparent;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.nft-shop .nft-list .item .bid a:hover{
+  color: #fff;
+  background-color: #000;
+}
+
+
+
+@media (max-width: 768px) {
+  .nft-shop .nft-list {
+      flex-direction: column; 
+      gap: 20px; 
+  }
+
+  .nft-shop .nft-list .item {
+      width: 100%; 
+      
+  }
+}
+
+
+

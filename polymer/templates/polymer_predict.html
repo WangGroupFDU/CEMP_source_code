@@ -1,0 +1,330 @@
+{% extends 'polymer_base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    
+    body {
+      font-family: Arial, sans-serif;
+      color: #333;
+      line-height: 1.6;
+    }
+    h1, h2, h3 {
+      margin: 1rem 0 0.5rem;
+      font-weight: bold;
+    }
+    p {
+      margin: 0.5rem 0;
+      white-space: pre-line;
+    }
+    ol li {
+      margin-bottom: 1.25rem;
+    }
+  
+    
+    .card {
+      background: #fff;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+  
+    
+    #upload-form {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    #file-name {
+      flex: 1;
+      min-width: 120px;
+    }
+  
+    
+    .performance-row {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .performance-item {
+      flex: 1;
+      background: #fafafa;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      text-align: center;
+    }
+    .performance-item img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto 0.5rem;
+    }
+    .performance-item figcaption {
+      font-size: 0.95rem;
+    }
+  
+    
+    .alert {
+      background: #ffe6e6;
+      color: #a00;
+      border-left: 4px solid #f00;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0.25rem;
+    }
+  </style>
+  
+  <div class="card" style="padding: 2rem;">
+    <section class="card">
+    
+    <h2>1. Introduction to the Polymer Property Prediction Models</h2>
+    <p>
+      Using XGBoost, separate predictive models were developed for five different properties of polymers: Glass transition temperature, static dielectric constant, melting point, tensile strength and Young's modulus. 
+      The specific training processes for these models follow the methodology described in the published paper  <b>‘Wang J F, Sun Y B, Chen Q T, et al. OpenPoly: A Polymer Database Empowering Benchmarking and Multi-property Predictions[J]. Chinese Journal of Polymer Science, 2025: 1-12.’</b>, which includes detailed training procedures and model performance.
+    </p>
+    </section>
+
+    
+    <section class="card">
+      <h2>2. Notes</h2>
+      <p>• Users must use the provided Excel file to input relevant parameters.<br>
+         • Ensure the Name column does not contain illegal characters (e.g., Chinese characters, commas, periods, slashes, etc.).<br>
+         • Ensure the PSMILES notation is correct (RDKit can be used to validate SMILES), otherwise the program will not function correctly.
+      </p>
+      <div class="alert">
+        <b>3. !!!!! Important Considerations !!!!!</b><br>
+        • After the user uploads the .xlsx file and clicks the Start button, prediction will begin.<br>
+        • Once the Start button is clicked, the user should not exit or refresh the current page, as this may result in the loss of calculation results. Please do not close or refresh the browser until the computation is complete.<br>
+        • By utilizing a pre-trained model for property prediction, large-scale ionic liquid property predictions can be conducted in a short amount of time.
+      </div>
+    </section>
+  
+    
+    <section class="card">
+      <h3>4. Download EXCEL FILE</h3>
+      <p>
+        <a href="{% static 'download/polymer_list.xlsx' %}" download class="btn btn-outline-primary">
+          Download template file of polymer prediction
+        </a>
+      </p>
+      <figure style="text-align: center;">
+        <img src="{% static 'images/polymer_predict_example.png' %}" alt="template file of polymer prediction " style="max-width:100%;height:auto;">
+        <figcaption><b>Figure 1</b>: Example of polymer prediction template file.</figcaption>
+      </figure>
+    </section>
+  
+    
+    <section class="card">
+      <h3>5. Upload EXCEL FILE</h3>
+      <form id="upload-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="file-upload">Upload EXCEL FILE: </label>
+        
+        <input type="file" id="file-upload" name="excel_file" accept=".xlsx,.xls" style="display:none;">
+        
+        <button type="button" id="custom-upload-button" class="btn btn-primary">Select File</button>
+        
+        <span id="file-name" style="margin-left: 10px;">No file chosen</span>
+        
+        <button type="submit" id="submit-button" class="btn btn-success" disabled>Upload</button>
+      </form>
+
+        
+        <button id="start-button">Start</button>
+
+        
+        <div id="elapsed-time">Elapsed Time: </div>
+        
+        
+        <div id="error-message" style="color: red; display: none;"></div>
+
+        
+        <p id="download-link"></p>
+
+    </section>
+  
+    
+    <section class="card">
+      <h3>6. Model Performance on Test Set</h3>
+      <div class="performance-row">
+        <figure class="performance-item">
+          <img src="{% static 'images/polymer_dielectric_constant_polymer_predict.png' %}" alt="Performance Dielectric Constant">
+          <figcaption><b>Dielectric Constant</b></figcaption>
+        </figure>
+        <figure class="performance-item">
+          <img src="{% static 'images/polymer_Tg_polymer_predict.png' %}" alt="Performance Tg">
+          <figcaption><b>Tg (K)</b></figcaption>
+        </figure>
+        <figure class="performance-item">
+          <img src="{% static 'images/polymer_Tm_polymer_predict.png' %}" alt="Performance Tg">
+          <figcaption><b>Tm (K)</b></figcaption>
+        </figure>
+        <figure class="performance-item">
+          <img src="{% static 'images/polymer_tensile_strength_polymer_predict.png' %}" alt="Performance Tensile Strength">
+          <figcaption><b>Tensile Strength (MPa)</b></figcaption>
+        </figure>
+        <figure class="performance-item">
+          <img src="{% static 'images/polymer_youngs_modulus_polymer_predict.png' %}" alt="Performance Young's Modulus">
+          <figcaption><b>Young's Modulus (MPa)</b></figcaption>
+        </figure>
+      </div>
+    </section>
+  </div>
+  
+  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    
+    document.getElementById('custom-upload-button').addEventListener('click', function() {
+
+        document.getElementById('file-upload').click();
+    });
+
+    document.getElementById('file-upload').addEventListener('change', function() {
+
+        var fileName = this.files[0] ? this.files[0].name : "No file chosen";
+        document.getElementById('file-name').textContent = fileName;
+
+
+        if (this.files.length > 0) {
+            document.getElementById('submit-button').disabled = false;
+        }
+    });
+
+      $(document).ready(function(){
+          $('#upload-form').on('submit', function(e){
+              e.preventDefault();
+              
+              var formData = new FormData(this);
+              
+              $.ajax({
+                  url: "{% url 'polymer:upload_excel_polymer_predict_file' %}",
+                  type: "POST",
+                  data: formData,
+                  processData: false,
+                  contentType: false,
+                  success: function(response) {
+
+                      alert("Upload Success!");
+                  },
+                  error: function(response) {
+
+                      alert("Upload Failed: " + response.responseJSON.error);
+                  }
+              });
+          });
+      });
+  </script>
+
+
+</div>
+
+<script>
+
+    document.getElementById('upload-form').onsubmit = function(event) {
+        const fileInput = document.getElementById('file-upload');
+        const file = fileInput.files[0];
+        if (!file) {
+            alert('请上传一个文件');
+            return false;
+        }
+        const fileType = file.name.split('.').pop();
+        if (fileType !== 'xlsx' && fileType !== 'xls') {
+            alert('请上传EXCEL类型的文件');
+            event.preventDefault();
+        }
+    };
+
+
+    document.getElementById('start-button').addEventListener('click', startProcessing);
+
+    function startProcessing() {
+        
+
+    document.getElementById('start-button').disabled = true;
+    const formData = new FormData(document.getElementById('upload-form'));
+
+
+    const startTime = new Date();
+    
+
+    function updateElapsedTime() {
+        const now = new Date();
+        const elapsedTime = Math.floor((now - startTime) / 1000);
+        document.getElementById('elapsed-time').textContent = `Elapsed Time: ${elapsedTime} seconds`;
+        
+
+        if (!taskCompleted) {
+            setTimeout(updateElapsedTime, 1000);
+        }
+    }
+    
+
+    let taskCompleted = false;
+    updateElapsedTime();
+    
+    fetch("{% url 'polymer:process_polymer_predict' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => {
+    console.log(response);
+    return response.json();
+    })
+    .then(data => {
+        if (data.download_url) {
+            taskCompleted = true;
+
+
+            const downloadLink = document.createElement('a');
+            downloadLink.href = data.download_url;
+            downloadLink.textContent = 'Download polymer_list.xlsx';
+            downloadLink.download = 'polymer_list.xlsx';
+
+            const downloadContainer = document.getElementById('download-link');
+            downloadContainer.innerHTML = '';
+            downloadContainer.appendChild(downloadLink);
+
+            alert('File processing is complete and ready for download!');
+        } else if (data.error) {
+
+            const errorMessageDiv = document.getElementById('error-message');
+            errorMessageDiv.textContent = `Processing failed: ${data.error}\n\nStdout:\n${data.stdout}\n\nStderr:\n${data.stderr}`;
+            errorMessageDiv.style.display = 'block';
+        } else {
+            const errorMessageDiv = document.getElementById('error-message');
+            errorMessageDiv.textContent = 'Processing failed, please try again!';
+            errorMessageDiv.style.display = 'block';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        const errorMessageDiv = document.getElementById('error-message');
+        errorMessageDiv.textContent = 'An unexpected error occurred. Please try again later.';
+        errorMessageDiv.style.display = 'block';
+    });
+}
+
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock content %}

@@ -1,0 +1,30 @@
+{% block content %}
+  <h1>User Permission Management</h1>
+  <form method="post" action="">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>AutoCompute</th>
+          <th>Database</th>
+          <th>ML Predict</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for form in formset %}
+        <tr>
+          
+          <td>{{ p.user.username }}</td>
+          
+          <td>{{ form.auto_compute_permission }}</td>
+          <td>{{ form.database_permission }}</td>
+          <td>{{ form.ml_prediction_permission }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <button type="submit" class="btn btn-primary">保存修改</button>
+  </form>
+{% endblock %}

@@ -1,0 +1,337 @@
+{% extends 'autocompute/autocompute_base.html' %}
+{% load static %}
+
+{% block navbar %} 
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Database' %}">Database</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:MDCompute' %}">MDCompute</a>
+  </li>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:SMILESDrawer' %}">SMILESDrawer</a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:Visualization' %}">Visualization</a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:from_smiles_get_name' %}">GetName</a>
+    </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'home:homepage' %}">Home</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:QcCompute_base' %}">Return</a>
+  </li>
+{% endblock navbar %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-6 col-md-8">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            
+            
+            <h4 class="card-title text-center mb-3">Draw ESP</h4>
+            
+            
+            <p class="text-muted small">
+              This tool generates electrostatic potential (ESP) maps from user-uploaded Gaussian checkpoint (.chk) and ORCA checkpoint (.gbw) files and provides both the rendered results and the associated workflow files through Multiwfn.<br>
+              <strong>Note:</strong> When using this functionality in scientific publications, please cite the following references:<br>
+              [1] Lu, T. A comprehensive electron wavefunction analysis toolbox for chemists, <em>Multiwfn</em> [J]. <em>The Journal of Chemical Physics</em>, 2024, <strong>161</strong>(8).<br>
+              [2] Wang, J.; Ju, J.; Wang, Y. CEMP: a platform unifying high-throughput online calculation, databases and predictive models for clean energy materials. <em>arXiv preprint</em> arXiv:2507.04423, 2025.
+            </p>
+            
+            
+            <form id="convert-form" method="post" enctype="multipart/form-data" 
+                  action="">
+              {% csrf_token %}
+              
+              
+              <div id="drop-zone" 
+                   class="border border-secondary rounded p-4 text-center"
+                   style="background-color: #fafafa; cursor: pointer;">
+                <input type="file" 
+                       id="file-input" 
+                       name="files" 
+                       multiple 
+                       style="display: none;" />
+                <i class="bi bi-cloud-arrow-up-fill" style="font-size: 2rem; color: #6c757d;"></i>
+                <p class="mb-0 mt-2 text-secondary">
+                  Drag &amp; drop files here<br>
+                  <small>or click to browse</small>
+                </p>
+                <div id="file-list" class="mt-2 text-start small"></div>
+              </div>
+              
+              
+              <div class="form-group mt-4">
+                <label for="conversion-type" class="form-label">Select Upload File Type</label>
+                <select id="conversion-type" name="conversion_type" class="form-select">
+                  <option value="chk2fchk">chk(Gaussian16)</option>
+                  <option value="fchk" selected>fchk(any version of Gaussian)</option>
+                  <option value="gbw2molden">gbw(ORCA6.0.1)</option>
+                  <option value="molden">molden(any version of ORCA)</option>
+                </select>
+              </div>
+              
+              
+              <div class="d-grid mt-4">
+                <button type="submit" id="transfer-btn" class="btn btn-primary" >
+                  Draw ESP
+                </button>
+              </div>
+              
+              
+              <div class="mt-3">
+                <p class="small text-muted">
+                  This module computes electrostatic potential (ESP) surfaces from user-supplied Gaussian checkpoint (.chk) or ORCA check point (.gbw)files.  
+                  Upon completion, it outputs volumetric grid files (.cub), corresponding formatted checkpoint files (.fchk, for Gaussian; .molden, for ORCA),  
+                  and VMD-rendered images (.tga).  
+                </p>
+              </div>
+              </form>
+            
+            
+            <div id="result-links" class="mt-4">
+              
+            </div>
+
+            
+            <hr class="my-4">
+            <div id="esp-examples" class="mt-3">
+              <h6 class="text-center text-muted mb-3">ESP Examples</h6>
+              <div class="row row-cols-1 row-cols-sm-2 g-3">
+                <div class="col">
+                  <figure class="mb-0">
+                    <img
+                      src="{% static 'images/eg_MPA.png' %}"
+                      alt="ESP example (MPA)"
+                      class="w-100 esp-thumb"
+                      loading="lazy">
+                    <figcaption class="small text-center text-muted mt-2">Example · MPA</figcaption>
+                  </figure>
+                </div>
+                <div class="col">
+                  <figure class="mb-0">
+                    <img
+                      src="{% static 'images/eg_G2.png' %}"
+                      alt="ESP example (G2)"
+                      class="w-100 esp-thumb"
+                      loading="lazy">
+                    <figcaption class="small text-center text-muted mt-2">Example · G2</figcaption>
+                  </figure>
+                </div>
+                <div class="col">
+                  <figure class="mb-0">
+                    <img
+                      src="{% static 'images/eg_G4.png' %}"
+                      alt="ESP example (G4)"
+                      class="w-100 esp-thumb"
+                      loading="lazy">
+                    <figcaption class="small text-center text-muted mt-2">Example · G4</figcaption>
+                  </figure>
+                </div>
+              </div>
+            </div>
+
+            
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('convert-form');
+      const dropZone = document.getElementById('drop-zone');
+      const fileInput = document.getElementById('file-input');
+      const conversionSelect = document.getElementById('conversion-type');
+      const transferBtn = document.getElementById('transfer-btn');
+      const fileListContainer = document.getElementById('file-list');
+      
+      form.action = "{% url 'autocompute:draw_ESP' %}";
+
+
+
+      const acceptMap = { chk2fchk: '.chk', gbw2molden: '.gbw', fchk: '.fchk', molden: '.molden' };
+      fileInput.setAttribute('accept', acceptMap[conversionSelect.value] || '');
+
+      
+
+    const routeMap = {
+
+      'chk2fchk': "{% url 'autocompute:draw_ESP' %}",
+      'fchk'    : "{% url 'autocompute:draw_ESP' %}",
+
+      'gbw2molden': "{% url 'autocompute:draw_ESP_gbw' %}",
+      'molden'    : "{% url 'autocompute:draw_ESP_gbw' %}",
+    };
+
+    conversionSelect.addEventListener('change', () => {
+
+      const mode = conversionSelect.value;
+
+      form.action = routeMap[mode] || "{% url 'autocompute:draw_ESP' %}";
+    });
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const mode = conversionSelect.value;
+      form.action = routeMap[mode] || "{% url 'autocompute:draw_ESP' %}";
+    });
+      
+
+      
+
+        const extMap = {
+          'chk2fchk'  : /\.(?:chk)$/i,
+          'fchk'      : /\.(?:fchk|fch)$/i,
+          'gbw2molden': /\.(?:gbw)$/i,
+          'molden'    : /\.(?:molden(?:\.input)?|mld)$/i
+        };
+
+        function validateFiles(files) {
+          const mode = (conversionSelect.value || '').trim();
+          const validExt = extMap[mode];
+          if (!validExt) {
+
+            console.warn('未匹配到有效模式：', mode);
+            return false;
+          }
+          if (!files || files.length === 0) return false;
+          for (const f of files) {
+            if (!validExt.test(f.name)) {
+              console.warn(`文件后缀不符合当前模式(${mode})：`, f.name);
+              return false;
+            }
+          }
+          return true;
+        }
+      
+      function updateFileList(files) {
+        fileListContainer.innerHTML = '';
+        if (files.length === 0) {
+          transferBtn.disabled = true;
+          return;
+        }
+
+        Array.from(files).forEach(file => {
+          const li = document.createElement('div');
+          li.textContent = file.name;
+          fileListContainer.appendChild(li);
+        });
+
+        transferBtn.disabled = !validateFiles(files);
+      }
+      
+
+      dropZone.addEventListener('click', () => {
+        fileInput.click();
+      });
+      
+
+      fileInput.addEventListener('change', () => {
+        updateFileList(fileInput.files);
+      });
+      
+
+      ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, e => {
+          e.preventDefault();
+          e.stopPropagation();
+        });
+      });
+      
+
+      ;['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+          dropZone.classList.add('border-primary');
+          dropZone.style.backgroundColor = '#e9f7ff';
+        });
+      });
+      
+
+      ;['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+          dropZone.classList.remove('border-primary');
+          dropZone.style.backgroundColor = '#fafafa';
+        });
+      });
+      
+
+      dropZone.addEventListener('drop', e => {
+        const dt = e.dataTransfer;
+        if (dt && dt.files) {
+          fileInput.files = dt.files;
+          updateFileList(dt.files);
+        }
+      });
+      
+
+      conversionSelect.addEventListener('change', () => {
+        updateFileList(fileInput.files);
+      });
+      
+
+
+      document.getElementById('convert-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        transferBtn.disabled = false;
+        transferBtn.textContent = 'Converting...';
+        fetch(this.action, {
+          method: 'POST',
+          body: formData,
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(resp => resp.json())
+        .then(data => {
+
+        transferBtn.textContent = 'Transfer';
+        transferBtn.disabled   = false;
+
+
+        const resultBox = document.getElementById('result-links');
+        resultBox.innerHTML = '';
+
+
+        if (data.error) {
+          const err = document.createElement('div');
+          err.className = 'alert alert-danger small';
+          err.textContent = data.error;
+          resultBox.appendChild(err);
+          return;
+        }
+
+
+        if (data.encrypted_id) {
+          const code = document.createElement('span');
+          code.className   = 'text-success fw-bold user-select-all';
+          code.textContent = data.encrypted_id;
+          resultBox.appendChild(code);
+        } else {
+
+          const warn = document.createElement('div');
+          warn.className = 'alert alert-warning small';
+          warn.textContent = 'No encrypted ID returned.';
+          resultBox.appendChild(warn);
+        }
+      })
+        .catch(err => {
+          transferBtn.textContent = 'Transfer';
+          transferBtn.disabled = false;
+          const errDiv = document.createElement('div');
+          errDiv.className = 'alert alert-danger small';
+          errDiv.textContent = 'An unexpected error occurred.';
+          document.getElementById('result-links').appendChild(errDiv);
+        });
+      });
+    });
+  </script>
+{% endblock content %}

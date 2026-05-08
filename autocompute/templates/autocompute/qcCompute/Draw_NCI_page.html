@@ -1,0 +1,319 @@
+{% extends 'autocompute/autocompute_base.html' %}
+{% load static %}
+
+{% block navbar %} 
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Database' %}">Database</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:MDCompute' %}">MDCompute</a>
+  </li>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:SMILESDrawer' %}">SMILESDrawer</a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:Visualization' %}">Visualization</a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:from_smiles_get_name' %}">GetName</a>
+    </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'home:homepage' %}">Home</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:QcCompute_base' %}">Return</a>
+  </li>
+{% endblock navbar %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-6 col-md-8">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            
+            
+            <h4 class="card-title text-center mb-3">NCI analysis</h4>
+            
+            
+            <p class="text-muted small">
+              This tool carries the NCI analysis from user-uploaded Gaussian checkpoint (.chk) or ORCA checkpoint (.gbw) files and provides both the rendered results and the associated workflow files through Multiwfn.<br>
+              <strong>Note:</strong> When using this functionality in scientific publications, please cite the following references:<br>
+              [1] Lu, T. A comprehensive electron wavefunction analysis toolbox for chemists, <em>Multiwfn</em> [J]. <em>The Journal of Chemical Physics</em>, 2024, <strong>161</strong>(8).<br>
+              [2] Wang, J.; Ju, J.; Wang, Y. CEMP: a platform unifying high-throughput online calculation, databases and predictive models for clean energy materials. <em>arXiv preprint</em> arXiv:2507.04423, 2025.
+            </p>
+            
+            
+            <form id="convert-form" method="post" enctype="multipart/form-data" 
+                  action="">
+              {% csrf_token %}
+              
+              
+              <div id="drop-zone" 
+                   class="border border-secondary rounded p-4 text-center"
+                   style="background-color: #fafafa; cursor: pointer;">
+                <input type="file" 
+                       id="file-input" 
+                       name="files" 
+                       multiple 
+                       style="display: none;" />
+                <i class="bi bi-cloud-arrow-up-fill" style="font-size: 2rem; color: #6c757d;"></i>
+                <p class="mb-0 mt-2 text-secondary">
+                  Drag &amp; drop files here<br>
+                  <small>or click to browse</small>
+                </p>
+                <div id="file-list" class="mt-2 text-start small"></div>
+              </div>
+              
+              
+              <div class="form-group mt-4">
+                <label for="conversion-type" class="form-label">NCI Analysis Type</label>
+                <select id="conversion-type" name="conversion_type" class="form-select">
+                  <option value="NCI_SCF" >NCI_SCF(accept .chk/.gbw, from Gaussian16/ORCA6.0.1)</option>
+                  <option value="NCI_SCF_fchkormolden" selected>NCI_SCF(accept .fchk/.molden, from any version of Gaussian/ORCA)</option>
+                  <option value="NCI_promolecular" >NCI_promolecular(accept .mol/.pdb/.xyz/.mol2)</option>
+                </select>
+              </div>
+              
+              
+              <div class="d-grid mt-4">
+                <button type="submit" id="transfer-btn" class="btn btn-primary" disabled>
+                  Start NCI analysis
+                </button>
+              </div>
+              
+              
+              <div class="mt-3">
+                <p class="small text-muted">
+                  This module implements the Non-Covalent Interaction (NCI) analysis to visualize and qualitatively classify weak interactions.
+                  It evaluates the reduced density gradient <em>s</em> and constructs isosurfaces in regions of low electron density (<em>&rho;</em>) and small gradients; 
+                  surfaces are colored by <code>sign(&lambda;<sub>2</sub>)&middot;&rho;</code> to indicate interaction character—blue (negative) for attractive contacts (e.g., hydrogen bonds), 
+                  green (near zero) for dispersive/van der Waals regions, and red (positive) for steric repulsion.<br>
+                  Two density sources are supported: <strong>self-consistent densities</strong> (Gaussian <code>.fchk/.cub</code>; ORCA <code>.molden/.cube</code>) and the <strong>promolecular approximation</strong> 
+                  (requiring only atomic species and coordinates) for rapid screening of large systems.<br>
+                  Upon completion, the workflow outputs rendered NCI isosurfaces (<code>.tga</code>), volumetric grids (<code>s.cube</code> and <code>sign(&lambda;<sub>2</sub>)&rho;.cube</code>), 
+                  and optional RDG scatter plots and summary statistics (<code>.csv/.png</code>), together with reproducibility scripts.<br>
+                  <strong>Note:</strong> For quantitative comparison or fine discrimination, self-consistent densities are recommended; promolecular results are intended for qualitative prescreening.
+                </p>
+              </div>
+              </form>
+            
+            
+            <div id="result-links" class="mt-4">
+              
+            </div>
+            
+            
+            <hr class="my-4">
+            <div id="orb-examples" class="mt-3">
+              <h6 class="text-center text-muted mb-3">NCI analysis Examples</h6>
+              <div class="row row-cols-1 row-cols-sm-2 g-3">
+                <div class="col">
+                  <figure class="mb-0">
+                    <img
+                      src="{% static 'images/H2O_dimer_NCI-RDG_plot.png' %}"
+                      alt="NCI-RDG(SCF) of H2O dimer"
+                      class="w-100 esp-thumb"
+                      loading="lazy">
+                    <figcaption class="small text-center text-muted mt-2">Example · NCI(SCF)-RDG of H2O dimer</figcaption>
+                  </figure>
+                </div>
+                <div class="col">
+                  <figure class="mb-0">
+                    <img
+                      src="{% static 'images/H2O_dimer_NCI.png' %}"
+                      alt="NCI(SCF) plot of H2O dimer"
+                      class="w-100 esp-thumb"
+                      loading="lazy">
+                    <figcaption class="small text-center text-muted mt-2">Example · NCI(SCF) plot of H2O dimer</figcaption>
+                  </figure>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('convert-form');
+      const dropZone = document.getElementById('drop-zone');
+      const fileInput = document.getElementById('file-input');
+      const conversionSelect = document.getElementById('conversion-type');
+      const transferBtn = document.getElementById('transfer-btn');
+      const fileListContainer = document.getElementById('file-list');
+      
+      form.action = "{% url 'autocompute:NCI_analysis' %}";
+
+
+
+      const acceptMap = { NCI_SCF: '.chk,.gbw', NCI_promolecular: '.mol2,.pdb,.mol,.xyz', NCI_SCF_fchkormolden:'.fchk,.molden' };
+      fileInput.setAttribute('accept', acceptMap[conversionSelect.value] || '');
+
+      
+    conversionSelect.addEventListener('change', () => {
+      if (conversionSelect.value === 'NCI_SCF') {
+        form.action = "{% url 'autocompute:NCI_analysis' %}";
+      } else if (conversionSelect.value === 'NCI_promolecular') {
+        form.action = "{% url 'autocompute:NCI_analysis_promolecular' %}";
+      } else if (conversionSelect.value === 'NCI_SCF_fchkormolden') {
+        form.action = "{% url 'autocompute:NCI_analysis' %}";
+      }
+      
+
+      updateFileList(fileInput.files);
+    });
+
+      
+       const extMap = {
+          'NCI_SCF'  : /\.(?:chk|gbw)$/i,
+          'NCI_SCF_fchkormolden': /\.(?:fchk|fch|molden)$/i,
+          'NCI_SCF_promolecular': /\.(?:xyz|pdb|mol2|mol)$/i,
+        };
+
+        function validateFiles(files) {
+          const mode = (conversionSelect.value || '').trim();
+          const validExt = extMap[mode];
+          if (!validExt) {
+
+            console.warn('未匹配到有效模式：', mode);
+            return false;
+          }
+          if (!files || files.length === 0) return false;
+          for (const f of files) {
+            if (!validExt.test(f.name)) {
+              console.warn(`文件后缀不符合当前模式(${mode})：`, f.name);
+              return false;
+            }
+          }
+          return true;
+        }
+
+      
+      
+      function updateFileList(files) {
+        fileListContainer.innerHTML = '';
+        if (files.length === 0) {
+          transferBtn.disabled = true;
+          return;
+        }
+
+        Array.from(files).forEach(file => {
+          const li = document.createElement('div');
+          li.textContent = file.name;
+          fileListContainer.appendChild(li);
+        });
+
+        transferBtn.disabled = !validateFiles(files);
+      }
+      
+
+      dropZone.addEventListener('click', () => {
+        fileInput.click();
+      });
+      
+
+      fileInput.addEventListener('change', () => {
+        updateFileList(fileInput.files);
+      });
+      
+
+      ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, e => {
+          e.preventDefault();
+          e.stopPropagation();
+        });
+      });
+      
+
+      ;['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+          dropZone.classList.add('border-primary');
+          dropZone.style.backgroundColor = '#e9f7ff';
+        });
+      });
+      
+
+      ;['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+          dropZone.classList.remove('border-primary');
+          dropZone.style.backgroundColor = '#fafafa';
+        });
+      });
+      
+
+      dropZone.addEventListener('drop', e => {
+        const dt = e.dataTransfer;
+        if (dt && dt.files) {
+          fileInput.files = dt.files;
+          updateFileList(dt.files);
+        }
+      });
+      
+
+      conversionSelect.addEventListener('change', () => {
+        updateFileList(fileInput.files);
+      });
+      
+
+
+      document.getElementById('convert-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        transferBtn.disabled = true;
+        transferBtn.textContent = 'Converting...';
+        fetch(this.action, {
+          method: 'POST',
+          body: formData,
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(resp => resp.json())
+        .then(data => {
+
+        transferBtn.textContent = 'Transfer';
+        transferBtn.disabled   = false;
+
+
+        const resultBox = document.getElementById('result-links');
+        resultBox.innerHTML = '';
+
+
+        if (data.error) {
+          const err = document.createElement('div');
+          err.className = 'alert alert-danger small';
+          err.textContent = data.error;
+          resultBox.appendChild(err);
+          return;
+        }
+
+
+        if (data.encrypted_id) {
+          const code = document.createElement('span');
+          code.className   = 'text-success fw-bold user-select-all';
+          code.textContent = data.encrypted_id;
+          resultBox.appendChild(code);
+        } else {
+
+          const warn = document.createElement('div');
+          warn.className = 'alert alert-warning small';
+          warn.textContent = 'No encrypted ID returned.';
+          resultBox.appendChild(warn);
+        }
+      })
+        .catch(err => {
+          transferBtn.textContent = 'Transfer';
+          transferBtn.disabled = false;
+          const errDiv = document.createElement('div');
+          errDiv.className = 'alert alert-danger small';
+          errDiv.textContent = 'An unexpected error occurred.';
+          document.getElementById('result-links').appendChild(errDiv);
+        });
+      });
+    });
+  </script>
+{% endblock content %}

@@ -1,0 +1,19 @@
+Hello {{ ticket.creator.username }},
+
+We have received your ticket on the CEMP platform.
+
+Ticket information:
+- Ticket ID: #{{ ticket.id }}
+- Subject: {{ ticket.subject }}
+- Category: {{ ticket.get_category_display }}
+- Priority: {{ ticket.get_priority_display }}
+- Current Status: {{ ticket.get_status_display }}
+
+You can review the conversation here:
+{{ detail_url }}
+
+This email is only a confirmation notice. Future maintainer replies will also remain available inside the ticket page.
+
+Best regards,
+CEMP Platform
+

@@ -1,0 +1,440 @@
+{% extends 'autocompute/autocompute_base.html' %}
+{% load static %}
+
+{% block navbar %} 
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Database' %}">Database</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:MDCompute' %}">MDCompute</a>
+  </li>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:SMILESDrawer' %}">SMILESDrawer</a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:Visualization' %}">Visualization</a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:from_smiles_get_name' %}">GetName</a>
+    </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'home:homepage' %}">Home</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:QcCompute_base' %}">Return</a>
+  </li>
+{% endblock navbar %}
+
+{% block content %}
+<style>
+    ol li {
+        margin-bottom: 20px; 
+    }
+
+    h1 {
+        font-size: 1.5em; 
+    }
+
+    h2 {
+        font-size: 1.5em; 
+    }
+
+    h3 {
+        font-size: 1.5em; 
+    }
+
+    p {
+        font-size: 1em; 
+        white-space: pre-line; 
+    }
+
+    h1, h2, h3, p {
+    margin: 0.5px 0; 
+    }
+  
+
+
+    .encrypted-id-container {
+        background-color: #f0f0f0;
+        padding: 10px;
+        border-radius: 5px;
+        display: none;  
+        margin-top: 20px;
+    }
+
+    .encrypted-id-container span {
+        font-family: monospace;
+        color: #333;
+    }
+
+    .copy-button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        margin-left: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .copy-button:hover {
+        background-color: #45a049;
+    }
+
+</style>
+
+<div style="padding: 20px;">
+    <h1>1. Introduction to the High-Throughput Quantum Chemistry Calculation Module</h1>
+    <p>
+        This module facilitates high-throughput quantum chemistry calculations based on Gaussian16 or ORCA, incorporating both structure optimization and single-point energy calculations. Users can choose between Gaussian16 and ORCA for their calculations.
+    </p>
+    
+    <h3>Calculation Software Options:</h3>
+    <ul>
+        <li>
+        <strong>Gaussian16:</strong> A commercial software requiring a license (available only to collaborating users). The calculation results on this platform are intended for educational purposes only and cannot be used for publication or commercial purposes without purchasing a license.
+        </li>
+        <li>
+        <strong>ORCA:</strong> Free for academic users. Suitable for both main group elements and transition metal-related calculations.
+        </li>
+    </ul>
+    
+    <h3>Important Note on Software Usage:</h3>
+    <ul>
+        <li>
+        Calculation results from Gaussian16 and ORCA cannot be mixed. Users must choose one software for all calculations in a project.
+        </li>
+    </ul>
+    
+    <h3>Structure Optimization:</h3>
+    <ul>
+        <li>
+        <strong>For Gaussian16:</strong>
+        <ul>
+            <li>Theoretical level: B3LYP/6-311G**</li>
+            <li>Dispersion correction: GD3BJ</li>
+            <li>Frequency correction factor: 0.9682</li>
+        </ul>
+        </li>
+        <li>
+        <strong>For ORCA:</strong>
+        <ul>
+            <li>Theoretical level: B3LYP/def2-TZVP</li>
+            <li>Acceleration method: RIJCOSX</li>
+            <li>Dispersion correction: GD3BJ</li>
+        </ul>
+        </li>
+    </ul>
+    <p>
+        The program automatically checks for optimization failures or imaginary frequencies and performs error correction if necessary.
+    </p>
+    
+    <h3>Single-Point Energy Calculation:</h3>
+    <ul>
+        <li>
+        <strong>For Gaussian16:</strong>
+        <ul>
+            <li>Theoretical level: M062X/6-311+(2d,p)</li>
+            <li>Dispersion correction: GD3</li>
+        </ul>
+        </li>
+        <li>
+        <strong>For ORCA:</strong>
+        <ul>
+            <li>Theoretical level: wB97M-V/def2-TZVP</li>
+            <li>Acceleration method: RIJCOSX</li>
+        </ul>
+        </li>
+    </ul>
+    <p>
+        The program automatically checks for calculation failures and performs error correction if necessary.
+    </p>
+    
+    <p>
+        Users need to download the provided Excel file, fill in the calculation parameters, and upload the completed file. The program will automatically execute the calculations and download the results upon completion.
+    </p>
+
+    <br>
+    <br>
+
+    <h2>2. Notes</h2>
+    
+    <h3>1. Software License and Usage:</h3>
+    <ul>
+        <li>
+        <strong>Gaussian16:</strong> A commercial software requiring a license (available only to collaborating users). The calculation results on this platform are intended for educational purposes only and cannot be used for publication or commercial purposes without purchasing a license.
+        </li>
+        <li>
+        <strong>ORCA:</strong> Free for academic users. Suitable for both main group elements and transition metal-related calculations.
+        </li>
+        <li>
+        Calculation results from Gaussian16 and ORCA cannot be mixed. Ensure all calculations in a project use the same software.
+        </li>
+    </ul>
+    
+    <h3>2. Excel File:</h3>
+    <ul>
+        <li>Users must use the provided Excel file to input relevant parameters.</li>
+        <li>Ensure the Name column does not contain illegal characters (e.g., Chinese characters, commas, periods, slashes, etc.).</li>
+        <li>Ensure the SMILES notation is correct (RDKit can be used to validate SMILES), otherwise the program will not function correctly.</li>
+    </ul>
+    
+    <h3>3. Fixed Parameters:</h3>
+    <ul>
+        <li>
+        The parameters for structure optimization and single-point energy calculations are fixed in the high-throughput calculation program to prevent errors that could result in meaningless results.
+        </li>
+    </ul>
+    
+    <h3>4. Applicability:</h3>
+    <ul>
+        <li>
+        The calculation parameters for Gaussian16 are only suitable for organic molecular systems.
+        </li>
+        <li>
+        For ORCA, the parameters support both main group elements and transition metal-related calculations.
+        </li>
+        <li>
+        Ensure the system does not contain transition metals when using Gaussian16, as this could lead to erroneous results. For transition metals, use ORCA.
+        </li>
+    </ul>
+
+    <p style="color: red;">
+        <b>5.	 !!!!! Important Considerations !!!!!:</b>
+        •	After the user uploads the HTQC.xlsx file and clicks the Start button, quantum chemistry calculations will begin. The computation time will increase with the number of molecules, the number of atoms within the molecules, and the complexity of the molecules.
+        •	Quantum chemistry calculations are relatively time-consuming tasks. Users are advised to be patient; as long as there are no red error messages on the browser page, the process is running normally. Please do not close the browser to avoid calculation failure or other issues.
+        •	Due to current computational resource limitations, the maximum level of parallelism provided by this program is 2 (i.e., only 2 quantum chemistry tasks can be executed simultaneously).
+    </p>
+
+    <br>
+    <br>
+
+    
+    <h3>3. Download EXCEL FILE</h3>
+    
+    <p>
+        <a href="{% static 'download/Dimer.xlsx' %}" download>Download HTQC_binding_energy EXCEL FILE (Dimer.xlsx)</a>
+    </p>
+
+    
+    <figure style="text-align: center;">
+      <img src="{% static 'images/binding_energy_example.png' %}" alt="Binding_enegy_Example" style="width: 600px; height: auto; display: block; margin: auto;">
+      <figcaption style="text-align: center;"><b>Figure 1</b>: Example of the HTQC_binding_energy EXCEL file.</figcaption>
+  </figure>
+
+    
+    <h3>4. Select Quantum Chemistry Calculation Software</h3>
+    <p>
+    <label for="qc-software-select">Choose Software:</label>
+    <select id="qc-software-select">
+        {% if gaussian_permission %}
+        <option value="gaussian">Gaussian</option>
+        {% endif %}
+        <option value="orca">ORCA</option>
+    </select>
+    </p>
+
+  <h3>5. Upload EXCEL FILE</h3>
+  
+  <form id="upload-form" method="post" enctype="multipart/form-data">
+    <label for="file-upload">Upload EXCEL FILE: </label>
+    
+    <input type="file" id="file-upload" name="excel_file" accept=".xlsx,.xls" style="display:none;">
+    
+    <button type="button" id="custom-upload-button" class="btn btn-primary">Select File</button>
+    
+    <span id="file-name" style="margin-left: 10px;">No file chosen</span>
+    
+    <button type="submit" id="submit-button" class="btn btn-success" disabled>Upload</button>
+  </form>
+  
+
+<div id="validation-result" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc; display: none;">
+    <h3>Validation Results:</h3>
+    <div id="result-content"></div> 
+</div>
+  
+  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    
+    document.getElementById('custom-upload-button').addEventListener('click', function() {
+
+        document.getElementById('file-upload').click();
+    });
+
+    document.getElementById('file-upload').addEventListener('change', function() {
+
+        var fileName = this.files[0] ? this.files[0].name : "No file chosen";
+        document.getElementById('file-name').textContent = fileName;
+
+
+        if (this.files.length > 0) {
+            document.getElementById('submit-button').disabled = false;
+        }
+    });
+
+      $(document).ready(function(){
+          $('#upload-form').on('submit', function(e){
+              e.preventDefault();
+              
+              var formData = new FormData(this);
+              
+              $.ajax({
+                  url: "{% url 'autocompute:upload_excel_QcCoumpute_HTQC_binding_energy' %}",
+                  type: "POST",
+                  data: formData,
+                  processData: false,
+                  contentType: false,
+                  success: function(response) {
+
+                    $('#validation-result').show();
+                    $('#result-content').html(response.validation_result);
+                  },
+                  error: function(response) {
+
+                    alert("Upload Failed: " + response.responseJSON.error);
+                  }
+              });
+          });
+      });
+  </script>
+
+    
+    <button id="start-button">Start</button>
+
+    
+    <div id="elapsed-time">Elapsed Time: </div>
+    
+    
+    <div id="error-message" style="color: red; display: none;"></div>
+
+    
+    <div class="encrypted-id-container" id="encrypted-id-container">
+        <label>Encrypted ID:</label>
+        <span id="encrypted-id"></span>
+        <button class="copy-button" id="copy-button">Copy</button>
+    </div>
+
+    
+    <p id="download-link"></p>
+</div>
+
+<script>
+
+    document.getElementById('upload-form').onsubmit = function(event) {
+        const fileInput = document.getElementById('file-upload');
+        const file = fileInput.files[0];
+        if (!file) {
+            alert('请上传一个文件');
+            return false;
+        }
+        const fileType = file.name.split('.').pop();
+        if (fileType !== 'xlsx' && fileType !== 'xls') {
+            alert('请上传EXCEL类型的文件');
+            event.preventDefault();
+        }
+    };
+
+
+    document.getElementById('start-button').addEventListener('click', startProcessing);
+
+    function startProcessing() {
+        
+
+    document.getElementById('start-button').disabled = true;
+    const formData = new FormData(document.getElementById('upload-form'));
+
+
+    const startTime = new Date();
+    
+
+    function updateElapsedTime() {
+        const now = new Date();
+        const elapsedTime = Math.floor((now - startTime) / 1000);
+        document.getElementById('elapsed-time').textContent = `Elapsed Time: ${elapsedTime} seconds`;
+        
+
+        if (!taskCompleted) {
+            setTimeout(updateElapsedTime, 1000);
+        }
+    }
+    
+
+    let taskCompleted = false;
+    updateElapsedTime();
+    
+
+    let qcSoftware = document.getElementById('qc-software-select').value;
+
+    let url;
+    if (qcSoftware === 'gaussian') {
+        url = "{% url 'autocompute:process_excel_QcCoumpute_HTQC_binding_energy_byurl' %}";
+    } else if (qcSoftware === 'orca') {
+        url = "{% url 'autocompute:process_excel_QcCoumpute_HTQC_binding_energy_byurl_orca' %}";
+    } else {
+        alert('Please select a software option.');
+        return;
+    }
+
+    fetch(url, {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json();
+            } else {
+                return response.text().then(text => {
+                    throw new Error(`Expected JSON but got: ${text}`);
+                });
+            }
+        })
+        .then(data => {
+            if (data.encrypted_id) {
+                taskCompleted = true;
+
+
+                const encryptedIdContainer = document.getElementById('encrypted-id-container');
+                const encryptedIdSpan = document.getElementById('encrypted-id');
+                encryptedIdSpan.textContent = data.encrypted_id;
+                encryptedIdContainer.style.display = 'block';
+
+
+                alert('Please copy this ID and keep it in a safe place, then you can check whether the task you submitted is completed or not in the ‘Query’ screen under the main directory.');
+        
+
+                document.getElementById('copy-button').addEventListener('click', function() {
+
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = data.encrypted_id;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+
+
+                    alert('Encrypted ID copied to clipboard!');
+                });
+            } else if (data.error) {
+
+                const errorMessageDiv = document.getElementById('error-message');
+                errorMessageDiv.textContent = `Processing failed: ${data.error}\n\nStdout:\n${data.stdout}\n\nStderr:\n${data.stderr}`;
+                errorMessageDiv.style.display = 'block';
+            } else {
+                const errorMessageDiv = document.getElementById('error-message');
+                errorMessageDiv.textContent = 'Processing failed, please try again!';
+                errorMessageDiv.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const errorMessageDiv = document.getElementById('error-message');
+            errorMessageDiv.textContent = 'An unexpected error occurred. Please try again later.';
+            errorMessageDiv.style.display = 'block';
+        });
+    }
+</script>
+{% endblock content %}

@@ -1,0 +1,104 @@
+{% extends 'autocompute/database/database_base.html'%}
+{% load static %}
+
+{% block head %} 
+
+
+
+
+<script
+type="text/javascript"
+src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.js"
+></script>
+
+
+
+<link rel="stylesheet" type="text/css"  href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" type="text/css"  href="https://cdn.datatables.net/buttons/1.4.0/css/buttons.dataTables.min.css" />
+
+
+
+
+
+<script type="text/javascript" src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+
+<script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.flash.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.colVis.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+
+<script type="text/javascript"
+src="https://cdn.datatables.net/fixedheader/3.2.3/js/dataTables.fixedHeader.min.js"></script>
+<style>
+    .container {
+        width: 100%; 
+        overflow-x: auto; 
+    }
+    .table-responsive {
+        min-width: 100%; 
+    }
+</style>
+{% endblock head %}
+
+{% block content %}
+
+
+<div class="container">
+  <table id="Cation_table" class="table display table-responsive table-striped table-bordered "
+         style="width:600px;">
+      <thead class="bg-dark text-light">
+      {% for head in field_names %}
+          <th>{{ head }}</th>
+      {% endfor %}
+      </thead>
+      <tbody>
+      {% for row in data %}
+          <tr>
+              {% for cell in row %}
+                  {% if cell %}
+                        <td>{{ cell }}</td>
+                  {% else %}
+                      <td>空</td>
+                  {% endif %}
+              {% endfor %}
+          </tr>
+      {% endfor %}
+      </tbody>
+  </table>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script>
+    $(document).ready(function () {
+
+        var table = $('#Cation_table').DataTable({
+            orderCellsTop: true,
+
+
+
+
+            dom: 'lBfrtip',
+            buttons: [ 
+                {   extend:'colvis', className:'dropdown-toggle',},
+                {   extend:'csv'},
+                {   extend: 'copy',text: 'Copy to clipboard',},
+                      'excel', 'pdf', 'print' ],
+            initComplete: function () {
+                var btns = $('.dt-button');
+                btns.addClass('btn btn-secondary text-light btn-sm mx-1');
+                btns.removeClass('dt-button');
+                
+            }
+    });
+               $('.dt-button-collection').addClass('custom_class');
+});
+</script>
+{% endblock script %}

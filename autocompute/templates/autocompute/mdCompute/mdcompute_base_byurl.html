@@ -1,0 +1,348 @@
+{% extends 'autocompute/autocompute_base.html' %}
+{% load static %}
+
+{% block navbar %} 
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Database' %}">Database</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:QcCompute_base' %}">QcCompute</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:MDCompute' %}">MDCompute</a>
+</li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:SMILESDrawer' %}">SMILESDrawer</a>
+  </li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Visualization' %}">Visualization</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:from_smiles_get_name' %}">GetName</a>
+</li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'home:homepage' %}">Home</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:index' %}">Return</a>
+  </li>
+{% endblock navbar %}
+
+{% block content %}
+<style>
+  ol li {
+      margin-bottom: 20px; 
+  }
+  h1 {
+      font-size: 1.5em; 
+  }
+  h2 {
+      font-size: 1.5em; 
+  }
+  h3 {
+      font-size: 1.5em; 
+  }
+  p {
+      font-size: 1em; 
+      white-space: pre-line; 
+  }
+  h1, h2, h3, p {
+  margin: 0.5px 0; 
+  }
+
+    .encrypted-id-container {
+        background-color: #f0f0f0;
+        padding: 10px;
+        border-radius: 5px;
+        display: none;  
+        margin-top: 20px;
+    }
+
+    .encrypted-id-container span {
+        font-family: monospace;
+        color: #333;
+    }
+
+    .copy-button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        margin-left: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .copy-button:hover {
+        background-color: #45a049;
+    }
+        
+        .reference-section {
+        margin: 40px 20px;
+        padding: 20px;
+        background-color: #f9f9f9; 
+        border: 1px solid #e0e0e0; 
+        border-radius: 5px; 
+    }
+
+    .reference-section h3, .reference-section h4 {
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .reference-section p {
+        color: #666;
+        margin-bottom: 15px;
+    }
+
+    .reference-section ol {
+        margin-left: 20px;
+    }
+
+    .reference-section li {
+        margin-bottom: 10px;
+        line-height: 1.6;
+        color: #444;
+    }
+
+</style>
+
+<div style="padding: 20px;">
+  <h1>1. Introduction to the Automated Molecular Dynamics Simulation Module</h1>
+    <p>
+        This module enables automated molecular dynamics (MD) simulations using Gromacs 2018.8, with user-defined simulation times (currently capped at a maximum of 5 ns due to computational resource limitations). The module provides a range of computational outputs, including:
+
+        1.	Radial Distribution Function (RDF) and Coordination Number (CN) curves, analyzed at the molecular level.
+        2.	Diffusion coefficients of various system components, also analyzed at the molecular level, derived using the Einstein-Nernst equation.
+        3.	System viscosity, analyzed at the macroscopic level.
+        4.	System density, analyzed at the macroscopic level.
+        5.	Ionic transference numbers within the system, analyzed at the ionic level.
+        6.	System conductivity, analyzed at the macroscopic level.
+        7.	Static dielectric constant of the system, analyzed at the macroscopic level.
+        8.	Potential of Mean Force (PMF) curves for target components, analyzed at the molecular level.
+        9.	Visualization outputs, including system structure diagrams, RDF and CN plots, Mean Square Displacement (MSD) plots, PMF plots, coordination environment diagrams, and simulation snapshots (both component-specific and overall system snapshots).
+        10.	Structure factor, analyzed at the macroscopic level.
+        11.	Strain-stress curves, analyzed at the macroscopic level, which are calculated only when the simulated system comprises pure polymers or polymer/molecular mixtures. Meaningful strain-stress curves require extended simulation times (>50 ns).
+
+    </p>
+
+    <br>
+    <br>
+
+    <h2>2. Important Notes</h2>
+    <p>
+        1.  All relevant parameters must be entered using the provided EXCEL template, adhering strictly to the specified formatting requirements. Detailed instructions for completing the form can be downloaded here. <a href="{% static 'download/System_tutorial.pdf' %}" download="System_tutorial.pdf">Download System.xlsx instructions</a> <a href="{% static 'download/System_tutorial_Chinese.pdf' %}" download="System_tutorial_Chinese.pdf">Download System.xlsx instructions (Chinese)</a>
+        2.	The default force fields used are GAFF, UFF, and Merz. Organic atoms are assigned parameters from GAFF, while metal ions use Merz parameters. If an organic atom lacks a definition in GAFF, UFF parameters will be applied by default. Atomic charges are calculated using RESP and are uniformly scaled to 70% of their original values. These parameters are fixed within the high-throughput computational framework to prevent errors that could result from incorrect user input, ensuring the generation of meaningful results.
+        3.	The current computational parameters are optimized exclusively for systems comprising polymers, organic molecules, or alkali metal salts. It is imperative to ensure that the system does not contain transition metals, particularly elemental metals, as their presence will lead to computational errors.
+    </p>
+    
+    <br>
+    <br>
+
+    
+    <h3>3. Download the EXCEL(System.xlsx) File</h3>
+    
+    <p>
+        <a href="{% static 'download/System.xlsx' %}" download>Download the System.xlsx</a>
+    </p>
+
+    
+    <figure style="text-align: center;">
+      <img src="{% static 'images/HTMD_Example.png' %}" alt="HTMD_Example" style="width: 1000px; height: auto; display: block; margin: auto;">
+      <figcaption style="text-align: center;"><b>Figure 1</b>: Example of the HTMD EXCEL file.</figcaption>
+  </figure>
+
+  <h3>4. Upload the EXCEL(System.xlsx) File</h3>
+    
+    <form id="upload-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="file-upload">Upload EXCEL File:</label>
+        <input type="file" id="file-upload" name="excel_file" accept=".xlsx,.xls">
+        <button type="submit">Upload</button>
+    </form>
+
+
+<div id="validation-result" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc; display: none;">
+    <h3>Validation Results:</h3>
+    <div id="result-content"></div> 
+</div>
+
+    
+
+    
+    <button id="start-button">Start</button>
+
+    
+    <div id="elapsed-time">Elapsed Time: </div>
+
+    
+    <div id="error-message" style="color: red; display: none;"></div>
+
+    
+    <div class="encrypted-id-container" id="encrypted-id-container">
+        <label>Encrypted ID:</label>
+        <span id="encrypted-id"></span>
+        <button class="copy-button" id="copy-button">Copy</button>
+    </div>
+
+    
+    <p id="download-link"></p>
+</div>
+
+
+<div class="reference-section">
+    <h3>Notice:</h3>
+    <p>When using this functionality, please ensure proper citation of the following references.</p>
+    <h4>References:</h4>
+    <ol>
+        <li>Abraham, M. J.; Murtola, T.; Schulz, R.; Páll, S.; Smith, J. C.; Hess, B.; Lindahl, E. GROMACS: High performance molecular simulations through multi-level parallelism from laptops to supercomputers. <em>SoftwareX</em> 2015, <strong>1</strong>, 19-25.</li>
+        <li>Lu, T.; Chen, F. Multiwfn: a multifunctional wavefunction analyzer. <em>J. Comput. Chem.</em> 2012, <strong>33</strong>, 580-592.</li>
+        <li>Li, K.; Wang, J.; Shen, Q.; Song, Y.; Gao, R.; Wang, Y. Interfacial Design Strategy for Polymeric Lithium Metal Batteries with Superfast Charge-Transfer Kinetics. <em>Adv. Energy Mater.</em> 2024, <strong>14</strong>, 2400956.</li>
+        <li>Bayly, C. I.; Cieplak, P.; Cornell, W.; Kollman, P. A. A well-behaved electrostatic potential based method using charge restraints for deriving atomic charges: the RESP model. <em>J. Phys. Chem.</em> 1993, <strong>97</strong>, 10269-10280.</li>
+        <li>Wang, J.; Wolf, R. M.; Caldwell, J. W.; Kollman, P. A.; Case, D. A. Development and testing of a general amber force field. <em>J. Comput. Chem.</em> 2004, <strong>25</strong>, 1157-1174.</li>
+        <li>Wang, J.; Wang, Y. Strategies to Improve the Quantum Computation Accuracy for Electrochemical Windows of Ionic Liquids. <em>J. Phys. Chem. B</em> 2024, <strong>128</strong>, 1943-1952.</li>
+        <li>Sengupta, A.; Li, Z.; Song, L. F.; Li, P.; Merz, K. M., Jr. Parameterization of Monovalent Ions for the OPC3, OPC, TIP3P-FB, and TIP4P-FB Water Models. <em>J. Chem. Inf. Model.</em> 2021, <strong>61</strong>, 869-880.</li>
+        <li>Li, Z.; Song, L. F.; Li, P.; Merz, K. M., Jr. Systematic Parametrization of Divalent Metal Ions for the OPC3, OPC, TIP3P-FB, and TIP4P-FB Water Models. <em>J. Chem. Theory Comput.</em> 2020, <strong>16</strong>, 4429-4442.</li>
+        <li>Izadi, S.; Onufriev, A. V. Accuracy limit of rigid 3-point water models. <em>J. Chem. Phys.</em> 2016, <strong>145</strong>.</li>
+    </ol>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $('#upload-form').on('submit', function(e){
+            e.preventDefault();
+            
+            var formData = new FormData(this);
+            
+            $.ajax({
+                url: "{% url 'autocompute:upload_excel_MDCoumpute' %}",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+
+                    $('#validation-result').show();
+                    $('#result-content').html(response.validation_result);
+                },
+                error: function(response) {
+
+                    alert("Upload Failed: " + response.responseJSON.error);
+                }
+            });
+        });
+    });
+</script>
+
+<script>
+
+    document.getElementById('upload-form').onsubmit = function(event) {
+        const fileInput = document.getElementById('file-upload');
+        const file = fileInput.files[0];
+        if (!file) {
+            alert('请上传一个文件');
+            return false;
+        }
+        const fileType = file.name.split('.').pop();
+        if (fileType !== 'xlsx' && fileType !== 'xls') {
+            alert('请上传EXCEL类型的文件');
+            event.preventDefault();
+        }
+    };
+
+
+    document.getElementById('start-button').addEventListener('click', startProcessing);
+
+    function startProcessing() {
+        
+
+    document.getElementById('start-button').disabled = true;
+    const formData = new FormData(document.getElementById('upload-form'));
+
+
+    const startTime = new Date();
+    
+
+    function updateElapsedTime() {
+        const now = new Date();
+        const elapsedTime = Math.floor((now - startTime) / 1000);
+        document.getElementById('elapsed-time').textContent = `Elapsed Time: ${elapsedTime} seconds`;
+        
+
+        if (!taskCompleted) {
+            setTimeout(updateElapsedTime, 1000);
+        }
+    }
+    
+
+    let taskCompleted = false;
+    updateElapsedTime();
+
+
+
+    let url = '';
+    url = "{% url 'autocompute:process_excel_MDCoumpute_byurl' %}";
+     
+    fetch(url, {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json();
+            } else {
+                return response.text().then(text => {
+                    throw new Error(`Expected JSON but got: ${text}`);
+                });
+            }
+        })
+        .then(data => {
+            if (data.encrypted_id) {
+                taskCompleted = true;
+
+
+                const encryptedIdContainer = document.getElementById('encrypted-id-container');
+                const encryptedIdSpan = document.getElementById('encrypted-id');
+                encryptedIdSpan.textContent = data.encrypted_id;
+                encryptedIdContainer.style.display = 'block';
+
+
+                alert('Please copy this ID and keep it in a safe place, then you can check whether the task you submitted is completed or not in the ‘Query’ screen under the main directory.');
+        
+
+                document.getElementById('copy-button').addEventListener('click', function() {
+
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = data.encrypted_id;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+
+
+                    alert('Encrypted ID copied to clipboard!');
+                });
+            } else if (data.error) {
+
+                const errorMessageDiv = document.getElementById('error-message');
+                errorMessageDiv.textContent = `Processing failed: ${data.error}\n\nStdout:\n${data.stdout}\n\nStderr:\n${data.stderr}`;
+                errorMessageDiv.style.display = 'block';
+            } else {
+                const errorMessageDiv = document.getElementById('error-message');
+                errorMessageDiv.textContent = 'Processing failed, please try again!';
+                errorMessageDiv.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const errorMessageDiv = document.getElementById('error-message');
+            errorMessageDiv.textContent = 'An unexpected error occurred. Please try again later.';
+            errorMessageDiv.style.display = 'block';
+        });
+    }
+</script>
+
+{% endblock content %}

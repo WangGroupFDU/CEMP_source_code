@@ -1,0 +1,900 @@
+{% extends 'bms_base.html' %}
+{% load static %}
+
+{% block header_scripts %}
+
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script src="https://unpkg.com/chart.js"></script>
+
+<link rel="stylesheet" href="{% static 'battery_manage_system/style_rate_prediction.css'%}" />
+{% endblock header_scripts %}
+
+
+{% block content %}
+
+{{ template_dict|json_script:"django-data" }}
+
+
+<script>
+
+    window.djangoVars = JSON.parse(document.getElementById('django-data').textContent);
+</script>
+<div id="root"></div>
+
+
+{% endblock content%}
+
+{% block scripts %}
+{% verbatim %}
+
+<script type="text/babel">
+
+    const { useState, useEffect, useRef } = React;
+
+
+    function App() {
+        const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+        const [predictionData, setPredictionData] = useState(null);
+        const [isLoading, setIsLoading] = useState(false);
+        const [showDetailedCycles, setShowDetailedCycles] = useState(false);
+        const [selectedCycle, setSelectedCycle] = useState(1);
+        const [detailedCycleData, setDetailedCycleData] = useState(null);
+        let data_backend;
+        const [formData, setFormData] = useState({
+            material: "LFP",
+            percent: "15",
+            memberaneSize: "60um",
+            cathodeArea: "0.1356",
+            specificCapacity: "150",
+            areaLivingMaterial: "4.830149",
+            temperature: "28",
+        });
+        const toggleSidebar = () => {
+            setIsSidebarOpen(!isSidebarOpen);
+        };
+
+
+        const handleInputChange = (e) => {
+            const { name, value } = e.target;
+            setFormData({
+                ...formData,
+                [name]: value,
+            });
+        };
+
+        const runPrediction = async (e) => {
+            e.preventDefault();
+            setIsLoading(true);
+            
+            try {
+
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+
+
+
+                const predictData = await fetchData();
+                setPredictionData(predictData);
+                setDetailedCycleData(null);
+                data_backend = predictData.datasets[0].data;
+                console.log("data_backend",data_backend)
+
+                setShowDetailedCycles(false);
+            } catch (error) {
+                console.error("Prediction failed:", error);
+                alert("Failed to generate prediction. Please try again.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        const setRandomParameters = () => {
+
+            const materials = ["LFP", "NCM", "LNMO"];
+
+
+            const randomFormData = {
+                material: materials[Math.floor(Math.random() * materials.length)],
+                percent: (Math.random() * 20 + 10).toFixed(1),
+                memberaneSize: (Math.random() * 150 + 50).toFixed(0) + "um",
+                cathodeArea: (Math.random() * 0.2 + 0.1).toFixed(4),
+                specificCapacity: (Math.random() * 50 + 120).toFixed(1),
+                areaLivingMaterial: (Math.random() * 0.5 + 0.5).toFixed(6),
+                temperature: (Math.random() * 15 + 20).toFixed(1),
+            };
+
+            setFormData(randomFormData);
+        };
+
+        const loadDetailedCycle = async (cycle) => {
+            if (!predictionData) return;
+
+            try {
+
+                setDetailedCycleData(null);
+
+
+
+                console.log(cycle,predictionData)
+
+                const detailedData = generateDetailedCycleData(cycle,predictionData);
+
+                setDetailedCycleData(detailedData);
+            } catch (error) {
+                console.error("Failed to load detailed cycle:", error);
+                alert("Failed to load detailed cycle data. Please try again.");
+            }
+        };
+
+        const handleCycleChange = (e) => {
+            setSelectedCycle(parseInt(e.target.value));
+        };
+
+        const handleViewDetailedCycle = () => {
+            loadDetailedCycle(selectedCycle);
+        };
+
+
+        const handleDetailedCyclesChange = () => {
+            const newValue = !showDetailedCycles;
+            setShowDetailedCycles(newValue);
+
+
+            if (!newValue) {
+                setDetailedCycleData(null);
+            }
+        };
+
+        const fetchData = async (params = formData) => {
+            console.log(params);
+            let csrf_token=window.djangoVars.csrf_token
+            console.log(csrf_token)
+            const cycles = 25;
+            const dataPoints = 1000;
+            const baseCapacity = parseFloat(params.specificCapacity);
+            console.log(baseCapacity)
+            console.log(typeof(baseCapacity))
+            let data_backend;
+            const formData = new FormData();
+            formData.append('material', params.material);
+            formData.append('size', params.memberaneSize);
+            formData.append('specific_capacity', params.specificCapacity);
+            formData.append('temperature', params.temperature);
+            formData.append('percent', params.percent);
+            formData.append('cathode_area', params.cathodeArea);
+            formData.append('area_living_material', params.areaLivingMaterial);
+            try {
+                const response = await fetch('/battery_manage_system/short_prediction/', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                data_backend = (await response.json()).data;
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                throw error;
+            }
+
+
+
+            const data = {
+                cycles: cycles,
+                labels: Array.from({ length: cycles }, (_, i) => i + 1),
+                
+                datasets: [
+                    {
+                        label: "Discharge Capacity (mAh/g)",
+                        data: data_backend,
+                    },
+                ],
+                metadata: {
+                    material: params.material,
+                    size: params.memberaneSize,
+                    capacity: params.specificCapacity + " mAh/g",
+                    temperature: params.temperature + "°C",
+                    percent: params.percent + "%",
+                    cathodeArea: params.cathodeArea + " cm²",
+                    areaLivingMaterial: params.areaLivingMaterial,
+                },
+
+            };
+            console.log(data.metadata)
+            return data;
+        };
+
+
+        const generateMockData = (params = formData) => {
+            const cycles = 25;
+            const dataPoints = 1000;
+
+            const baseCapacity = parseFloat(params.specificCapacity);
+
+            const data = {
+                cycles: cycles,
+                labels: Array.from({ length: cycles }, (_, i) => i + 1),
+                datasets: [
+                    {
+                        label: "Discharge Capacity (mAh/g)",
+                        data: Array.from({ length: cycles }, (_, i) => {
+                            const cycleCapacity = baseCapacity - i * (baseCapacity * 0.02);
+                            return Array.from({ length: dataPoints }, (_, j) => {
+                                const x = j / dataPoints;
+
+                                const y = cycleCapacity * (1 - Math.exp(-10 * x)) * Math.exp(-0.1 * x);
+                                return { x, y };
+                            });
+                        }),
+                    },
+                ],
+                metadata: {
+                    material: params.material,
+                    size: params.memberaneSize,
+                    capacity: params.specificCapacity + " mAh/g",
+                    temperature: params.temperature + "°C",
+                    percent: params.percent + "%",
+                    cathodeArea: params.cathodeArea + " cm²",
+                    areaLivingMaterial: params.areaLivingMaterial,
+                },
+            };
+
+            return data;
+        };
+        
+
+        const getDetailedCycleData = (cycle) => {
+
+        }
+        const generateDetailedCycleData = (cycle,predictionData) => {
+            const dataPoints = 1000;
+            console.log(predictionData.datasets[0].data)
+            console.log("predictionData[1]:",predictionData.datasets[0].data[1])
+            console.log("cycle:",parseInt(cycle))
+            const cycle_selected_data=predictionData.datasets[0].data[parseInt(cycle)-1]
+
+            console.log("cycle_selected_data:",cycle_selected_data)
+            const data_detailed = Array.from({ length: dataPoints }, (_, i) => {
+                    const x = cycle_selected_data[i].x;
+
+                    let y;
+                    y=cycle_selected_data[i].y
+                    return { x, y };
+                });
+            console.log("data_detailed:",data_detailed)
+            return {
+                cycle: cycle,
+                data: data_detailed,
+            };
+        };
+
+
+        const downloadPNG = () => {
+            const canvas = document.querySelector("canvas");
+            if (canvas) {
+                const link = document.createElement("a");
+                link.download = `battery-prediction${detailedCycleData ? `-cycle-${detailedCycleData.cycle}` : ""}.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            }
+        };
+
+        const downloadSVG = () => {
+
+            const svgData = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400">
+          <text x="400" y="200" fontFamily="Times New Roman" textAnchor="middle">Battery Cycle Data</text>
+        </svg>`;
+
+            const blob = new Blob([svgData], { type: "image/svg+xml" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.download = `battery-prediction${detailedCycleData ? `-cycle-${detailedCycleData.cycle}` : ""}.svg`;
+            link.href = url;
+            link.click();
+            URL.revokeObjectURL(url);
+        };
+
+        return (
+            <div className="app-container">
+
+
+                {}
+                <div className={`sidebar ${!isSidebarOpen ? 'collapsed' : ''}`}>
+                    <div className="sidebar-content">
+                        <h2 className="sidebar-title">Battery Recipe</h2>
+                        {}
+                        <button
+                            className={`sidebar-toggle ${isSidebarOpen ? 'sidebar-open' : ''}`}
+                            onClick={toggleSidebar}
+                        >
+                            ≡
+                        </button>
+                        <form onSubmit={runPrediction}>
+                            <div className="form-group">
+                                <label className="form-label" htmlFor="material">Material:</label>
+                                <select
+                                    className="form-select"
+                                    id="material"
+                                    name="material"
+                                    value={formData.material}
+                                    onChange={handleInputChange}
+                                >
+                                    {window.djangoVars && window.djangoVars.cathode_active_material_options &&
+                                        window.djangoVars.cathode_active_material_options.map((cathode_active_material_option) => (
+                                            <option key={cathode_active_material_option} value={cathode_active_material_option}>
+                                                {cathode_active_material_option}
+                                            </option>
+                                        ))
+                                    }
+                                </select>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label" htmlFor="percent">Percent (%):</label>
+                                <input
+                                    className="form-input"
+                                    type="text"
+                                    id="percent"
+                                    name="percent"
+                                    value={formData.percent}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label" htmlFor="memberaneSize">Memberane Size:</label>
+                                <input
+                                    className="form-input"
+                                    type="text"
+                                    id="memberaneSize"
+                                    name="memberaneSize"
+                                    value={formData.memberaneSize}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label" htmlFor="cathodeArea">Cathode Area (cm²):</label>
+                                <input
+                                    className="form-input"
+                                    type="text"
+                                    id="cathodeArea"
+                                    name="cathodeArea"
+                                    value={formData.cathodeArea}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label" htmlFor="specificCapacity">Specific Capacity (mAh/g):</label>
+                                <input
+                                    className="form-input"
+                                    type="text"
+                                    id="specificCapacity"
+                                    name="specificCapacity"
+                                    value={formData.specificCapacity}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label" htmlFor="areaLivingMaterial">Area Living Material:</label>
+                                <input
+                                    className="form-input"
+                                    type="text"
+                                    id="areaLivingMaterial"
+                                    name="areaLivingMaterial"
+                                    value={formData.areaLivingMaterial}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label" htmlFor="temperature">Temperature (°C):</label>
+                                <input
+                                    className="form-input"
+                                    type="text"
+                                    id="temperature"
+                                    name="temperature"
+                                    value={formData.temperature}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+
+                            <div className="separator"></div>
+
+                            <button
+                                type="button"
+                                className="btn btn-secondary"
+                                onClick={setRandomParameters}
+                            >
+                                🎲 Random Parameters
+                            </button>
+
+                            <button
+                                type="submit"
+                                className="btn btn-primary"
+                                disabled={isLoading}
+                            >
+                                {isLoading ? 'Loading...' : '⚡ Run Prediction'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {}
+                <div className="main-content">
+                    <h1 className="page-title">Battery Management System - Long-Term Prediction</h1>
+
+                    {!predictionData && !isLoading && (
+                        <div className="welcome-screen">
+                            <h2 className="welcome-title">Welcome to Battery Cycle Prediction</h2>
+                            <p className="welcome-text">
+                                Configure your battery parameters in the sidebar and click "Run Prediction" to generate battery cycle data.
+                            </p>
+                            <div className="welcome-icon">📊</div>
+                        </div>
+                    )}
+
+                    {isLoading && !predictionData && (
+                        <div className="card">
+                            <div className="card-header">
+                                <h3 className="card-title">Generating Prediction...</h3>
+                            </div>
+                            <div className="skeleton skeleton-chart"></div>
+                            <div className="btn-group">
+                                <div className="skeleton skeleton-button"></div>
+                                <div className="skeleton skeleton-button"></div>
+                            </div>
+                        </div>
+                    )}
+
+                    {predictionData && (
+                        <>
+                            <div className="card">
+                                <div className="card-header">
+                                    <h3 className="card-title">Prediction Results</h3>
+                                    <div className="card-metadata">
+                                        Material: {predictionData.metadata.material}, Size: {predictionData.metadata.size},
+                                        Capacity: {predictionData.metadata.capacity}, Temp: {predictionData.metadata.temperature}
+                                    </div>
+                                </div>
+                                <div className="chart-container">
+                                    <BatteryCycleChart data={predictionData} />
+                                </div>
+                                <div className="btn-group">
+                                    <button className="btn btn-secondary btn-sm" onClick={downloadPNG}>
+                                        📥 Download PNG
+                                    </button>
+                                    <button className="btn btn-secondary btn-sm" onClick={downloadSVG}>
+                                        📥 Download SVG
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="detailed-cycles">
+                                <div className="checkbox-container">
+                                    <input
+                                        type="checkbox"
+                                        id="detailedCycles"
+                                        checked={showDetailedCycles}
+                                        onChange={handleDetailedCyclesChange}
+                                    />
+                                    <label className="checkbox-label" htmlFor="detailedCycles">
+                                        Show Detailed Cycle View
+                                    </label>
+                                </div>
+
+                                {showDetailedCycles && (
+                                    <div className="cycle-selector">
+                                        <label className="cycle-selector-label" htmlFor="cycleSelect">
+                                            Select Cycle (1-25):
+                                        </label>
+                                        <select
+                                            id="cycleSelect"
+                                            className="cycle-select"
+                                            value={selectedCycle}
+                                            onChange={handleCycleChange}
+                                        >
+                                            {Array.from({ length: 25 }, (_, i) => (
+                                                <option key={i + 1} value={i + 1}>
+                                                    Cycle {i + 1}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <button className="btn btn-primary" onClick={handleViewDetailedCycle}>
+                                            View Detailed Cycle
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {}
+                            {showDetailedCycles && detailedCycleData && (
+                                <div className="card">
+                                    <div className="card-header">
+                                        <h3 className="card-title">Detailed Cycle {detailedCycleData.cycle}</h3>
+                                    </div>
+                                    <div className="chart-container">
+                                        <DetailedCycleChart data={detailedCycleData} />
+                                    </div>
+                                    <div className="btn-group">
+                                        <button className="btn btn-secondary btn-sm" onClick={downloadPNG}>
+                                            📥 Download PNG
+                                        </button>
+                                        <button className="btn btn-secondary btn-sm" onClick={downloadSVG}>
+                                            📥 Download SVG
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+
+    function BatteryCycleChart({ data }) {
+        const chartRef = useRef(null);
+        const chartInstance = useRef(null);
+
+        useEffect(() => {
+            if (!chartRef.current || !data) return;
+
+
+            if (chartInstance.current) {
+                chartInstance.current.destroy();
+            }
+
+            const ctx = chartRef.current.getContext('2d');
+
+
+            console.log(data.datasets[0])
+            console.log(data.datasets[0].data)
+            console.log(typeof(data.datasets[0].data))
+            
+            const chartData = {
+                labels: data.labels,
+                datasets: [
+                    {
+                        label: 'Discharge Capacity (mAh/g)',
+                        data: data.datasets[0].data.map((cycleData, index) => {
+
+                            return Math.max(...cycleData.map(point => point.y));
+                        }),
+                        borderColor: '#ff8c00',
+                        backgroundColor: 'rgba(255, 140, 0, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        pointBackgroundColor: '#ff8c00',
+                    },
+                ],
+            };
+
+
+            chartInstance.current = new Chart(ctx, {
+                type: 'line',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `Capacity: ${context.parsed.y.toFixed(2)} mAh/g`,
+                            },
+                            backgroundColor: 'white',
+                            borderColor: '#e0e0e0',
+                            borderWidth: 1,
+                            titleColor: '#ff8c00',
+                            bodyColor: '#333333',
+                            titleFont: {
+                                family: 'Times New Roman',
+                            },
+                            bodyFont: {
+                                family: 'Times New Roman',
+                            },
+                        },
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    family: 'Times New Roman',
+                                },
+                                color: '#333333',
+                            },
+                        },
+                        title: {
+                            display: true,
+                            text: 'Battery Cycle Prediction Results',
+                            color: '#ff8c00',
+                            font: {
+                                family: 'Times New Roman',
+                                size: 16,
+                                weight: 'bold',
+                            },
+                        },
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Cycle Number',
+                                color: '#666666',
+                                font: {
+                                    family: 'Times New Roman',
+                                },
+                            },
+                            ticks: {
+                                color: '#666666',
+                                font: {
+                                    family: 'Times New Roman',
+                                },
+                            },
+                            grid: {
+                                color: '#e0e0e0',
+                            },
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Discharge Capacity (mAh/g)',
+                                color: '#666666',
+                                font: {
+                                    family: 'Times New Roman',
+                                },
+                            },
+                            ticks: {
+                                color: '#666666',
+                                font: {
+                                    family: 'Times New Roman',
+                                },
+                            },
+                            grid: {
+                                color: '#e0e0e0',
+                            },
+                            min: 0,
+                        },
+                    },
+                },
+            });
+
+            return () => {
+                if (chartInstance.current) {
+                    chartInstance.current.destroy();
+                }
+            };
+        }, [data]);
+
+        return (
+            <canvas ref={chartRef} />
+        );
+    }
+
+
+    function DetailedCycleChart({ data }) {
+      const canvasRef = useRef(null);
+      const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0, value: '' });
+      console.log("data",data)
+      useEffect(() => {
+        if (!canvasRef.current || !data) return;
+        
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        
+
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        
+        ctx.scale(dpr, dpr);
+        
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+
+        ctx.font = "12px 'Times New Roman'";
+        
+
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, rect.width, rect.height);
+        
+
+        const margin = {
+          top: 30,
+          right: 30,
+          bottom: 50,
+          left: 60,
+        };
+        
+        const chartWidth = rect.width - margin.left - margin.right;
+        const chartHeight = rect.height - margin.top - margin.bottom;
+        console.log(data.data)
+
+        const xValues = data.data.map(d => d.x);
+        const yValues = data.data.map(d => d.y);
+        console.log(xValues,yValues)
+        const xMin = Math.min(...xValues);
+        const xMax = Math.max(...xValues);
+        const yMin = 0;
+        const yMax = Math.max(...yValues) * 1.1;
+        console.log("yMax:",yMax)
+
+        const xScale = (x) => margin.left + ((x - xMin) / (xMax - xMin)) * chartWidth;
+        const yScale = (y) => margin.top + chartHeight - ((y - yMin) / (yMax - yMin)) * chartHeight;
+        
+
+        ctx.strokeStyle = '#666666';
+        ctx.lineWidth = 1;
+        
+
+        ctx.beginPath();
+        ctx.moveTo(margin.left, margin.top + chartHeight);
+        ctx.lineTo(margin.left + chartWidth, margin.top + chartHeight);
+        ctx.stroke();
+        
+
+        ctx.beginPath();
+        ctx.moveTo(margin.left, margin.top);
+        ctx.lineTo(margin.left, margin.top + chartHeight);
+        ctx.stroke();
+        
+
+        const xTickCount = 10;
+        console.log("xMin,xMax",xMin,xMax)
+        for (let i = 0; i <= xTickCount; i++) {
+          const x = xMin + (i / xTickCount) * (xMax - xMin);
+          const xPos = xScale(x);
+          
+          ctx.beginPath();
+          ctx.moveTo(xPos, margin.top + chartHeight);
+          ctx.lineTo(xPos, margin.top + chartHeight + 5);
+          ctx.stroke();
+          
+          ctx.fillStyle = '#666666';
+          ctx.textAlign = 'center';
+
+          ctx.fillText(x.toFixed(2), xPos, margin.top + chartHeight + 20);
+        }
+        
+
+        const yTickCount = 5;
+        console.log(yMin,yMax)
+        for (let i = 0; i <= yTickCount; i++) {
+          const y = yMin + (i / yTickCount) * (yMax - yMin);
+          const yPos = yScale(y);
+          
+          ctx.beginPath();
+          ctx.moveTo(margin.left, yPos);
+          ctx.lineTo(margin.left - 5, yPos);
+          ctx.stroke();
+          
+          ctx.fillStyle = '#666666';
+          ctx.textAlign = 'right';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(y.toFixed(1), margin.left - 10, yPos);
+        }
+        
+
+        ctx.fillStyle = '#666666';
+        ctx.textAlign = 'center';
+        
+
+        ctx.fillText('Voltage (V)', margin.left + chartWidth / 2, rect.height - 10);
+        
+
+        ctx.save();
+        ctx.translate(15, margin.top + chartHeight / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.textAlign = 'center';
+        ctx.fillText('Discharge Capacity (mAh/g)', 0, 0);
+        ctx.restore();
+        
+
+        ctx.textAlign = 'center';
+        ctx.font = "bold 14px 'Times New Roman'";
+        ctx.fillStyle = '#ff8c00';
+        ctx.fillText(`Detailed Cycle ${data.cycle} Discharge Curve`, margin.left + chartWidth / 2, margin.top - 10);
+        
+
+        ctx.beginPath();
+        ctx.strokeStyle = '#ff8c00';
+        ctx.lineWidth = 2;
+        
+
+        let firstPoint = true;
+        for (const point of data.data) {
+          const x = xScale(point.x);
+          const y = yScale(point.y);
+          
+          if (firstPoint) {
+            ctx.moveTo(x, y);
+            firstPoint = false;
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+        
+        ctx.stroke();
+        
+
+        const handleMouseMove = (e) => {
+          const rect = canvas.getBoundingClientRect();
+          const mouseX = e.clientX - rect.left;
+          const mouseY = e.clientY - rect.top;
+          
+
+          let closestPoint = null;
+          let closestDistance = Number.POSITIVE_INFINITY;
+          
+          for (const point of data.data) {
+            const x = xScale(point.x);
+            const y = yScale(point.y);
+            
+            const distance = Math.sqrt(Math.pow(mouseX - x, 2) + Math.pow(mouseY - y, 2));
+            
+            if (distance < closestDistance && distance < 20) {
+              closestDistance = distance;
+              closestPoint = point;
+            }
+          }
+          
+          if (closestPoint) {
+            setTooltip({
+              visible: true,
+              x: xScale(closestPoint.x),
+              y: yScale(closestPoint.y),
+              value: `Capacity: ${closestPoint.y.toFixed(2)} mAh/g at ${(closestPoint.x).toFixed(2)} V`,
+            });
+          } else {
+            setTooltip({ visible: false, x: 0, y: 0, value: '' });
+          }
+        };
+        
+        canvas.addEventListener('mousemove', handleMouseMove);
+        
+        return () => {
+          canvas.removeEventListener('mousemove', handleMouseMove);
+        };
+      }, [data]);
+      
+      return (
+        <div style={{ position: 'relative', height: '100%', width: '100%' }}>
+          <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />
+          {tooltip.visible && (
+            <div
+              className="tooltip"
+              style={{
+                left: tooltip.x + 10,
+                top: tooltip.y - 30,
+              }}
+            >
+              {tooltip.value}
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+</script>
+{% endverbatim %}
+{% endblock scripts %}
+
+
+

@@ -1,0 +1,200 @@
+
+#app {
+    font-family: 'Poppins', sans-serif;
+    color: #343434;
+    
+  }
+  
+  .battery-structure ul {
+    list-style-type: none;
+    padding-left: 1.5rem;
+  }
+  
+  .battery-structure li {
+    position: relative;
+    padding: 0.25rem 0;
+  }
+  
+  .battery-structure li::before {
+    content: "•";
+    position: absolute;
+    left: -1rem;
+    color: #ff8800;
+  }
+  
+  .orange-underline {
+    text-decoration: underline;          
+    text-decoration-color: #FFA500;      
+    text-decoration-thickness: 2px;      
+    text-underline-offset: 3px;          
+  }
+  
+  .btn-primary {
+    background-color: #ff8800;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  
+  .btn-primary:hover {
+    background-color: #e67e00;
+  }
+  
+  .card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+  
+  .card-header {
+    background-color: #343434;
+    color: white;
+    padding: 1rem;
+    font-weight: bold;
+  }
+  
+  .card-body {
+    padding: 1.5rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .form-input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
+  }
+  
+  .form-select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
+    background-color: white;
+  }
+  
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    margin: 0.5rem 0;
+  }
+  
+  .checkbox-container input {
+    margin-right: 0.5rem;
+  }
+  
+  
+  .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+  }
+  
+  .modal-content {
+    background-color: white;
+    border-radius: 0.5rem;
+    max-width: 800px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  
+  .modal-header {
+    padding: 1rem;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+  
+
+@media (min-width: 768px) {
+    .grid-cols-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+  }
+
+
+#app-opendata {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+#app-opendata h1 {
+    color: #ff8c42;
+    text-align: center;
+    margin-bottom: 20px;
+}
+#app-opendata table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+#app-opendata th, 
+#app-opendata td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+    color: #333333;
+}
+#app-opendata th {
+    background-color: #1a1a1a;
+    color: #ffffff;
+    font-weight: bold;
+}
+#app-opendata tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+#app-opendata tr:hover {
+    background-color: #f1f1f1;
+}
+#app-opendata a {
+    color: #ff8c42;
+    text-decoration: none;
+    font-weight: bold;
+}
+#app-opendata a:hover {
+    text-decoration: underline;
+}
+#app-opendata .no-link {
+    color: #666;
+    font-style: italic;
+}

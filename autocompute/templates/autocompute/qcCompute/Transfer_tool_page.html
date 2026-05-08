@@ -1,0 +1,257 @@
+{% extends 'autocompute/autocompute_base.html' %}
+{% load static %}
+
+{% block navbar %} 
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Database' %}">Database</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:MDCompute' %}">MDCompute</a>
+  </li>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:SMILESDrawer' %}">SMILESDrawer</a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:Visualization' %}">Visualization</a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:from_smiles_get_name' %}">GetName</a>
+    </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'home:homepage' %}">Home</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:QcCompute_base' %}">Return</a>
+  </li>
+{% endblock navbar %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-6 col-md-8">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            
+            
+            <h4 class="card-title text-center mb-3">Quantum-Chemistry File Converter</h4>
+            
+            
+            <p class="text-center text-muted small">
+              Convert your quantum-chemistry output files into human-readable formats.
+            </p>
+            
+            
+            <form id="convert-form" method="post" enctype="multipart/form-data" 
+                  action="">
+              {% csrf_token %}
+              
+              
+              <div id="drop-zone" 
+                   class="border border-secondary rounded p-4 text-center"
+                   style="background-color: #fafafa; cursor: pointer;">
+                <input type="file" 
+                       id="file-input" 
+                       name="files" 
+                       multiple 
+                       style="display: none;" />
+                <i class="bi bi-cloud-arrow-up-fill" style="font-size: 2rem; color: #6c757d;"></i>
+                <p class="mb-0 mt-2 text-secondary">
+                  Drag &amp; drop files here<br>
+                  <small>or click to browse</small>
+                </p>
+                <div id="file-list" class="mt-2 text-start small"></div>
+              </div>
+              
+              
+              <div class="form-group mt-4">
+                <label for="conversion-type" class="form-label">Select Conversion Type</label>
+                <select id="conversion-type" name="conversion_type" class="form-select">
+                  <option value="chk2fchk" selected>chk → fchk</option>
+                  <option value="gbw2molden">gbw → molden</option>
+                </select>
+              </div>
+              
+              
+              <div class="d-grid mt-4">
+                <button type="submit" id="transfer-btn" class="btn btn-primary" disabled>
+                  Transfer
+                </button>
+              </div>
+              
+              
+              <div class="mt-3">
+                <p class="small text-muted">
+                  This tool converts raw quantum-chemistry checkpoint/log files into 
+                  formats that can be read and analyzed. For <strong>chk → fchk</strong>, 
+                  only <code>.chk</code> files are accepted. For <strong>gbw → molden</strong>, 
+                  only <code>.gbw</code> files are accepted.
+                </p>
+              </div>
+            </form>
+            
+            
+            <div id="result-links" class="mt-4">
+              
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('convert-form');
+      const dropZone = document.getElementById('drop-zone');
+      const fileInput = document.getElementById('file-input');
+      const conversionSelect = document.getElementById('conversion-type');
+      const transferBtn = document.getElementById('transfer-btn');
+      const fileListContainer = document.getElementById('file-list');
+      
+      form.action = "{% url 'autocompute:convert_chk_to_fchk' %}";
+
+      
+    conversionSelect.addEventListener('change', () => {
+      if (conversionSelect.value === 'chk2fchk') {
+        form.action = "{% url 'autocompute:convert_chk_to_fchk' %}";
+      } else if (conversionSelect.value === 'gbw2molden') {
+        form.action = "{% url 'autocompute:convert_gbw_to_molden' %}";
+      }
+
+      updateFileList(fileInput.files);
+    });
+
+      
+      function validateFiles(files) {
+        const mode = conversionSelect.value;
+        const validExt = mode === 'chk2fchk' ? /\.chk$/i : /\.gbw$/i;
+        let allValid = true;
+        for (let f of files) {
+          if (!validExt.test(f.name)) {
+            allValid = false;
+            break;
+          }
+        }
+        return allValid;
+      }
+      
+      
+      function updateFileList(files) {
+        fileListContainer.innerHTML = '';
+        if (files.length === 0) {
+          transferBtn.disabled = true;
+          return;
+        }
+
+        Array.from(files).forEach(file => {
+          const li = document.createElement('div');
+          li.textContent = file.name;
+          fileListContainer.appendChild(li);
+        });
+
+        transferBtn.disabled = !validateFiles(files);
+      }
+      
+
+      dropZone.addEventListener('click', () => {
+        fileInput.click();
+      });
+      
+
+      fileInput.addEventListener('change', () => {
+        updateFileList(fileInput.files);
+      });
+      
+
+      ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, e => {
+          e.preventDefault();
+          e.stopPropagation();
+        });
+      });
+      
+
+      ;['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+          dropZone.classList.add('border-primary');
+          dropZone.style.backgroundColor = '#e9f7ff';
+        });
+      });
+      
+
+      ;['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+          dropZone.classList.remove('border-primary');
+          dropZone.style.backgroundColor = '#fafafa';
+        });
+      });
+      
+
+      dropZone.addEventListener('drop', e => {
+        const dt = e.dataTransfer;
+        if (dt && dt.files) {
+          fileInput.files = dt.files;
+          updateFileList(dt.files);
+        }
+      });
+      
+
+      conversionSelect.addEventListener('change', () => {
+        updateFileList(fileInput.files);
+      });
+      
+
+
+      document.getElementById('convert-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        transferBtn.disabled = true;
+        transferBtn.textContent = 'Converting...';
+        fetch(this.action, {
+          method: 'POST',
+          body: formData,
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(resp => resp.json())
+        .then(data => {
+          transferBtn.textContent = 'Transfer';
+          transferBtn.disabled = false;
+
+          document.getElementById('result-links').innerHTML = '';
+          if (data.error) {
+            const err = document.createElement('div');
+            err.className = 'alert alert-danger small';
+            err.textContent = data.error;
+            document.getElementById('result-links').appendChild(err);
+          } else if (data.zip_download_url) {
+            const a = document.createElement('a');
+            a.href = data.zip_download_url;
+            a.className = 'd-block';
+            a.textContent = 'Download converted file';
+            document.getElementById('result-links').appendChild(a);
+          } else if (data.download_urls) {
+
+            data.download_urls.forEach(url => {
+              const a = document.createElement('a');
+              a.href = url;
+              a.className = 'd-block';
+              a.textContent = `Download: ${url.split('/').pop()}`;
+              document.getElementById('result-links').appendChild(a);
+            });
+          }
+        })
+        .catch(err => {
+          transferBtn.textContent = 'Transfer';
+          transferBtn.disabled = false;
+          const errDiv = document.createElement('div');
+          errDiv.className = 'alert alert-danger small';
+          errDiv.textContent = 'An unexpected error occurred.';
+          document.getElementById('result-links').appendChild(errDiv);
+        });
+      });
+    });
+  </script>
+{% endblock content %}

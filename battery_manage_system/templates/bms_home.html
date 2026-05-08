@@ -1,0 +1,52 @@
+{% extends 'bms_base.html' %}
+{% load static %}
+{% block content%}
+<section class="layout_padding ">
+  <div class="nft-shop">
+
+    <div class="card-section">
+        <div class="card" id="card1">
+                <div>
+                  <img class="btc_img" src="{% static 'images/BMS/home-image-database.png' %}" alt=""/>
+                  <h3>Battery Data</h3>
+                  <p>User can explore li-ion & lithium anode battery data and  visualize their overall performance and detailed cycle condition</p>
+                </div>
+            </div>
+            <div class="card" id="card2">
+                <div>
+                      <img class="btc_img" src="{% static 'images/BMS/home-image-battery-curve-prediction.jpg' %}" alt=""/>
+                      <h3>Battery curve Prediction</h3>
+                      <p>User can predict Lithium metal battery rate curve based on composition and policy</p>
+                    </div>
+                </div>
+                <div class="card" id="card3">
+                    <div>
+                      <img class="btc_img" src="{% static 'images/BMS/home-image-battery-defer.jpg' %}" alt=""/>
+                      <h3>Pattern recognition</h3>
+                      <p>User can upload battery curve and get analysis of this curve by step ,leading to the battery recipe</p>
+                    </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+    
+    <script>
+
+      document.getElementById('card1').addEventListener('click', function() {
+          window.location.href = "{% url 'bms:bms_visual' %}";
+      });
+
+      document.getElementById('card2').addEventListener('click', function() {
+          window.location.href = "{% url 'bms:bms_short_prediction' %}";
+      });
+
+      document.getElementById('card3').addEventListener('click', function() {
+          window.location.href = "{% url 'ionic_liquid:search' %}";
+      });
+      
+  </script>
+{% endblock scripts %}

@@ -1,0 +1,284 @@
+{% extends 'autocompute/database/database_base.html'%}
+{% load static %}
+{% block head %} 
+
+
+
+
+
+<script
+type="text/javascript"
+src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.js"
+></script>
+
+
+<script type="text/javascript" src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+
+<script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
+
+
+
+<link rel="stylesheet" type="text/css"  href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" type="text/css"  href="https://cdn.datatables.net/buttons/1.4.0/css/buttons.dataTables.min.css" />
+
+
+<script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.flash.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.4.0/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.colVis.min.js"></script>
+
+
+
+<script type="text/javascript"
+src="https://cdn.datatables.net/fixedheader/3.2.3/js/dataTables.fixedHeader.min.js"></script>
+<style>
+    .container {
+        width: 100%; 
+        overflow-x: auto; 
+    }
+    .table-responsive {
+        min-width: 100%; 
+    }
+    
+    .modal {
+        z-index: 1100 !important; 
+    }
+
+    
+    .modal-backdrop {
+        z-index: 1090 !important; 
+    }
+    
+    .modal-dialog {
+        max-width: 90%; 
+    }
+
+    
+    .modal-body {
+        max-height: calc(100vh - 200px); 
+        overflow-y: auto;
+    }
+
+    
+    #data-container {
+        overflow-x: auto;
+        max-width: 100%;
+    }
+
+    
+    #jsmol-container {
+        padding: 20px;
+    }
+</style>
+{% endblock head %}
+
+{% block content %}
+
+
+<div class="container">
+  <table id="Electrolyte_table" class="table display table-responsive table-striped table-bordered "
+         style="width:600px;">
+      <thead class="bg-dark text-light">
+      {% for head in field_names %}
+          <th>{{ head }}</th>
+      {% endfor %}
+      </thead>
+      <tbody id="table-body">
+      {% for row in data %}
+          <tr>
+              {% for cell in row %}
+                  {% if cell %}
+                        <td>{{ cell }}</td>
+                  {% else %}
+                      <td>空</td>
+                  {% endif %}
+              {% endfor %}
+          </tr>
+      {% endfor %}
+      </tbody>
+  </table>
+
+  
+  <button id="load-more" class="btn btn-primary mt-3" data-page="{{ page_number }}" {% if not has_next %}style="display:none;"{% endif %}>
+    Load More
+  </button>
+</div>
+
+
+<div class="modal fade" id="dataModal" tabindex="-1" aria-labelledby="dataModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl"> 
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Details</h5> 
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> 
+        </div>
+        <div class="modal-body">
+          
+          <div class="row">
+            
+            <div class="col-md-5" id="jsmol-container">
+              
+              <div style="padding: 20px;">
+                <table width="100%" cellpadding="10">
+                  <tr>
+                    <td>
+                      <a href="javascript:Jmol.show2d(jmol, false)">3D</a>
+                      <br>
+                      
+                      <div id="jsmolApplet" style="width:100%; height:400px;"></div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+            
+            <div class="col-md-7" id="data-container">
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+{{ field_names|json_script:"field-names" }}
+
+{% endblock content %}
+
+{% block script %}
+<script>
+    document.querySelector('.btn-close').addEventListener('click', function () {
+        console.log('关闭按钮被点击');
+    });
+
+    $(document).ready(function () {
+
+        var table = $('#Electrolyte_table').DataTable({
+            orderCellsTop: true,
+            dom: 'lBfrtip',
+            buttons: [ 
+                { extend:'colvis', className:'dropdown-toggle' },
+                { extend:'csv' },
+                { extend: 'copy', text: 'Copy to clipboard' },
+                'excel', 'pdf', 'print' 
+            ],
+            initComplete: function () {
+
+                var btns = $('.dt-button');
+                btns.addClass('btn btn-secondary text-light btn-sm mx-1');
+                btns.removeClass('dt-button');
+            }
+        });
+
+        
+
+
+    var fieldNames = JSON.parse(document.getElementById('field-names').textContent);
+
+
+    var jmol;
+
+
+    var JmolInfo = {
+        width: 300,
+        height: 300,
+        debug: false,
+        color: "white",
+        use: "HTML5",
+
+
+        jarPath: "{% static 'jsmol/java' %}",
+        jarFile: "JmolAppletSigned.jar",
+        j2sPath: "{% static 'jsmol/j2s' %}",
+        isSigned: true,
+
+        console: "none",
+        script: "",
+    };
+
+
+
+    $('#Electrolyte_table tbody').on('click', 'tr', function () {
+
+            var data = table.row(this).data();
+
+
+            var componentNameB = data[fieldNames.indexOf('Component_Name_B')];
+
+
+            var content = '<table class="table">';
+            for (var i = 0; i < fieldNames.length; i++) {
+                content += '<tr><th>' + fieldNames[i] + '</th><td>' + data[i] + '</td></tr>';
+            }
+            content += '</table>';
+
+
+            $('#data-container').html(content);
+            
+
+            var fileUrl = "{% url 'autocompute:get_molecule_file' %}?component_name=" + encodeURIComponent(componentNameB);
+                
+
+            JmolInfo.script = "load '" + fileUrl + "';";
+            
+
+            if (jmol) {
+                Jmol._destroy(jmol);
+            }
+
+
+            jmol = Jmol.getApplet("jmol", JmolInfo);
+
+
+            document.getElementById('jsmolApplet').innerHTML = Jmol.getAppletHtml(jmol);
+
+
+            $('#dataModal').modal('show');
+        });
+
+
+        $('#load-more').click(function () {
+            var nextPage = parseInt($(this).attr('data-page')) + 1;
+            $.ajax({
+                url: "{% url 'autocompute:electrolyte' %}",
+                data: {
+                    'page': nextPage
+                },
+                dataType: 'json',
+                success: function (response) {
+
+                    var rows = '';
+                    $.each(response.data, function (index, row) {
+                        rows += '<tr>';
+                        $.each(row, function (i, cell) {
+                            if (cell) {
+                                rows += '<td>' + cell + '</td>';
+                            } else {
+                                rows += '<td>空</td>';
+                            }
+                        });
+                        rows += '</tr>';
+                    });
+
+
+                    $('#table-body').append(rows);
+                    table.rows.add($(rows)).draw(false);
+
+
+                    if (!response.has_next) {
+                        $('#load-more').hide();
+                    }
+                    $('#load-more').attr('data-page', nextPage);
+                },
+                error: function () {
+                    alert('Failed to load more data.');
+                }
+            });
+        });
+    });
+</script>
+{% endblock script %}

@@ -1,0 +1,516 @@
+{% extends 'autocompute/autocompute_base.html' %}
+{% load static %}
+
+{% block navbar %} 
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Database' %}">Database</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:MDCompute' %}">MDCompute</a>
+  </li>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:SMILESDrawer' %}">SMILESDrawer</a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:Visualization' %}">Visualization</a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:from_smiles_get_name' %}">GetName</a>
+    </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'home:homepage' %}">Home</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:QcCompute_base' %}">Return</a>
+  </li>
+{% endblock navbar %}
+
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+
+{% block content %}
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+        line-height: 1.6;
+        color: #333;
+        background-color: #f9f9f9;
+    }
+    h1, h2, h3 {
+        color: #2c3e50;
+    }
+    h1 {
+        text-align: center;
+    }
+    .equation {
+        text-align: center;
+        margin: 20px 0;
+    }
+    .content {
+        max-width: 800px;
+        margin: auto;
+        background: #fff;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    hr {
+        border: 0;
+        height: 1px;
+        background: #ddd;
+        margin: 40px 0;
+    }
+    ul, ol {
+        margin-left: 20px;
+    }
+    p, li {
+        font-size: 1.1em;
+    }
+    em {
+        font-style: italic;
+    }
+    
+</style>
+
+<div style="padding: 20px;">
+  <h2>1. Introduction to the High-Throughput redox potential Calculation Module</h2>
+  <p>
+    This module facilitates high-throughput quantum chemistry calculations based on Gaussian16 or ORCA, incorporating both structure optimization and single-point energy calculations. Users can choose between Gaussian16 and ORCA for their calculations.
+</p>
+
+<h3>Calculation Software Options:</h3>
+<ul>
+    <li>
+    <strong>Gaussian16:</strong> A commercial software requiring a license (available only to collaborating users). The calculation results on this platform are intended for educational purposes only and cannot be used for publication or commercial purposes without purchasing a license.
+    </li>
+    <li>
+    <strong>ORCA:</strong> Free for academic users. Suitable for both main group elements and transition metal-related calculations.
+    </li>
+</ul>
+
+<h3>Important Note on Software Usage:</h3>
+<ul>
+    <li>
+    Calculation results from Gaussian16 and ORCA cannot be mixed. Users must choose one software for all calculations in a project.
+    </li>
+</ul>
+
+<h3>Structure Optimization:</h3>
+<ul>
+    <li>
+    <strong>For Gaussian16:</strong>
+    <ul>
+        <li>Theoretical level: B3LYP/6-311G**</li>
+        <li>Dispersion correction: GD3BJ</li>
+        <li>Frequency correction factor: 0.9682</li>
+    </ul>
+    </li>
+    <li>
+    <strong>For ORCA:</strong>
+    <ul>
+        <li>Theoretical level: B3LYP/def2-TZVP</li>
+        <li>Acceleration method: RIJCOSX</li>
+        <li>Dispersion correction: GD3BJ</li>
+    </ul>
+    </li>
+</ul>
+<p>
+    The program automatically checks for optimization failures or imaginary frequencies and performs error correction if necessary.
+</p>
+
+<h3>Single-Point Energy Calculation:</h3>
+<ul>
+    <li>
+    <strong>For Gaussian16:</strong>
+    <ul>
+        <li>Theoretical level: M062X/6-311+(2d,p)</li>
+        <li>Dispersion correction: GD3</li>
+    </ul>
+    </li>
+    <li>
+    <strong>For ORCA:</strong>
+    <ul>
+        <li>Theoretical level: wB97M-V/def2-TZVP</li>
+        <li>Acceleration method: RIJCOSX</li>
+    </ul>
+    </li>
+</ul>
+<p>
+    The program automatically checks for calculation failures and performs error correction if necessary.
+</p>
+
+<p>
+    Users need to download the provided Excel file, fill in the calculation parameters, and upload the completed file. The program will automatically execute the calculations and download the results upon completion.
+</p>
+
+    <br>
+    <br>
+
+    <h2>2. Notes</h2>
+    
+    <h3>1. Software License and Usage:</h3>
+    <ul>
+        <li>
+        <strong>Gaussian16:</strong> A commercial software requiring a license (available only to collaborating users). The calculation results on this platform are intended for educational purposes only and cannot be used for publication or commercial purposes without purchasing a license.
+        </li>
+        <li>
+        <strong>ORCA:</strong> Free for academic users. Suitable for both main group elements and transition metal-related calculations.
+        </li>
+        <li>
+        Calculation results from Gaussian16 and ORCA cannot be mixed. Ensure all calculations in a project use the same software.
+        </li>
+    </ul>
+    
+    <h3>2. Excel File:</h3>
+    <ul>
+        <li>Users must use the provided Excel file to input relevant parameters.</li>
+        <li>Ensure the Name column does not contain illegal characters (e.g., Chinese characters, commas, periods, slashes, etc.).</li>
+        <li>Ensure the SMILES notation is correct (RDKit can be used to validate SMILES), otherwise the program will not function correctly.</li>
+    </ul>
+    
+    <h3>3. Fixed Parameters:</h3>
+    <ul>
+        <li>
+        The parameters for structure optimization and single-point energy calculations are fixed in the high-throughput calculation program to prevent errors that could result in meaningless results.
+        </li>
+    </ul>
+    
+    <h3>4. Applicability:</h3>
+    <ul>
+        <li>
+        The calculation parameters for Gaussian16 are only suitable for organic molecular systems.
+        </li>
+        <li>
+        For ORCA, the parameters support both main group elements and transition metal-related calculations.
+        </li>
+        <li>
+        Ensure the system does not contain transition metals when using Gaussian16, as this could lead to erroneous results. For transition metals, use ORCA.
+        </li>
+    </ul>
+
+    <div class="content">
+        <h1>Calculation of Molecular Oxidation and Reduction Potentials</h1>
+        <h2>Introduction</h2>
+        <p>
+            The oxidation and reduction potentials of molecules are fundamental properties in electrochemistry, crucial for understanding redox reactions, designing electrochemical cells, and exploring electron transfer processes. Computational chemistry provides valuable tools to calculate these potentials using quantum chemical methods.
+        </p>
+        <h2>Theoretical Background</h2>
+        <p>
+            The oxidation potential (<em>E<sub>ox</sub></em>) and reduction potential (<em>E<sub>red</sub></em>) can be calculated using the Gibbs free energy changes associated with the oxidation and reduction reactions, respectively. According to thermodynamics, the relationship between the Gibbs free energy change (ΔG) and the electrode potential (E) is given by:
+        </p>
+        <div class="formula">
+            $$ E = -\frac{\Delta G}{nF} $$
+        </div>
+        <p>
+            Where:
+        </p>
+        <ul>
+            <li><em>n</em> is the number of electrons transferred (usually 1 for single-electron processes).</li>
+            <li><em>F</em> is the Faraday constant (approximately 96485 C·mol<sup>−1</sup>).</li>
+        </ul>
+        <h3>Calculating Gibbs Free Energy Changes</h3>
+        <p>
+            The Gibbs free energy change for a redox reaction can be calculated using the total Gibbs free energies of the reactants and products obtained from quantum chemical calculations:
+        </p>
+        <div class="formula">
+            $$ \Delta G = G_{\text{products}} - G_{\text{reactants}} $$
+        </div>
+        <p>
+            For oxidation (loss of an electron):
+        </p>
+        <div class="formula">
+            $$ \text{M} \rightarrow \text{M}^+ + e^- $$
+            $$ \Delta G_{\text{ox}} = G_{\text{M}^+} - G_{\text{M}} $$
+        </div>
+        <p>
+            For reduction (gain of an electron):
+        </p>
+        <div class="formula">
+            $$ \text{M} + e^- \rightarrow \text{M}^- $$
+            $$ \Delta G_{\text{red}} = G_{\text{M}^-} - G_{\text{M}} $$
+        </div>
+        <h3>Electrode Potential Calculation</h3>
+        <p>
+            Combining the equations, the electrode potential relative to the standard hydrogen electrode (SHE) can be calculated as:
+        </p>
+        <div class="formula">
+            $$ E = -\frac{\Delta G}{nF} - E_{\text{SHE}} $$
+        </div>
+        <p>
+            Where <em>E<sub>SHE</sub></em> is the absolute potential of the standard hydrogen electrode, approximately 4.44 V.
+        </p>
+        <h2>Computational Procedure</h2>
+        <ol>
+            <li><strong>Geometry Optimization:</strong> Optimize the molecular geometries of the neutral molecule, its cation (for oxidation), and its anion (for reduction) using a suitable level of theory (e.g., DFT with B3LYP functional and appropriate basis set).</li>
+            <li><strong>Frequency Calculation:</strong> Perform frequency calculations to obtain thermal corrections and ensure that the optimized structures are at energy minima (no imaginary frequencies).</li>
+            <li><strong>Single Point Energy Calculation:</strong> Calculate the total electronic energies and thermal corrections to Gibbs free energies for each species.</li>
+            <li><strong>Compute Gibbs Free Energies:</strong> Obtain the total Gibbs free energy for each species:
+                <div class="formula">
+                    $$ G_{\text{total}} = E_{\text{electronic}} + G_{\text{thermal}} $$
+                </div>
+            </li>
+            <li><strong>Calculate ΔG:</strong> Compute the Gibbs free energy changes for oxidation and reduction:
+                <div class="formula">
+                    $$ \Delta G_{\text{ox}} = G_{\text{M}^+} - G_{\text{M}} $$
+                    $$ \Delta G_{\text{red}} = G_{\text{M}^-} - G_{\text{M}} $$
+                </div>
+            </li>
+            <li><strong>Calculate Electrode Potentials:</strong> Use the Nernst equation to calculate the electrode potentials relative to SHE:
+                <div class="formula">
+                    $$ E_{\text{ox}} = -\frac{\Delta G_{\text{ox}}}{nF} - E_{\text{SHE}} $$
+                    $$ E_{\text{red}} = -\frac{\Delta G_{\text{red}}}{nF} - E_{\text{SHE}} $$
+                </div>
+            </li>
+            <li><strong>Convert Units:</strong> Since computational energies are in Hartree and potentials are in volts, convert the energy units:
+                <div class="formula">
+                    $$ 1 \text{ Hartree} = 27.2114 \text{ eV} $$
+                    $$ \Delta G (\text{eV}) = \Delta G (\text{Hartree}) \times 27.2114 $$
+                </div>
+            </li>
+            <li><strong>Final Calculation:</strong> The electrode potentials can be simplified as:
+                <div class="formula">
+                    $$ E = \frac{\Delta G (\text{eV})}{n} - E_{\text{SHE}} $$
+                </div>
+            </li>
+        </ol>
+        <h2>Notes and Considerations</h2>
+        <div class="note">
+            <p><strong>Number of Electrons:</strong> Ensure that the correct number of electrons (<em>n</em>) is used in calculations; for single-electron processes, <em>n</em> = 1.</p>
+            <p><strong>Reference Electrode:</strong> Be consistent with the reference electrode potential; the absolute potential of SHE is approximately 4.44 V but can vary slightly in literature.</p>
+        </div>
+        <h2>Conclusion</h2>
+        <p>
+            Calculating the oxidation and reduction potentials of molecules using quantum chemical methods involves careful consideration of computational details and thermodynamic principles. Accurate results depend on the level of theory, inclusion of solvent effects, and proper unit conversions.
+        </p>
+    </div>
+
+    <br>
+    <br>
+
+    
+    <h3>3. Download EXCEL FILE</h3>
+    
+    <p>
+        <a href="{% static 'download/HTQC_ox_red.xlsx' %}" download>Download HTQC_ox_red FILE</a>
+    </p>
+
+    
+    <figure style="text-align: center;">
+      <img src="{% static 'images/oxidation_reduction_template.png' %}" alt="HTQC_ox_red_Example" style="width: 600px; height: auto; display: block; margin: auto;">
+      <figcaption style="text-align: center;"><b>Figure 1</b>: Example of the HTQC_ox_red Calculate EXCEL file.</figcaption>
+  </figure>
+
+    
+    <h3>4. Select Quantum Chemistry Calculation Software</h3>
+    <p>
+    <label for="qc-software-select">Choose Software:</label>
+    <select id="qc-software-select">
+        {% if gaussian_permission %}
+        <option value="gaussian">Gaussian</option>
+        {% endif %}
+        <option value="orca">ORCA</option>
+    </select>
+    </p>
+
+
+<div class="upload-container">
+    <h3>5. Upload EXCEL File</h3>
+    
+    
+    <form id="upload-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="file-upload">Upload EXCEL File:</label>
+        <input type="file" id="file-upload" name="excel_file" accept=".xlsx,.xls">
+        <button type="submit">Upload</button>
+    </form>
+
+    
+    <div id="validation-result" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc; display: none;">
+        <h3>Validation Results:</h3>
+        <div id="result-content"></div> 
+    </div>
+    
+    
+    <button id="start-button">Start</button>
+
+    
+    <div id="elapsed-time">Elapsed Time:</div>
+    
+    
+    <div id="error-message" style="display: none;"></div>
+    
+    
+    <div class="encrypted-id-container" id="encrypted-id-container" style="display: none;">
+        <label>Encrypted ID:</label>
+        <span id="encrypted-id"></span>
+        <button class="copy-button" id="copy-button">Copy</button>
+    </div>
+</div>
+      
+      
+  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+      $(document).ready(function(){
+          $('#upload-form').on('submit', function(e){
+              e.preventDefault();
+              
+              var formData = new FormData(this);
+              
+              $.ajax({
+                  url: "{% url 'autocompute:upload_excel_QcCoumpute_HTQC_ox_red' %}",
+                  type: "POST",
+                  data: formData,
+                  processData: false,
+                  contentType: false,
+                  success: function(response) {
+
+                    $('#validation-result').show();
+                    $('#result-content').html(response.validation_result);
+                  },
+                  error: function(response) {
+
+                      alert("Upload Failed: " + response.responseJSON.error);
+                  }
+              });
+          });
+      });
+  </script>
+</div>
+
+<script>
+
+    document.getElementById('upload-form').onsubmit = function(event) {
+        const fileInput = document.getElementById('file-upload');
+        const file = fileInput.files[0];
+        if (!file) {
+            alert('请上传一个文件');
+            return false;
+        }
+        const fileType = file.name.split('.').pop();
+        if (fileType !== 'xlsx' && fileType !== 'xls') {
+            alert('请上传EXCEL类型的文件');
+            event.preventDefault();
+        }
+    };
+
+
+    document.getElementById('start-button').addEventListener('click', startProcessing);
+
+    function startProcessing() {
+        
+
+    document.getElementById('start-button').disabled = true;
+    const formData = new FormData(document.getElementById('upload-form'));
+
+
+    const startTime = new Date();
+    
+
+    function updateElapsedTime() {
+        const now = new Date();
+        const elapsedTime = Math.floor((now - startTime) / 1000);
+        document.getElementById('elapsed-time').textContent = `Elapsed Time: ${elapsedTime} seconds`;
+        
+
+        if (!taskCompleted) {
+            setTimeout(updateElapsedTime, 1000);
+        }
+    }
+    
+
+    let taskCompleted = false;
+    updateElapsedTime();
+
+
+    let qcSoftware = document.getElementById('qc-software-select').value;
+
+    let url;
+    if (qcSoftware === 'gaussian') {
+        url = "{% url 'autocompute:process_excel_QcCoumpute_HTQC_ox_red' %}";
+    } else if (qcSoftware === 'orca') {
+        url = "{% url 'autocompute:process_excel_QcCoumpute_HTQC_ox_red_orca' %}";
+    } else {
+        alert('Please select a software option.');
+        return;
+    }
+
+    fetch(url, {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json();
+            } else {
+                return response.text().then(text => {
+                    throw new Error(`Expected JSON but got: ${text}`);
+                });
+            }
+        })
+        .then(data => {
+            if (data.encrypted_id) {
+                taskCompleted = true;
+
+
+                const encryptedIdContainer = document.getElementById('encrypted-id-container');
+                const encryptedIdSpan = document.getElementById('encrypted-id');
+                encryptedIdSpan.textContent = data.encrypted_id;
+                encryptedIdContainer.style.display = 'block';
+
+
+                alert('Please copy this ID and keep it in a safe place, then you can check whether the task you submitted is completed or not in the ‘Query’ screen under the main directory.');
+        
+
+                document.getElementById('copy-button').addEventListener('click', function() {
+
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = data.encrypted_id;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+
+
+                    alert('Encrypted ID copied to clipboard!');
+                });
+            } else if (data.error) {
+
+                const errorMessageDiv = document.getElementById('error-message');
+                errorMessageDiv.textContent = `Processing failed: ${data.error}\n\nStdout:\n${data.stdout}\n\nStderr:\n${data.stderr}`;
+                errorMessageDiv.style.display = 'block';
+            } else {
+                const errorMessageDiv = document.getElementById('error-message');
+                errorMessageDiv.textContent = 'Processing failed, please try again!';
+                errorMessageDiv.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const errorMessageDiv = document.getElementById('error-message');
+            errorMessageDiv.textContent = 'An unexpected error occurred. Please try again later.';
+            errorMessageDiv.style.display = 'block';
+        });
+    }
+
+
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock content %}

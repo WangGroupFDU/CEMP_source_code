@@ -1,0 +1,210 @@
+{% extends 'home_base.html' %}
+
+{% block content %}
+<style>
+  .ticket-manage-page {
+    background: linear-gradient(180deg, #f4f8fb 0%, #eef3f8 100%);
+    padding: 36px 18px 56px;
+  }
+
+  .ticket-manage-shell {
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+
+  .ticket-card,
+  .timeline-card,
+  .reply-card {
+    border-radius: 24px;
+    padding: 28px 32px;
+    border: 1px solid rgba(21, 54, 87, 0.08);
+    box-shadow: 0 18px 36px rgba(16, 44, 72, 0.08);
+    background: rgba(255, 255, 255, 0.96);
+    margin-bottom: 22px;
+  }
+
+  .ticket-meta {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+  }
+
+  .ticket-meta div {
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: #f6f9fc;
+    border: 1px solid #e3ecf5;
+  }
+
+  .ticket-meta strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #173450;
+  }
+
+  .ticket-message {
+    padding: 18px 20px;
+    border-radius: 20px;
+    border: 1px solid #e3ecf5;
+    background: #fbfdff;
+    margin-bottom: 16px;
+  }
+
+  .ticket-message.staff {
+    background: #eef6ff;
+    border-color: #d4e7fb;
+  }
+
+  .ticket-message-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #4f6377;
+  }
+
+  .ticket-message-body {
+    white-space: pre-wrap;
+    color: #20374d;
+    line-height: 1.8;
+  }
+
+  .reply-card label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 700;
+    color: #173450;
+  }
+
+  .reply-card .errorlist {
+    margin: 8px 0 0;
+    color: #b94a48;
+  }
+
+  .ticket-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .ticket-status-badge.waiting {
+    background: #fff4cf;
+    color: #8a6500;
+  }
+
+  .ticket-status-badge.completed {
+    background: #ddf7e7;
+    color: #1f6b3b;
+  }
+
+  .ticket-status-badge.closed {
+    background: #e8edf2;
+    color: #4c5d6e;
+  }
+
+  @media (max-width: 860px) {
+    .ticket-meta {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>
+
+<section class="ticket-manage-page">
+  <div class="ticket-manage-shell">
+    <div class="ticket-card">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+        <div>
+          <h1>Handle Ticket #{{ ticket.id }}</h1>
+          <p class="mb-1">{{ ticket.subject }}</p>
+          <p class="mb-0 text-muted">User: {{ ticket.creator.username }} · {{ ticket.creator.email }}</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+          <span class="ticket-status-badge {{ status_presentation.tone }}">{{ status_presentation.label }}</span>
+          {% if can_close %}
+            <form method="post" class="m-0" onsubmit="return confirm('Close this ticket? The conversation will become read-only.');">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="close">
+              <button type="submit" class="btn btn-outline-danger">Close Ticket</button>
+            </form>
+          {% endif %}
+          <a href="{% url 'tickets:manage_list' %}" class="btn btn-outline-secondary">Back to Management</a>
+          <a href="/admin/tickets/ticket/{{ ticket.id }}/change/?native=1" class="btn btn-outline-secondary">Open Native Admin</a>
+        </div>
+      </div>
+
+      <div class="ticket-meta">
+        <div>
+          <strong>Category</strong>
+          <span>{{ ticket.get_category_display }}</span>
+        </div>
+        <div>
+          <strong>Priority</strong>
+          <span>{{ ticket.get_priority_display }}</span>
+        </div>
+        <div>
+          <strong>Status</strong>
+          <span>{{ status_presentation.label }}</span>
+        </div>
+        <div>
+          <strong>Created At</strong>
+          <span>{{ ticket.created_at|date:"Y-m-d H:i" }}</span>
+        </div>
+        <div>
+          <strong>Updated At</strong>
+          <span>{{ ticket.updated_at|date:"Y-m-d H:i" }}</span>
+        </div>
+      </div>
+      <div class="mt-3 text-muted">{{ status_presentation.help_text }}</div>
+    </div>
+
+    <div class="timeline-card">
+      <h2>Conversation</h2>
+      {% for ticket_message in ticket_messages %}
+        <div class="ticket-message {% if ticket_message.author_role == 'staff' %}staff{% endif %}">
+          <div class="ticket-message-head">
+            <span>
+              {% if ticket_message.author_role == 'staff' %}
+                Maintainer{% if ticket_message.author %} · {{ ticket_message.author.username }}{% endif %}
+              {% else %}
+                {{ ticket.creator.username }}
+              {% endif %}
+            </span>
+            <span>{{ ticket_message.created_at|date:"Y-m-d H:i" }}</span>
+          </div>
+          <div class="ticket-message-body">{{ ticket_message.content }}</div>
+        </div>
+      {% empty %}
+        <p>No messages yet.</p>
+      {% endfor %}
+    </div>
+
+    <div class="reply-card">
+      <h2>Maintainer Reply</h2>
+      {% if can_reply %}
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <label for="{{ form.content.id_for_label }}">{{ form.content.label }}</label>
+          {{ form.content }}
+          {{ form.content.errors }}
+          <div class="mt-3">
+            <button type="submit" class="btn btn-primary">Submit Official Reply</button>
+          </div>
+        </form>
+      {% else %}
+        <div class="alert alert-secondary mb-0">This ticket has been closed. The management page is now read-only for this ticket.</div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock content %}

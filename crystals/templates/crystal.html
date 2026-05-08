@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+  
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  
+  <meta name="keywords" content="" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <title>Ionic Liquid</title>
+  
+  <link rel="stylesheet" type="text/css"
+    href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.1.3/assets/owl.carousel.min.css" />
+
+  
+  <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}" />
+
+  
+  <link href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap" rel="stylesheet" />
+  
+  <link href="{% static 'css/responsive.css' %}" rel="stylesheet" />
+  
+  <link href="{% static 'css/responsive.css' %}" rel="stylesheet" />
+  
+  <link href="{% static 'css/style.css' %}" rel="stylesheet" />
+
+  <script type="text/javascript" src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
+
+  
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.12.1/datatables.min.css"/>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.12.1/datatables.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/fixedheader/3.2.3/js/dataTables.fixedHeader.min.js"></script>
+</head>
+
+<body>
+  <div class="hero_area">
+    
+    <header class="header_section">
+      <div class="container">
+        <nav class="navbar navbar-expand-lg custom_nav-container pt-3">
+          <a class="navbar-brand" href= "">
+            <img src="{% static 'images/dlogo.png' %}" alt=""/><span>
+              Ionic Liquid
+            </span>
+          </a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <div class="d-flex ml-auto flex-column flex-lg-row align-items-center">
+              <ul class="navbar-nav  ">
+                <li class="nav-item active">
+                  <a class="nav-link" href="{% url 'search' %}">Search <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'calculate' %}"> Calculate</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'predict' %}"> Predict </a>
+                </li>
+
+              </ul>
+
+            </div>
+          </div>
+
+
+        </nav>
+      </div>
+    </header>
+    
+  </div>
+  <div class="container">
+          <section class="search_section">
+            <h5>
+              Search Ionic Liquid by Name
+            </h5>
+            <div class="search_form_container">
+              <form action="ionic_liquid" method ='post'>
+                  {% csrf_token %}
+                <input id="ionic_liquid_name" type="text" name="ionic_liquid_name" >
+                <button type="submit">
+                  Search
+                </button>
+              </form>
+            </div>
+           </div>
+        <div class="container">
+          <table id="ionic_liquid_table" class="display" style="width:100%">
+              <thead>
+              {% for head in field_names %}
+                 <th>{{ head }}</th>
+              {% endfor %}
+              </thead>
+              <tbody>
+              {% for row in data %}
+                  <tr>
+                  {% for cell in row %}
+                      <td>{{ cell }}</td>
+                  {% endfor %}
+                  </tr>
+              {% endfor %}
+              </tbody>
+          </table>
+          </section>
+   </div>
+
+
+  
+  <section class="container-fluid footer_section">
+    <p>
+      Copyright &copy; 2022 All Rights Reserved By
+      <a href="https://yingwanggroup/">Ying Wang Group</a>
+    </p>
+  </section>
+  
+
+
+  <script>
+   $(document).ready(function () {
+
+    $('#ionic_liquid_table thead tr')
+        .clone(true)
+        .addClass('filters')
+        .appendTo('#ionic_liquid_table thead');
+
+    var table = $('#ionic_liquid_table').DataTable({
+        orderCellsTop: true,
+        fixedHeader: true,
+        initComplete: function () {
+            var api = this.api();
+
+
+            api
+                .columns()
+                .eq(0)
+                .each(function (colIdx) {
+
+                    var cell = $('.filters th').eq(
+                        $(api.column(colIdx).header()).index()
+                    );
+                    var title = $(cell).text();
+                    $(cell).html('<input type="text" placeholder="' + title + '" />');
+
+
+                    $(
+                        'input',
+                        $('.filters th').eq($(api.column(colIdx).header()).index())
+                    )
+                        .off('keyup change')
+                        .on('change', function (e) {
+
+                            $(this).attr('title', $(this).val());
+                            var regexr = '({search})';
+
+                            var cursorPosition = this.selectionStart;
+
+                            api
+                                .column(colIdx)
+                                .search(
+                                    this.value != ''
+                                        ? regexr.replace('{search}', '(((' + this.value + ')))')
+                                        : '',
+                                    this.value != '',
+                                    this.value == ''
+                                )
+                                .draw();
+                        })
+                        .on('keyup', function (e) {
+                            e.stopPropagation();
+
+                            $(this).trigger('change');
+                            $(this)
+                                .focus()[0]
+                                .setSelectionRange(cursorPosition, cursorPosition);
+                        });
+                });
+        },
+    });
+});
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,172 @@
+{% extends 'autocompute/autocompute_base.html'%}
+{% load static %}
+
+{% block head %} 
+
+
+
+
+<style>
+    
+
+    h1 {
+        font-size: 2em;
+        color: #343a40;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    h2, h3 {
+        font-size: 1.75em;
+        color: #495057;
+        margin-top: 1.5rem;
+        text-align: center;
+    }
+
+    p {
+        font-size: 1.1em;
+        color: #6c757d;
+        margin-bottom: 1.25rem;
+        text-align: justify;
+        text-indent: 2em;
+    }
+
+    
+    p {
+        padding-left: 2rem;
+    }
+
+    ul, ol {
+        margin-bottom: 1.5rem;
+        padding-left: 2.5rem;
+    }
+
+    ul li, ol li {
+        margin-bottom: 10px;
+        font-size: 1.1em;
+    }
+
+    
+    hr {
+        border: none;
+        height: 1px;
+        background-color: #adb5bd;
+        margin: 2rem 0;
+    }
+
+    
+    figure {
+        text-align: center;
+        margin: 1.5rem auto;
+    }
+
+    figure img {
+        max-width: 100%;
+        height: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    figcaption {
+        font-size: 1em;
+        color: #6c757d;
+        margin-top: 0.5rem;
+    }
+
+    
+    b {
+        color: #212529;
+    }
+
+    
+    p {
+        text-indent: 30px;
+        text-align: justify;
+        margin-bottom: 20px;
+    }
+    
+    #navbarSupportedContent .nav-link {
+        font-size: 18px !important;
+    }
+</style>
+
+{% endblock head %}
+
+{% block navbar %} 
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Database' %}">Database</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:QcCompute_base' %}">QcCompute</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:MDCompute' %}">MDCompute</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:SMILESDrawer' %}">SMILESDrawer</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Visualization' %}">Visualization</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:from_smiles_get_name' %}">GetName</a>
+</li>
+
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'home:homepage' %}">Home</a>
+</li>
+{% endblock navbar %}
+
+{% block content %}
+<body>
+    
+    <section id="database-section">
+        <h1>1. Database</h1>
+        <p>
+            The database contains results from high-throughput quantum chemistry calculations, including cations, anions, ionic liquids, electrolytes, Li+-electrolyte dimers, and salts (lithium salts, sodium salts, and potassium salts). The structure optimizations were performed at the <b>B3LYP/6-311G**</b> level with GD3BJ dispersion corrections. Frequency calculations accounted for a frequency correction factor of 0.9682. The energy calculations were carried out using initial configurations from the structure optimizations, performed at the <b>M062X/6-311+(2d,p)</b> level with GD3 dispersion corrections.
+        </p>
+        <p>The types of data in the database include:</p>
+        <ul>
+            <li>Name</li>
+            <li>SMILES</li>
+            <li>Single-point energy (Hartree)</li>
+            <li>Free energy correction (Hartree)</li>
+            <li>Enthalpy correction (Hartree)</li>
+            <li>Entropy (J/mol K)</li>
+            <li>HOMO (Hartree)</li>
+            <li>LUMO (Hartree)</li>
+            <li>HOMO-LUMO gap (Hartree)</li>
+            <li>Dipole moment (Debye)</li>
+            <li>Gibbs free energy (Hartree)</li>
+            <li>Enthalpy (Hartree)</li>
+        </ul>
+    </section>
+
+    <hr />
+
+    
+    <section id="qccompute-section">
+        <h1>2. QCCompute</h1>
+        <p><b>QCCompute</b> is a high-throughput quantum chemistry calculation platform. Users can perform high-throughput quantum chemistry calculations based on ORCA 6.0.1 by submitting Excel files in the specified format. The quantum chemistry tasks include structure optimization and energy calculations, using the same theoretical levels and computational methods as those adopted in the database.</p>
+        <figure>
+            <img src="{% static 'images/Autocompute_HTQC_QCcompute.png' %}" alt="QCCompute Image" style="width: 600px; height: auto; display: block; margin: auto;">
+            <figcaption><b>Figure 1</b>: Workflow diagram of the high-throughput quantum chemistry calculation process in QCCompute.</figcaption>
+        </figure>
+    </section>
+
+    <hr />
+
+    
+    <section id="mdcompute-section">
+        <h1>3. MDCompute</h1>
+        <p><b>MDCompute</b> is an automated molecular dynamics calculation platform. Users can perform automated molecular dynamics calculations based on <b>Gromacs 2018.8</b> by submitting Excel files in the specified format. The calculations employ the GAFF force field and RESP atomic charges with a scaling factor of 0.7.</p>
+        <figure>
+            <img src="{% static 'images/Autocompute_HTMD_MDCompute.png' %}" alt="MDCompute Image" style="width: 800px; height: auto; display: block; margin: auto;">
+            <figcaption><b>Figure 2</b>: Workflow diagram of the automated molecular dynamics calculation process in MDCompute.</figcaption>
+        </figure>
+    </section>
+</body>
+{% endblock content %}

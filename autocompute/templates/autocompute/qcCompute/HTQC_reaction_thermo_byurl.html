@@ -1,0 +1,372 @@
+{% extends 'autocompute/autocompute_base.html' %}
+{% load static %}
+
+{% block navbar %} 
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Database' %}">Database</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:MDCompute' %}">MDCompute</a>
+  </li>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:SMILESDrawer' %}">SMILESDrawer</a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:Visualization' %}">Visualization</a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:from_smiles_get_name' %}">GetName</a>
+    </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'home:homepage' %}">Home</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:QcCompute_base' %}">Return</a>
+  </li>
+{% endblock navbar %}
+
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+
+{% block content %}
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+        line-height: 1.6;
+        color: #333;
+        background-color: #f9f9f9;
+    }
+    h1, h2, h3 {
+        color: #2c3e50;
+    }
+    h1 {
+        text-align: center;
+    }
+    .equation {
+        text-align: center;
+        margin: 20px 0;
+    }
+    .content {
+        max-width: 800px;
+        margin: auto;
+        background: #fff;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    hr {
+        border: 0;
+        height: 1px;
+        background: #ddd;
+        margin: 40px 0;
+    }
+    ul, ol {
+        margin-left: 20px;
+    }
+    p, li {
+        font-size: 1.1em;
+    }
+    em {
+        font-style: italic;
+    }
+    strong {
+            font-weight: bold;
+    }
+    a.download-button {
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: #007BFF;
+        color: #fff;
+        border-radius: 5px;
+        text-decoration: none;
+        margin: 20px 0;
+    }
+    a.download-button:hover {
+        background-color: #0056b3;
+    }
+    figure {
+        text-align: center;
+        margin: 40px 0;
+    }
+    figure img {
+        max-width: 100%;
+        height: auto;
+        border: 1px solid #ddd;
+    }
+    figcaption {
+        margin-top: 10px;
+        font-style: italic;
+        color: #555;
+    }
+    
+</style>
+
+<div style="padding: 20px;">
+  <h2>1. Introduction to the High-Throughput Reaction Thermodynamic Properties Calculation Module</h2>
+    <p>
+        This module facilitates high-throughput quantum chemistry calculations based on Gaussian16, incorporating both structure optimization and single-point energy calculations.
+        
+        <li><b>Structure Optimization:</b></li>
+        <li>Theoretical level: B3LYP/6-311G**</li>
+        <li>Dispersion correction: GD3BJ</li>
+        <li>Frequency correction factor: 0.9682</li>
+        <li>The program automatically checks for optimization failures or imaginary frequencies and performs error correction if necessary.</li>
+	
+        <li><b>Single-Point Energy Calculation:</b></li>
+        <li>Theoretical level: M062X/6-311+(2d,p)</li>
+        <li>Dispersion correction: GD3</li>
+        <li>Implicit solvent model: SMD (<strong>Simulating the reaction environment, such as solvent conditions, using the static dielectric constant.</strong>)</li>
+        <li>The program automatically checks for calculation failures and performs error correction if necessary.</li>
+    
+    Users need to download the provided Excel file, fill in the calculation parameters, and upload the completed file. The program will automatically execute the calculations and download the results upon completion.
+    </p>
+
+    <br>
+    <br>
+
+    <h2>2. Notes</h2>
+    <p>
+        <li><b>1.	Gaussian16 License: </b></li>
+        <li>Gaussian16 is a commercial software. The calculation results on this platform are intended for educational purposes only and cannot be used for publication or commercial purposes without purchasing a license.</li>
+        <li><b>2.	Excel File:</b></li>
+        <li>Users must use the provided Excel file to input relevant parameters.</li>
+        <li>Ensure the Name column does not contain illegal characters (e.g., Chinese characters, commas, periods, slashes, etc.).</li>
+        <li>Ensure the SMILES notation is correct (RDKit can be used to validate SMILES), otherwise the program will not function correctly.</li>
+        <li><b>3.	Fixed Parameters:</b></li>
+        <li>The parameters for structure optimization and single-point energy calculations are fixed in the high-throughput calculation program to prevent errors that could result in meaningless results.</li>
+        <li><b>4.	Applicability:</b></li>
+        <li>The current calculation parameters are only suitable for organic molecular systems.</li>
+        <li>Ensure the system does not contain transition metals, as this could lead to erroneous results.</li>
+    </p>
+
+    
+    <div class="formula">
+        <h2>3. Calculation Details</h2>
+        <p><strong>1. Calculation of Enthalpy Change (ΔH):</strong></p>
+        \[
+        \Delta H = \sum_{\text{products}} \nu_i H_i^\circ - \sum_{\text{reactants}} \nu_j H_j^\circ
+        \]
+        where:
+        <ul>
+            <li>\( \nu \): Stoichiometric coefficients of the substances.</li>
+            <li>\( H^\circ \): Standard enthalpy of the substances.</li>
+        </ul>
+
+        <p><strong>2. Calculation of Gibbs Free Energy Change (ΔG):</strong></p>
+        \[
+        \Delta G = \sum_{\text{products}} \nu_i G_i^\circ - \sum_{\text{reactants}} \nu_j G_j^\circ
+        \]
+        where:
+        <ul>
+            <li>\( G^\circ \): Standard Gibbs free energy of the substances.</li>
+        </ul>
+
+        <p><strong>3. Relation between ΔG, ΔH, and ΔS:</strong></p>
+        \[
+        \Delta G = \Delta H - T \Delta S
+        \]
+        where:
+        <ul>
+            <li>\( \Delta S \): Entropy change of the reaction.</li>
+            <li>\( T \): Absolute temperature (in Kelvin).</li>
+        </ul>
+    </div>
+
+    
+    <p>
+        By utilizing quantum chemistry calculations, we can accurately determine the thermodynamic properties of chemical reactions. These calculations are essential for predicting reaction behavior and guiding experimental and industrial applications.
+    </p>
+
+    <br>
+    <br>
+
+    <h3>4. Download EXCEL File</h3>
+    
+    <p>
+        
+        <a class="download-button" href="{% static 'download/HTQC_reaction_thermo.xlsx' %}" download>Download HTQC Thermo Reaction EXCEL File</a>
+    </p>
+
+    <h3>How to Fill the EXCEL Spreadsheet for Reaction Thermodynamics Calculation</h3>
+
+    <p>
+        Users can fill multiple <strong>Reactant</strong> and <strong>Product</strong> columns. For each reactant, ensure the column names are in the form: <strong>Reactant_Name_{N}</strong>, <strong>Reactant_SMILES_{N}</strong>, <strong>Reactant_Coefficient_{N}</strong>. For the same reactant, <strong>N must be the same</strong>. Similarly, for products, you should fill in <strong>Product_Name_{N}</strong>, <strong>Product_SMILES_{N}</strong>, <strong>Product_Coefficient_{N}</strong>. Here, <strong>Reactant_Coefficient_{N}</strong> and <strong>Product_Coefficient_{N}</strong> are the reaction coefficients; you can fill in any numerical values (according to the actual chemical reaction equation). The <strong>eps</strong> column represents the reaction environment; when users are reacting under a specific solvent, the eps column should be filled with the static dielectric constant of that solvent. If the reaction takes place in the gas phase, <strong>eps</strong> should be filled with <strong>0</strong>. Users can fill in any number of reactant or product columns.
+    </p>
+
+    
+    <figure>
+        <img src="{% static 'images/HTQC_reaction_thermo_template.png' %}" alt="Example of Thermodynamic Properties Calculation for Chemical Reactions">
+        <figcaption><strong>Figure 1</strong>: Example of thermodynamic properties calculation for chemical reactions.</figcaption>
+    </figure>
+
+
+<div class="upload-container">
+    <h3>5. Upload EXCEL File</h3>
+    
+    
+    <form id="upload-form" method="post" enctype="multipart/form-data">
+        <label for="file-upload">Upload EXCEL File:</label>
+        <input type="file" id="file-upload" name="excel_file" accept=".xlsx,.xls">
+        <button type="submit">Upload</button>
+    </form>
+    
+
+<div id="validation-result" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc; display: none;">
+    <h3>Validation Results:</h3>
+    <div id="result-content"></div> 
+</div>
+
+    
+    <button id="start-button">Start</button>
+
+    
+    <div id="elapsed-time">Elapsed Time:</div>
+    
+    
+    <div id="error-message" style="display: none;"></div>
+    
+    
+    <div class="encrypted-id-container" id="encrypted-id-container" style="display: none;">
+        <label>Encrypted ID:</label>
+        <span id="encrypted-id"></span>
+        <button class="copy-button" id="copy-button">Copy</button>
+    </div>
+</div>
+      
+      
+  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+      $(document).ready(function(){
+          $('#upload-form').on('submit', function(e){
+              e.preventDefault();
+              
+              var formData = new FormData(this);
+              
+              $.ajax({
+                  url: "{% url 'autocompute:upload_excel_QcCoumpute_HTQC_reaction_thermo' %}",
+                  type: "POST",
+                  data: formData,
+                  processData: false,
+                  contentType: false,
+                  success: function(response) {
+
+                    $('#validation-result').show();
+                    $('#result-content').html(response.validation_result);
+                  },
+                  error: function(response) {
+
+                      alert("Upload Failed: " + response.responseJSON.error);
+                  }
+              });
+          });
+      });
+  </script>
+</div>
+
+<script>
+
+    document.getElementById('upload-form').onsubmit = function(event) {
+        const fileInput = document.getElementById('file-upload');
+        const file = fileInput.files[0];
+        if (!file) {
+            alert('请上传一个文件');
+            return false;
+        }
+        const fileType = file.name.split('.').pop();
+        if (fileType !== 'xlsx' && fileType !== 'xls') {
+            alert('请上传EXCEL类型的文件');
+            event.preventDefault();
+        }
+    };
+
+
+    document.getElementById('start-button').addEventListener('click', startProcessing);
+
+    function startProcessing() {
+        
+
+    document.getElementById('start-button').disabled = true;
+    const formData = new FormData(document.getElementById('upload-form'));
+
+
+    const startTime = new Date();
+    
+
+    function updateElapsedTime() {
+        const now = new Date();
+        const elapsedTime = Math.floor((now - startTime) / 1000);
+        document.getElementById('elapsed-time').textContent = `Elapsed Time: ${elapsedTime} seconds`;
+        
+
+        if (!taskCompleted) {
+            setTimeout(updateElapsedTime, 1000);
+        }
+    }
+    
+
+    let taskCompleted = false;
+    updateElapsedTime();
+    
+    fetch("{% url 'autocompute:process_excel_HTQC_reaction_thermo' %}", {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json();
+            } else {
+                return response.text().then(text => {
+                    throw new Error(`Expected JSON but got: ${text}`);
+                });
+            }
+        })
+        .then(data => {
+            if (data.encrypted_id) {
+                taskCompleted = true;
+
+
+                const encryptedIdContainer = document.getElementById('encrypted-id-container');
+                const encryptedIdSpan = document.getElementById('encrypted-id');
+                encryptedIdSpan.textContent = data.encrypted_id;
+                encryptedIdContainer.style.display = 'block';
+
+
+                alert('Please copy this ID and keep it in a safe place, then you can check whether the task you submitted is completed or not in the ‘Query’ screen under the main directory.');
+        
+
+                document.getElementById('copy-button').addEventListener('click', function() {
+
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = data.encrypted_id;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+
+
+                    alert('Encrypted ID copied to clipboard!');
+                });
+            } else if (data.error) {
+
+                const errorMessageDiv = document.getElementById('error-message');
+                errorMessageDiv.textContent = `Processing failed: ${data.error}\n\nStdout:\n${data.stdout}\n\nStderr:\n${data.stderr}`;
+                errorMessageDiv.style.display = 'block';
+            } else {
+                const errorMessageDiv = document.getElementById('error-message');
+                errorMessageDiv.textContent = 'Processing failed, please try again!';
+                errorMessageDiv.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const errorMessageDiv = document.getElementById('error-message');
+            errorMessageDiv.textContent = 'An unexpected error occurred. Please try again later.';
+            errorMessageDiv.style.display = 'block';
+        });
+    }
+</script>
+{% endblock content %}

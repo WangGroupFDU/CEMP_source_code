@@ -1,0 +1,226 @@
+{% extends 'autocompute/autocompute_base.html' %}
+{% load static %}
+
+{% block navbar %} 
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:Database' %}">Database</a>
+</li>
+<li class="nav-item active">
+  <a class="nav-link" href="{% url 'autocompute:QcCompute_base' %}">QcCompute</a>
+</li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:MDCompute' %}">MDCompute</a>
+  </li>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:SMILESDrawer' %}">SMILESDrawer</a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:Visualization' %}">Visualization</a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'autocompute:from_smiles_get_name' %}">GetName</a>
+    </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'home:homepage' %}">Home</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="{% url 'autocompute:index' %}">Return</a>
+  </li>
+{% endblock navbar %}
+
+{% block content %}
+
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    
+    .card-container {
+        display: flex; 
+        flex-wrap: wrap; 
+        justify-content: space-around; 
+        align-items: flex-start; 
+        padding: 20px;
+         
+    }
+
+    
+    .card {
+        background-color: white; 
+        border-radius: 10px; 
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+        width: 200px; 
+        padding: 20px; 
+        text-align: center; 
+        transition: transform 0.2s; 
+        cursor: pointer; 
+        height: 300px; 
+        overflow: hidden; 
+    }
+
+    
+    .card:hover {
+        transform: translateY(-5px); 
+    }
+
+    .card img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .card h3 {
+        margin: 20px 0 10px;
+        font-size: 1.0rem;
+        color: #333;
+    }
+
+    .card p {
+        color: #666;
+        font-size: 0.8rem;
+        line-height: 1.5;
+    }
+
+    
+    @media (max-width: 768px) {
+        .card-container {
+            flex-direction: column;
+        }
+    }
+    
+    .reference-section {
+        margin: 40px 20px;
+        padding: 20px;
+        background-color: #f9f9f9; 
+        border: 1px solid #e0e0e0; 
+        border-radius: 5px; 
+    }
+
+    .reference-section h3, .reference-section h4 {
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .reference-section p {
+        color: #666;
+        margin-bottom: 15px;
+    }
+
+    .reference-section ol {
+        margin-left: 20px;
+    }
+
+    .reference-section li {
+        margin-bottom: 10px;
+        line-height: 1.6;
+        color: #444;
+    }
+</style>
+
+
+<body>
+    
+    <div class="card-container">
+        <div class="card" id="card1">
+            <img src="{% static 'images/Cation logo.jpg' %}" alt="Cations" style="width: 100px; height: auto; display: block; margin: auto;">
+            <h3>Cations</h3>
+            <p>Contains 431 entries of cation data.</p>
+        </div>
+
+        <div class="card" id="card2">
+            <img src="{% static 'images/Anion logo.jpg' %}" alt="Anions" style="width: 100px; height: auto; display: block; margin: auto;">
+            <h3>Anions</h3>
+            <p>Contains 63 entries of anion data.</p>
+        </div>
+        
+        <div class="card" id="card3">
+            <img src="{% static 'images/IL logo.jpg' %}" alt="Ionic Liquids" style="width: 100px; height: auto; display: block; margin: auto;">
+            <h3>Ionic Liquids</h3>
+            <p>Contains 1065 entries of ionic liquid data.</p>
+        </div>
+
+        <div class="card" id="card4">
+            <img src="{% static 'images/electrolyte logo.jpg' %}" alt="electrolytes" style="width: 100px; height: auto; display: block; margin: auto;">
+            <h3>Electrolytes</h3>
+            <p>Bulk molecules, batch calculation of molecule oxidation and reduction potential.</p>
+        </div>
+
+        <div class="card" id="card5">
+            <img src="{% static 'images/Li Electrolyte logo.jpg' %}" alt="Li-Electrolytes" style="width: 100px; height: auto; display: block; margin: auto;">
+            <h3>Li-Electrolytes</h3>
+            <p>Contains 4198 entries of quantum chemistry calculation results for dimers formed by Li+ and organic electrolytes.</p>
+        </div>
+
+        <div class="card" id="card6">
+            <img src="{% static 'images/Salt logo .jpg' %}" alt="Salts" style="width: 100px; height: auto; display: block; margin: auto;">
+            <h3>Salts</h3>
+            <p>Contains 499 entries of salts formed by Li+, Na+, and K+ with corresponding anions.</p>
+        </div>
+
+    </div>
+
+    
+    <script>
+
+        document.getElementById('card1').addEventListener('click', function() {
+            window.location.href = "{% url 'autocompute:Cation' %}";
+        });
+
+        document.getElementById('card2').addEventListener('click', function() {
+            window.location.href = "{% url 'autocompute:Anion' %}";
+        });
+
+        document.getElementById('card3').addEventListener('click', function() {
+            window.location.href = "{% url 'autocompute:IL' %}";
+        });
+        
+        document.getElementById('card4').addEventListener('click', function() {
+            window.location.href = "{% url 'autocompute:electrolyte' %}";
+        });
+
+        document.getElementById('card5').addEventListener('click', function() {
+            window.location.href = "{% url 'autocompute:Li_electrolyte' %}";
+        });
+        
+        document.getElementById('card6').addEventListener('click', function() {
+            window.location.href = "{% url 'autocompute:Salt' %}";
+        });
+
+    </script>
+</body>
+
+
+<div class="reference-section">
+    <h3>Notice:</h3>
+    <p>Users can select the desired database from the options in the upper right corner. Currently, there are six databases available: <b>Cation, Anion, IL (Ionic Liquid), Electrolyte, Li-electrolyte, and Salt (Li+, Na+, K+ salt).</b></p>
+    <ul>
+        <li><b>Cation Database</b>: Contains 431 entries of cation data, where all cations are monovalent (+1 charge). The SMILES is sourced from the ILthermo database.</li>
+        <li><b>Anion Database</b>: Contains 63 entries of anion data, where all anions are monovalent (-1 charge). The SMILES is sourced from the ILthermo database.</li>
+        <li><b>IL (Ionic Liquid) Database</b>: Contains 1065 entries of ionic liquid data, with both anions and cations being monovalent. The SMILES is sourced from the ILthermo database.</li>
+        <li><b>Li-electrolyte Database</b>: Contains 4198 entries of quantum chemistry calculation results for dimers formed by Li+ and organic electrolytes. The SMILES of the electrolytes is sourced from the publication: Data-Driven Insight into the Reductive Stability of Ion−Solvent Complexes in Lithium Battery Electrolytes.</li>
+        <li><b>Salt Database</b>: Contains 499 entries of salts formed by Li+, Na+, and K+ with corresponding anions. The anions’ SMILES is sourced from the ILthermo database.</li>
+    </ul>
+    <h4>References:</h4>
+    <ol>
+        <li>Frisch, M. J.; Trucks, G. W.; Schlegel, H. B.; et al. <em>Gaussian 16, Revision C.1</em>; Gaussian, Inc.: Wallingford, CT, 2016.</li>
+        <li>Stephens, P. J.; Devlin, F. J.; Chabalowski, C. F.; Frisch, M. J. Ab initio calculation of vibrational absorption and circular dichroism spectra using density functional force fields. <em>J. Phys. Chem.</em> 1994, <strong>98</strong>, 11623-11627.</li>
+        <li>Wang, J.; Wang, Y. Strategies to Improve the Quantum Computation Accuracy for Electrochemical Windows of Ionic Liquids. <em>J. Phys. Chem. B</em> 2024, <strong>128</strong>, 1943-1952.</li>
+        <li>Li, K.; Wang, J.; Song, Y.; Wang, Y. Machine learning-guided discovery of ionic polymer electrolytes for lithium metal batteries. <em>Nat. Commun.</em> 2023, <strong>14</strong>, 2789.</li>
+        <li>Hehre, W. J.; Ditchfield, R.; Pople, J. A. Self—consistent molecular orbital methods. XII. Further extensions of Gaussian—type basis sets for use in molecular orbital studies of organic molecules. <em>J. Chem. Phys.</em> 1972, <strong>56</strong>, 2257-2261.</li>
+        <li>Goerigk, L.; Grimme, S. A thorough benchmark of density functional methods for general main group thermochemistry, kinetics, and noncovalent interactions. <em>Phys. Chem. Chem. Phys.</em> 2011, <strong>13</strong>, 6670-6688.</li>
+        <li>Zhao, Y.; Truhlar, D. G. The M06 suite of density functionals for main group thermochemistry, thermochemical kinetics, noncovalent interactions, excited states, and transition elements: two new functionals and systematic testing of four M06-class functionals and 12 other functionals. <em>Theor. Chem. Acc.</em> 2008, <strong>120</strong>, 215-241.</li>
+        <li>Hanson, R. M.; Prilusky, J.; Renjian, Z.; Nakane, T.; Sussman, J. L. JSmol and the Next-Generation Web-Based Representation of 3D Molecular Structure as Applied to Proteopedia. <em>Israel Journal of Chemistry</em> 2013, <strong>53</strong>, 207-216.</li>
+        <li>Probst, D.; Reymond, J.-L. SmilesDrawer: Parsing and Drawing SMILES-Encoded Molecular Structures Using Client-Side JavaScript. <em>Journal of Chemical Information and Modeling</em> 2018, <strong>58</strong>, 1-7.</li>
+    </ol>
+</div>
+
+{% endblock content %}

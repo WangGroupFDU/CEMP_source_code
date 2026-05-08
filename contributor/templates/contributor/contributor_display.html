@@ -1,0 +1,414 @@
+{% extends 'home_base.html'%}
+{% load static %}
+
+{% block head %} 
+
+
+
+
+
+
+
+<link rel="stylesheet" type="text/css"  href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" type="text/css"  href="https://cdn.datatables.net/buttons/1.4.0/css/buttons.dataTables.min.css" />
+
+<script type="text/javascript" src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+
+
+<script type="text/javascript"
+src="https://cdn.datatables.net/fixedheader/3.2.3/js/dataTables.fixedHeader.min.js"></script>
+{% endblock head %}
+
+{% block content %}
+<style>
+    
+    .contributor-page {
+        background:
+            radial-gradient(circle at top left, rgba(31, 78, 121, 0.12), transparent 28%),
+            linear-gradient(180deg, #f6f9fc 0%, #eef3f8 100%);
+        padding: 36px 20px 56px;
+    }
+
+    .contributor-shell {
+        max-width: 1180px;
+        margin: 0 auto;
+    }
+
+    
+    .contributor-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 34px 36px;
+        border-radius: 28px;
+        background: linear-gradient(135deg, #16324f 0%, #21507f 55%, #3f7ab4 100%);
+        color: #ffffff;
+        box-shadow: 0 24px 48px rgba(17, 43, 72, 0.18);
+        margin-bottom: 28px;
+    }
+
+    .contributor-hero::before,
+    .contributor-hero::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        pointer-events: none;
+    }
+
+    .contributor-hero::before {
+        width: 240px;
+        height: 240px;
+        top: -120px;
+        right: -60px;
+    }
+
+    .contributor-hero::after {
+        width: 160px;
+        height: 160px;
+        bottom: -70px;
+        right: 180px;
+    }
+
+    .contributor-hero-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 20px;
+    }
+
+    .contributor-eyebrow {
+        display: inline-block;
+        margin-bottom: 12px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .contributor-hero h1 {
+        margin: 0 0 12px;
+        font-size: 36px;
+        font-weight: 700;
+        color: #ffffff;
+    }
+
+    .contributor-hero p {
+        max-width: 720px;
+        margin: 0;
+        font-size: 16px;
+        line-height: 1.8;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .feedback-card {
+        min-width: 250px;
+        max-width: 320px;
+        padding: 18px 20px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        backdrop-filter: blur(8px);
+    }
+
+    .feedback-card-label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.76);
+    }
+
+    .feedback-card a {
+        color: #ffffff;
+        font-size: 18px;
+        font-weight: 700;
+        word-break: break-word;
+    }
+
+    .feedback-card a:hover {
+        color: #dceeff;
+        text-decoration: none;
+    }
+
+    
+    .contributors-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+    }
+
+    .contributor-card {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: 28px;
+        border: 1px solid rgba(21, 57, 92, 0.08);
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 16px 34px rgba(33, 61, 91, 0.08);
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+    .contributor-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 22px 42px rgba(33, 61, 91, 0.12);
+        border-color: rgba(33, 80, 127, 0.16);
+    }
+
+    .contributor-card-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .avatar-frame,
+    .avatar-placeholder {
+        width: 82px;
+        height: 82px;
+        flex-shrink: 0;
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 10px 20px rgba(25, 54, 85, 0.12);
+    }
+
+    .avatar-frame img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .avatar-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #1d4a76 0%, #4f93d0 100%);
+        color: #ffffff;
+        font-size: 30px;
+        font-weight: 700;
+    }
+
+    .contributor-meta h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #18324b;
+    }
+
+    .contributor-role {
+        display: inline-flex;
+        margin-top: 8px;
+        padding: 5px 12px;
+        border-radius: 999px;
+        background: #edf4fb;
+        color: #21507f;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .contributor-contact {
+        margin-bottom: 18px;
+        color: #526173;
+        line-height: 1.7;
+    }
+
+    .contributor-contact a {
+        color: #1c5b98;
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+    .contributor-contact a:hover {
+        color: #163f6a;
+        text-decoration: none;
+    }
+
+    .contributor-card h3 {
+        margin: 0 0 14px;
+        font-size: 18px;
+        color: #1b3d5c;
+    }
+
+    .contribution-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 10px;
+    }
+
+    .contribution-list li {
+        position: relative;
+        padding: 12px 14px 12px 44px;
+        border-radius: 16px;
+        background: #f6f9fc;
+        color: #31485f;
+        line-height: 1.7;
+    }
+
+    .contribution-list li::before {
+        content: "";
+        position: absolute;
+        top: 18px;
+        left: 18px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1d4a76 0%, #6ba6db 100%);
+        box-shadow: 0 0 0 5px rgba(79, 147, 208, 0.12);
+    }
+
+    .contribution-list strong {
+        color: #16324f;
+    }
+
+    @media (max-width: 991px) {
+        .contributor-hero-content {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .feedback-card {
+            min-width: 0;
+            max-width: none;
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .contributor-page {
+            padding: 24px 14px 40px;
+        }
+
+        .contributor-hero {
+            padding: 26px 22px;
+            border-radius: 22px;
+        }
+
+        .contributor-hero h1 {
+            font-size: 28px;
+        }
+
+        .contributor-card {
+            padding: 22px;
+            border-radius: 20px;
+        }
+
+        .contributor-card-header {
+            align-items: flex-start;
+        }
+
+        .avatar-frame,
+        .avatar-placeholder {
+            width: 72px;
+            height: 72px;
+            border-radius: 18px;
+        }
+    }
+</style>
+
+<section class="contributor-page">
+    <div class="contributor-shell">
+        <div class="contributor-hero">
+            <div class="contributor-hero-content">
+                <div>
+                    <span class="contributor-eyebrow">Contributor Team</span>
+                    <h1>People Behind CEMP</h1>
+                    <p>
+                        CEMP is built through interdisciplinary collaboration in clean energy materials,
+                        database engineering, algorithm development, and platform implementation.
+                    </p>
+                </div>
+                <div class="feedback-card">
+                    <span class="feedback-card-label">Feedback & Suggestions</span>
+                    <p style="margin: 0 0 10px; color: rgba(255, 255, 255, 0.88); line-height: 1.7;">
+                        We welcome suggestions on content, features, and usability improvements.
+                    </p>
+                    <a href="mailto:user@example.com">user@example.com</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="contributors-grid">
+            
+            <article class="contributor-card">
+                <div class="contributor-card-header">
+                    <div class="avatar-placeholder" aria-hidden="true">Y</div>
+                    <div class="contributor-meta">
+                        <h2>Ying Wang</h2>
+                        <span class="contributor-role">Principal Investigator</span>
+                    </div>
+                </div>
+                <p class="contributor-contact">
+                    <strong>Contact:</strong>
+                    <a href="mailto:user@example.com">user@example.com</a>
+                </p>
+                <h3>Contribution</h3>
+                <ul class="contribution-list">
+                    <li>Provided the website concept.</li>
+                    <li>Guided the overall design direction.</li>
+                    <li>Developed the core framework of the website.</li>
+                    <li>Led the <strong>Ionic Liquids</strong> section.</li>
+                </ul>
+            </article>
+
+            
+            <article class="contributor-card">
+                <div class="contributor-card-header">
+                    <div class="avatar-frame">
+                        <img src="{% static 'images/jifengwang.jpeg' %}" alt="Jifeng Wang">
+                    </div>
+                    <div class="contributor-meta">
+                        <h2>Jifeng Wang</h2>
+                        <span class="contributor-role">Chief Technology Officer</span>
+                    </div>
+                </div>
+                <p class="contributor-contact">
+                    <strong>Contact:</strong>
+                    <a href="mailto:user@example.com">user@example.com</a>
+                </p>
+                <h3>Contribution</h3>
+                <ul class="contribution-list">
+                    <li>Built the <strong>Autocompute</strong> section.</li>
+                    <li>Developed the <strong>Ionic Liquids</strong> section.</li>
+                    <li>Developed the <strong>Polymer</strong> section.</li>
+                    <li>Developed the <strong>Crystal</strong> section.</li>
+                    <li>Designed the <strong>Query</strong> algorithm.</li>
+                    <li>Implemented platform logic, high-throughput QC/MD workflows, and core functions.</li>
+                </ul>
+            </article>
+
+            
+            <article class="contributor-card">
+                <div class="contributor-card-header">
+                    <div class="avatar-frame">
+                        <img src="{% static 'images/jujiazhe.jpeg' %}" alt="Jiazhe Ju">
+                    </div>
+                    <div class="contributor-meta">
+                        <h2>Jiazhe Ju</h2>
+                        <span class="contributor-role">Platform Contributor</span>
+                    </div>
+                </div>
+                <p class="contributor-contact">
+                    <strong>Contact:</strong>
+                    <a href="mailto:user@example.com">user@example.com</a>
+                </p>
+                <h3>Contribution</h3>
+                <ul class="contribution-list">
+                    <li>Built the <strong>Battery Manage System</strong> section.</li>
+                    <li>Improved website implementation details.</li>
+                    <li>Developed <strong>user login and management</strong>.</li>
+                </ul>
+            </article>
+        </div>
+    </div>
+</section>
+{% endblock content %}

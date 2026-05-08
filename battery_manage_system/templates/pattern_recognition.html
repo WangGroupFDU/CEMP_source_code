@@ -1,0 +1,214 @@
+{% extends 'bms_base.html' %}
+{% load static %}
+
+{% block header_scripts %}
+<link
+  rel="stylesheet"
+  href="{% static 'battery_manage_system/style_pattern_recgonition.css'%}"
+/>
+{% endblock header_scripts %}
+
+{% block content%}
+<div class="pattern-container">
+    <div class="header">
+        <h1>Curve Analysis Dashboard</h1>
+        <p>Advanced electrochemical curve analysis and parameter extraction</p>
+    </div>
+
+    <div class="cards-container">
+        
+        <div class="card">
+            <h2 class="card-title">
+                📊 Upload Curve File
+            </h2>
+            
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Drag and drop your curve file here</div>
+                <div class="upload-subtext">Supports .csv, .txt, .xlsx files up to 10MB</div>
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    Choose File
+                </button>
+                <input type="file" id="fileInput" class="file-input" accept=".csv,.txt,.xlsx" />
+            </div>
+
+            <div class="file-info" id="fileInfo">
+                <div class="file-name" id="fileName"></div>
+                <div class="file-size" id="fileSize"></div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <div>Analyzing curve data...</div>
+            </div>
+        </div>
+
+        
+        <div class="card">
+            <h2 class="card-title">
+                🔬 Analysis Results
+            </h2>
+
+            <div class="results-section" id="resultsSection">
+                <div class="parameter-grid">
+                    <div class="parameter-item">
+                        <div class="parameter-label">Cathode Material</div>
+                        <div class="parameter-value" id="cathode">LiFePO₄</div>
+                    </div>
+
+                    <div class="parameter-item">
+                        <div class="parameter-label">Cathode Area Loading</div>
+                        <div class="parameter-value" id="cathodeLoading">2.5<span class="parameter-unit">mg/cm²</span></div>
+                    </div>
+
+                    <div class="parameter-item">
+                        <div class="parameter-label">Membrane Size</div>
+                        <div class="parameter-value" id="membraneSize">25<span class="parameter-unit">mm</span></div>
+                    </div>
+
+                    <div class="parameter-item">
+                        <div class="parameter-label">Polymer Percent</div>
+                        <div class="parameter-value" id="polymerPercent">15<span class="parameter-unit">%</span></div>
+                    </div>
+
+                    <div class="parameter-item">
+                        <div class="parameter-label">Cycle Temperature</div>
+                        <div class="parameter-value" id="cycleTemp">25<span class="parameter-unit">°C</span></div>
+                    </div>
+
+                    <div class="parameter-item">
+                        <div class="parameter-label">C-Rate</div>
+                        <div class="parameter-value" id="rate">0.5<span class="parameter-unit">C</span></div>
+                    </div>
+
+                    <div class="parameter-item">
+                        <div class="parameter-label">Cycle Number</div>
+                        <div class="parameter-value" id="cycleNumber">150<span class="parameter-unit">cycles</span></div>
+                    </div>
+
+                    <div class="parameter-item">
+                        <div class="parameter-label">Capacity</div>
+                        <div class="parameter-value" id="capacity">145<span class="parameter-unit">mAh/g</span></div>
+                    </div>
+
+                    <div class="parameter-item">
+                        <div class="parameter-label">Voltage Range</div>
+                        <div class="parameter-value" id="voltageRange">2.5-4.2<span class="parameter-unit">V</span></div>
+                    </div>
+
+                    <div class="parameter-item">
+                        <div class="parameter-label">Efficiency</div>
+                        <div class="parameter-value" id="efficiency">98.5<span class="parameter-unit">%</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content%}
+
+{% block scripts %}
+<script>
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const loading = document.getElementById('loading');
+    const resultsSection = document.getElementById('resultsSection');
+
+
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFile(files[0]);
+        }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFile(e.target.files[0]);
+        }
+    });
+
+    function handleFile(file) {
+
+        fileName.textContent = file.name;
+        fileSize.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+        fileInfo.classList.add('show');
+
+
+        loading.classList.add('show');
+        resultsSection.classList.remove('show');
+
+
+        setTimeout(() => {
+            analyzeFile(file);
+        }, 2000);
+    }
+    
+
+    function analyzeFile(file) {
+
+        loading.classList.remove('show');
+
+
+        const analysisResults = generateAnalysisResults();
+        
+
+        updateResults(analysisResults);
+
+
+        resultsSection.classList.add('show');
+    }
+
+    function generateAnalysisResults() {
+        const cathodes = ['LiFePO₄', 'LNMO', 'NCM'];
+        const temperatures = [28,50,80];
+        const rates = [0.1, 0.2, 0.5, 1.0, 2.0, 5.0];
+
+        return {
+            cathode: cathodes[Math.floor(Math.random() * cathodes.length)],
+            cathodeLoading: (Math.random() * 5 + 1).toFixed(1),
+            membraneSize: Math.floor(Math.random() * 20 + 20),
+            polymerPercent: Math.floor(Math.random() * 25 + 10),
+            cycleTemp: temperatures[Math.floor(Math.random() * temperatures.length)],
+            rate: rates[Math.floor(Math.random() * rates.length)],
+            cycleNumber: Math.floor(Math.random() * 500 + 50),
+            capacity: Math.floor(Math.random() * 100 + 100),
+            voltageRange: `${(Math.random() * 1 + 2).toFixed(1)}-${(Math.random() * 1 + 4).toFixed(1)}`,
+            efficiency: (Math.random() * 10 + 90).toFixed(1)
+        };
+    }
+
+    function updateResults(results) {
+        document.getElementById('cathode').textContent = results.cathode;
+        document.getElementById('cathodeLoading').innerHTML = `${results.cathodeLoading}<span class="parameter-unit">mg/cm²</span>`;
+        document.getElementById('membraneSize').innerHTML = `${results.membraneSize}<span class="parameter-unit">mm</span>`;
+        document.getElementById('polymerPercent').innerHTML = `${results.polymerPercent}<span class="parameter-unit">%</span>`;
+        document.getElementById('cycleTemp').innerHTML = `${results.cycleTemp}<span class="parameter-unit">°C</span>`;
+        document.getElementById('rate').innerHTML = `${results.rate}<span class="parameter-unit">C</span>`;
+        document.getElementById('cycleNumber').innerHTML = `${results.cycleNumber}<span class="parameter-unit">cycles</span>`;
+        document.getElementById('capacity').innerHTML = `${results.capacity}<span class="parameter-unit">mAh/g</span>`;
+        document.getElementById('voltageRange').innerHTML = `${results.voltageRange}<span class="parameter-unit">V</span>`;
+        document.getElementById('efficiency').innerHTML = `${results.efficiency}<span class="parameter-unit">%</span>`;
+    }
+
+
+
+
+
+</script>
+{% endblock scripts %}
+

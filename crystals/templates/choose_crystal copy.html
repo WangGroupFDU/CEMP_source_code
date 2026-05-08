@@ -1,0 +1,9 @@
+{% extends 'crystals_base.html'%}
+{% block content %}
+Choose Crystal:
+<select onchange="window.location.href = this.value;" name="crystal" id="crystal">
+  {% for obj in crystal_list %}
+    <option value="/crystals/crystal_selected/?crystal={{ obj.crystal }}">{{ obj.crystal }}</option>
+  {% endfor %}
+</select>
+{% endblock %}

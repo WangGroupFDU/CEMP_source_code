@@ -1,0 +1,42 @@
+{% extends 'home_base.html' %}
+
+{% block title %}Activation Email Resent{% endblock title %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white text-center">
+                    <h3><i class="fas fa-envelope"></i> Activation Email Resent</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-check-circle"></i> Email Sent Successfully</h5>
+                        <p class="mb-0">
+                            Hello <strong>{{ username }}</strong>! A new activation email has been sent to <strong>{{ email }}</strong>.
+                        </p>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <h5><i class="fas fa-exclamation-triangle"></i> Important Notice</h5>
+                        <ul class="mb-0">
+                            <li>Please click the activation link in the email within <strong>3 days</strong> to activate your account.</li>
+                            <li>If you don't receive the email, please check your <strong>spam folder</strong>.</li>
+                        </ul>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <a href="{% url 'register:login' %}" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Back to Login
+                        </a>
+                        <a href="{% url 'home:homepage' %}" class="btn btn-secondary">
+                            <i class="fas fa-home"></i> Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

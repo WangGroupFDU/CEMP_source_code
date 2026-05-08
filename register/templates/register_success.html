@@ -1,0 +1,55 @@
+{% extends 'home_base.html' %}
+
+{% block title %}Registration Success{% endblock title %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white text-center">
+                    <h3><i class="fas fa-check-circle"></i> Registration Successful!</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-envelope"></i> Activation Email Sent</h5>
+                        <p class="mb-0">
+                            Hello <strong>{{ username }}</strong>! We have sent an activation email to <strong>{{ email }}</strong>.
+                        </p>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <h5><i class="fas fa-exclamation-triangle"></i> Important Notice</h5>
+                        <ul class="mb-0">
+                            <li>Please click the activation link in the email within <strong>3 days</strong> to activate your account.</li>
+                            <li>If you don't receive the email, please check your <strong>spam folder</strong>.</li>
+                            <li>If the link expires, you may need to register again.</li>
+                        </ul>
+                    </div>
+
+                    {% if is_limited_domain %}
+                    <div class="alert alert-warning">
+                        <h5><i class="fas fa-info-circle"></i> Email Domain Authorization</h5>
+                        <p class="mb-0">
+                            Your email domain (<strong>{{ domain }}</strong>) has limited authorization: You can <strong>download database</strong> but <strong>cannot submit autocompute tasks</strong> after activation.
+                        </p>
+                        <p class="mb-0 mt-2">
+                            For full access, please re-register with an educational (*.edu.*), military (*.mil.*), or government (*.gov.*) email domain.
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    <div class="text-center mt-4">
+                        <a href="{% url 'register:login' %}" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Back to Login
+                        </a>
+                        <a href="{% url 'home:homepage' %}" class="btn btn-secondary">
+                            <i class="fas fa-home"></i> Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
