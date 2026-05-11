@@ -123,11 +123,10 @@ This public code snapshot supports reproducibility at the level of software arch
 
 ## Citation
 
-If you use this code snapshot in academic work, cite the associated CEMP manuscript. Replace the placeholder below with the final citation after publication:
+If you use this code snapshot in academic work, cite the associated CEMP manuscript.
 
 ```text
-CEMP: Clean Energy Materials Platform for Materials Data, Machine-Learning Prediction,
-and Automated Computational Workflows. Manuscript in preparation / under review.
+CEMP: An Online Cheminformatics Platform for Clean Energy Materials. Manuscript in preparation / under review.
 ```
 
 ## License
