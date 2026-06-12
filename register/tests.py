@@ -12,24 +12,24 @@ class UserProfileAdminViewTests(TestCase):
 
         self.staff_user = User.objects.create_user(
             username="staff_admin",
-            email="user@example.com",
+            email="support@localhost.invalid",
             password="test-pass-123",
             is_staff=True,
             is_superuser=True,
         )
         self.normal_user = User.objects.create_user(
             username="normal_user",
-            email="user@example.com",
+            email="support@localhost.invalid",
             password="test-pass-123",
         )
         self.target_user = User.objects.create_user(
             username="target_user",
-            email="user@example.com",
+            email="support@localhost.invalid",
             password="test-pass-123",
         )
         self.second_target = User.objects.create_user(
             username="second_target",
-            email="user@example.com",
+            email="support@localhost.invalid",
             password="test-pass-123",
         )
 

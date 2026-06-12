@@ -1,7 +1,12 @@
-# Public Documentation Placeholder
+# Ionic Liquid Database API Test Notes
 
-This internal document was removed from the public snapshot because it contained private operational notes or non-English comments that are not required for paper-code inspection.
+Load the local demo data before testing database-backed endpoints:
 
-Original relative path: `ionic_liquid/TEST_DATABASE_API.md`
+```bash
+python manage.py migrate
+python manage.py load_public_data --manifest data/public_manifest.json --mode demo
+python manage.py seed_public_demo --username cemp_demo --password cemp_demo_local
+```
 
-Please refer to the top-level `README.md` and `SECURITY_PUBLICATION_NOTES.md` for the public description of this code release.
+Use `ionic_liquid/API_TEST_EXAMPLES.md` for request examples. All public examples
+should use `http://localhost:8000` and the demo token flow.

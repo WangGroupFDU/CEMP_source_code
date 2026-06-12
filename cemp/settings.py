@@ -10,12 +10,91 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
-from pathlib import Path
 import os
-from cryptography.fernet import Fernet  
+import base64
+import hashlib
+from pathlib import Path
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+os.makedirs(BASE_DIR / "logs", exist_ok=True)
+
+
+def env_list(name, default):
+    """
+    功能目的：
+        将逗号分隔的环境变量解析为 Django 可直接使用的字符串列表。
+    输入参数：
+        name: 环境变量名称。
+        default: 环境变量缺失或为空时使用的默认列表。
+    返回值：
+        去除空白后的字符串列表。
+    关键流程：
+        先读取环境变量；若为空则返回默认值；否则按逗号拆分并过滤空项。
+    可能报错或边界情况：
+        环境变量中多余的逗号会被忽略，避免生成空 host 或 origin。
+    """
+    raw_value = os.environ.get(name, "")
+    if not raw_value.strip():
+        return list(default)
+    return [item.strip() for item in raw_value.split(",") if item.strip()]
+
+
+def env_bool(name, default=False):
+    """
+    功能目的：
+        将常见布尔环境变量写法转换为 Python bool。
+    输入参数：
+        name: 环境变量名称。
+        default: 环境变量缺失时使用的默认值。
+    返回值：
+        True 或 False。
+    关键流程：
+        仅把 1、true、yes、on 视为真值，其余非空值视为假值。
+    可能报错或边界情况：
+        拼写错误会被解释为 False，因此生产部署应显式检查环境配置。
+    """
+    raw_value = os.environ.get(name)
+    if raw_value is None:
+        return default
+    return raw_value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def get_fernet_key():
+    """
+    功能目的：
+        获取 CEMP 用于加密任务路径等短文本的 Fernet key。
+    输入参数：
+        无，配置来自 CEMP_FERNET_KEY 或 CEMP_DEMO_FERNET_SEED 环境变量。
+    返回值：
+        满足 Fernet 要求的 urlsafe-base64 字节串。
+    关键流程：
+        优先使用 CEMP_FERNET_KEY；若未提供，则用本地 demo seed 派生稳定 key。
+    可能报错或边界情况：
+        本地派生 key 只适合 demo；生产环境必须提供 CEMP_FERNET_KEY，避免不同部署共享默认密钥。
+    """
+    explicit_key = os.environ.get("CEMP_FERNET_KEY", "").strip()
+    if explicit_key:
+        return explicit_key.encode("utf-8")
+    seed = os.environ.get("CEMP_DEMO_FERNET_SEED", "cemp-public-demo-fernet-seed")
+    return base64.urlsafe_b64encode(hashlib.sha256(seed.encode("utf-8")).digest())
+
+
+def optional_path(name):
+    """
+    功能目的：
+        只在目录存在时加入 Django 路径配置，避免公开版缺少可选静态目录时报 warning。
+    输入参数：
+        name: 相对 BASE_DIR 的目录名。
+    返回值：
+        存在则返回 Path，不存在则返回 None。
+    关键流程：
+        公开仓库不包含所有生产静态目录，因此按存在性过滤。
+    可能报错或边界情况：
+        如果用户后续新增目录，需要重启 Django 才会重新读取配置。
+    """
+    path = BASE_DIR / name
+    return path if path.exists() else None
 
 
 
@@ -71,56 +150,31 @@ LOGIN_URL = "/register/login/"
 
 
 
-SECRET_KEY = "<CHANGE_ME_DJANGO_SECRET_KEY>"
+SECRET_KEY = os.environ.get(
+    "CEMP_SECRET_KEY",
+    "cemp-public-demo-secret-key-change-before-production-use",
+)
+
+
+FERNET_SECRET_KEY = get_fernet_key()
 
 
 
-
-FERNET_KEY_FILE_PATH = os.path.join(BASE_DIR, "static", "Fernet_key", "FernetKey")
-
-with open(FERNET_KEY_FILE_PATH, "rb") as key_file:
-    FERNET_SECRET_KEY = (
-        key_file.read().strip()
-    )  
+DEBUG = env_bool("CEMP_DEBUG", True)
 
 
-
-DEBUG = True
-
-
-ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "localhost",
-    "<PRIVATE_IP>",
-    "0.0.0.0",
-    "<PRIVATE_IP>",
-    "example.com",
-    "<PRIVATE_IP>",
-    "<PRIVATE_IP>",
-    "<PRIVATE_IP>",
-    "example.com",
-]
+ALLOWED_HOSTS = env_list("CEMP_ALLOWED_HOSTS", ["127.0.0.1", "localhost", "0.0.0.0"])
 
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://example.com",
-    "https://example.com",
-    "http://<PRIVATE_IP>:4173",
-    "http://<PRIVATE_IP>:4174",
-    "http://<PRIVATE_IP>:8686",
-    "http://<PRIVATE_IP>:4173",
-    "http://<PRIVATE_IP>:4174",
-    
-]
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3001",
-    "http://<PRIVATE_IP>:4173",
-    "http://<PRIVATE_IP>:4174",
-    "http://<PRIVATE_IP>:4174",
-    "http://<PRIVATE_IP>:3001",
-    "http://<PRIVATE_IP>:4173",
-]
+CSRF_TRUSTED_ORIGINS = env_list(
+    "CEMP_CSRF_TRUSTED_ORIGINS",
+    ["http://localhost:8000", "http://127.0.0.1:8000"],
+)
+CORS_ALLOW_ALL_ORIGINS = env_bool("CEMP_CORS_ALLOW_ALL_ORIGINS", True)
+CORS_ALLOWED_ORIGINS = env_list(
+    "CEMP_CORS_ALLOWED_ORIGINS",
+    ["http://localhost:3001", "http://127.0.0.1:3001"],
+)
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
@@ -222,20 +276,22 @@ WSGI_APPLICATION = "cemp.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "public_example.sqlite3",
+        "NAME": os.environ.get("CEMP_SQLITE_PATH", str(BASE_DIR / "public_demo.sqlite3")),
         "OPTIONS": {
             "timeout": 30,
         },
     },
-    "mysql": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "mydb",
-        "USER": "root",
-        "PASSWORD": "<CHANGE_ME_DB_PASSWORD>",
-        "HOST": "127.0.0.1",
-        "PORT": 3306,
-    },
 }
+
+if env_bool("CEMP_ENABLE_MYSQL", False):
+    DATABASES["mysql"] = {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": os.environ.get("CEMP_MYSQL_DATABASE", "cemp"),
+        "USER": os.environ.get("CEMP_MYSQL_USER", "cemp"),
+        "PASSWORD": os.environ.get("CEMP_MYSQL_PASSWORD", ""),
+        "HOST": os.environ.get("CEMP_MYSQL_HOST", "127.0.0.1"),
+        "PORT": int(os.environ.get("CEMP_MYSQL_PORT", "3306")),
+    }
 
 
 DATABASE_ROUTERS = ["crystals.routers.MyRouter"]
@@ -280,13 +336,17 @@ STATIC_ROOT = os.path.join(
 )  
 
 STATICFILES_DIRS = [
-    BASE_DIR / "autocompute/static",
-    BASE_DIR / "home/static",
-    BASE_DIR / "ionic_liquid/static",
-    BASE_DIR / "contributor/static",
-    BASE_DIR / "polymer/static",
-    BASE_DIR / "crystals/static",
-    BASE_DIR / "static",
+    path
+    for path in [
+        optional_path("autocompute/static"),
+        optional_path("home/static"),
+        optional_path("ionic_liquid/static"),
+        optional_path("contributor/static"),
+        optional_path("polymer/static"),
+        optional_path("crystals/static"),
+        optional_path("static"),
+    ]
+    if path is not None
 ]
 
 
@@ -301,17 +361,27 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 
 
+GAUSSIAN_DATABASE_DIR = os.environ.get(
+    "CEMP_GAUSSIAN_DATABASE_DIR",
+    str(BASE_DIR / "external_data" / "Gaussian_database" / "opt+freq"),
+)
+ORCA_DATABASE_DIR = os.environ.get(
+    "CEMP_ORCA_DATABASE_DIR",
+    str(BASE_DIR / "external_data" / "ORCA_database" / "opt+freq"),
+)
+
+
 
 
 
 
 MARKOV_GDYNET_PACKAGE_DIR = os.environ.get(
     "CEMP_MARKOV_GDYNET_PACKAGE_DIR",
-    "/path/to/example/46_markov_chain/gdynet-pytorch",
+    str(BASE_DIR / "external" / "gdynet-pytorch"),
 )
 CEMP_AGENT_MARKOV_CONTROLLER_URL = os.environ.get(
     "CEMP_AGENT_MARKOV_CONTROLLER_URL",
-    "http://11.tcp.vip.cpolar.cn:13840/api/internal/markov/jobs",
+    "",
 )
 MARKOV_AGENT_POLL_INTERVAL_SECONDS = int(os.environ.get("CEMP_MARKOV_AGENT_POLL_INTERVAL_SECONDS", "20"))
 MARKOV_AGENT_TIMEOUT_SECONDS = int(os.environ.get("CEMP_MARKOV_AGENT_TIMEOUT_SECONDS", str(7 * 24 * 60 * 60)))
@@ -328,19 +398,18 @@ CRON_CLASSES = [
 
 
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"  
+EMAIL_BACKEND = os.environ.get("CEMP_EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
 
-EMAIL_HOST = "smtp.gmail.com"  
-EMAIL_PORT = 587  
-EMAIL_USE_TLS = True  
-EMAIL_HOST_USER = "user@example.com"  
-EMAIL_HOST_PASSWORD = "<CHANGE_ME_PASSWORD>"  
-DEFAULT_FROM_EMAIL = "CEMP Platform <user@example.com>"  
+EMAIL_HOST = os.environ.get("CEMP_EMAIL_HOST", "")
+EMAIL_PORT = int(os.environ.get("CEMP_EMAIL_PORT", "587"))
+EMAIL_USE_TLS = env_bool("CEMP_EMAIL_USE_TLS", True)
+EMAIL_HOST_USER = os.environ.get("CEMP_EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("CEMP_EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL = os.environ.get("CEMP_DEFAULT_FROM_EMAIL", "CEMP Platform <noreply@localhost>")
 EMAIL_TIMEOUT = 10  
 TICKETS_EMAIL_ASYNC = True  
 TICKETS_ENABLE_EMAIL_NOTIFICATIONS = False  
 
 
 
-SITE_DOMAIN = "https://example.com"  
-
+SITE_DOMAIN = os.environ.get("CEMP_SITE_DOMAIN", "http://localhost:8000")

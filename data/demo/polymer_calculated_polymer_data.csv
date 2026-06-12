@@ -1,0 +1,3 @@
+Name,reactant_1,reactant_2,psmiles,SMILES,reaction_type,Energy_Hatree,es,Isotropic_Polarizability_au,HOMO_eV,LUMO_eV,HOMO_LUMO_Gap_eV,Software,Theory_Level,Source
+demo_polyethylene,ethylene,ethylene,[*]CC[*],CC,addition,-156.8,0.0,42.1,-7.9,1.0,8.9,ORCA,demo-open-workflow,QC demo
+demo_polyether,ethylene_oxide,ethylene_oxide,[*]CCO[*],CCO,ring-opening,-306.4,0.0,51.3,-7.4,0.7,8.1,ORCA,demo-open-workflow,QC demo

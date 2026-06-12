@@ -12,7 +12,7 @@ def auto_compute_permission_required(view_func):
     def _wrapped(request, *args, **kwargs):
         profile = getattr(request.user, 'userprofile', None)
         if not profile or not profile.auto_compute_permission:
-            return HttpResponseForbidden("You do not have permission to access AutoCompute. Please contact user@example.com to request access.")
+            return HttpResponseForbidden("You do not have permission to access AutoCompute. Please contact support@localhost.invalid to request access.")
         return view_func(request, *args, **kwargs)
     return _wrapped
 
@@ -23,7 +23,7 @@ def premium_permission_required(view_func):
     def _wrapped(request, *args, **kwargs):
         profile = getattr(request.user, 'userprofile', None)
         if not profile or not profile.database_permission:
-            return HttpResponseForbidden("You do not have premium permission to access this feature. Please contact user@example.com to request access.")
+            return HttpResponseForbidden("You do not have premium permission to access this feature. Please contact support@localhost.invalid to request access.")
         return view_func(request, *args, **kwargs)
     return _wrapped
 
@@ -50,7 +50,7 @@ def email_in_valid_domains(view_func):
                     f"This feature is only available to users with educational (*.edu.*), "
                     f"military (*.mil.*), or government (*.gov.*) domains. "
                     f"You can still access database download features. "
-                    f"Please contact user@example.com for more information."
+                    f"Please contact support@localhost.invalid for more information."
                 )
 
         return view_func(request, *args, **kwargs)
@@ -63,7 +63,7 @@ def ml_prediction_permission_required(view_func):
     def _wrapped(request, *args, **kwargs):
         profile = getattr(request.user, 'userprofile', None)
         if not profile or not profile.ml_prediction_permission:
-            return HttpResponseForbidden("You do not have permission to access ML Prediction. Please contact user@example.com to request access.")
+            return HttpResponseForbidden("You do not have permission to access ML Prediction. Please contact support@localhost.invalid to request access.")
         return view_func(request, *args, **kwargs)
     return _wrapped
 
@@ -73,7 +73,7 @@ def gaussian_permission_required(view_func):
     def _wrapped(request, *args, **kwargs):
         profile = getattr(request.user, 'userprofile', None)
         if not profile or not profile.gaussian_permission:
-            return HttpResponseForbidden("You do not have permission to access Gaussian related task. Please contact user@example.com to request access.")
+            return HttpResponseForbidden("You do not have permission to access Gaussian related task. Please contact support@localhost.invalid to request access.")
         return view_func(request, *args, **kwargs)
     return _wrapped
 

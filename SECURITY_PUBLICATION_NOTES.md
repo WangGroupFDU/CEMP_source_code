@@ -1,14 +1,35 @@
 # Security and Publication Notes
 
-This public snapshot was generated from a private research/deployment repository using whitelist copying, secret redaction, notebook output stripping, and comment removal.
+## Configuration
 
-## Sanitization Policy
+CEMP public release settings are environment-driven. Important secrets and
+deployment-specific values are read from environment variables such as
+`CEMP_SECRET_KEY`, `CEMP_FERNET_KEY`, `CEMP_SQLITE_PATH`, and `MP_API_KEY`.
 
-- Real secrets and deployment endpoints were replaced with placeholders.
-- Runtime databases, logs, media folders, task downloads, recovery SQL files, and generated outputs were excluded.
-- Notebook outputs and execution counts were removed.
-- Notebook explanatory comments and code comments were removed for public release.
+The local demo derives a Fernet key from `CEMP_DEMO_FERNET_SEED` if an explicit
+`CEMP_FERNET_KEY` is not provided. This keeps the demo runnable while making it
+clear that persistent deployments must provide their own key.
 
-## Before Public Release
+## Materials Project Key Handling
 
-Review `PUBLICATION_AUDIT_REPORT.md` and manually inspect any files listed under residual findings. Do not publish this snapshot if high-risk sensitive strings remain.
+The crystal data refresh script requires `MP_API_KEY`. No Materials Project API
+key should appear in source files, notebooks, documentation, commit messages, or
+release notes. If a key was ever committed or shared, revoke it in Materials
+Project and generate a replacement.
+
+## Excluded Runtime State
+
+Do not publish:
+
+- real user accounts or tokens;
+- sessions, admin logs, ticket contents, or email records;
+- uploaded files, task outputs, scheduler logs, media folders, or private job
+  directories;
+- private compute-node inventory, SSH hosts, or server paths;
+- private database backups or raw operational SQLite/MySQL dumps;
+- unreviewed model artifacts whose training data or license is unclear.
+
+## Release Gate
+
+Run the checks documented in `PUBLICATION_AUDIT_REPORT.md` before every public
+tag, GitHub Release, or Zenodo deposit.

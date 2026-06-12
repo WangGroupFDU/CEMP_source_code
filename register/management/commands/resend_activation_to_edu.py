@@ -4,7 +4,7 @@ import smtplib
 from email.mime.text import MIMEText
 from datetime import timedelta
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.http import urlsafe_base64_encode
@@ -13,10 +13,6 @@ from django.conf import settings
 
 from register.tokens import activation_token
 
-SMTP_HOST = "smtp.qq.com"
-SMTP_PORT = 465
-SMTP_USER = "user@example.com"
-SMTP_PASS = "<CHANGE_ME_SMTP_PASSWORD>"
 MAX_RETRIES = 3
 DELAY_BETWEEN_EMAILS = 3
 DELAY_BETWEEN_RETRIES = 10
@@ -60,6 +56,14 @@ class Command(BaseCommand):
             self.stdout.write(f"\nDRY RUN — 添加 --send 参数来执行发送。")
             return
 
+        smtp_host = settings.EMAIL_HOST
+        smtp_port = settings.EMAIL_PORT
+        smtp_user = settings.EMAIL_HOST_USER
+        smtp_pass = settings.EMAIL_HOST_PASSWORD
+        from_email = settings.DEFAULT_FROM_EMAIL
+        if not smtp_host or not smtp_user or not smtp_pass:
+            raise CommandError("请先通过 CEMP_EMAIL_* 环境变量配置 SMTP 后再使用 --send。")
+
         success, failed = 0, 0
 
         for i, u in enumerate(users):
@@ -75,14 +79,14 @@ class Command(BaseCommand):
             sent = False
             for attempt in range(1, MAX_RETRIES + 1):
                 try:
-                    smtp = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=15)
-                    smtp.login(SMTP_USER, SMTP_PASS)
+                    smtp = smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=15)
+                    smtp.login(smtp_user, smtp_pass)
 
                     msg = MIMEText(body, "plain", "utf-8")
                     msg["Subject"] = subject
-                    msg["From"] = SMTP_USER
+                    msg["From"] = from_email
                     msg["To"] = u.email
-                    smtp.sendmail(SMTP_USER, [u.email], msg.as_string())
+                    smtp.sendmail(from_email, [u.email], msg.as_string())
                     smtp.quit()
 
                     self.stdout.write(

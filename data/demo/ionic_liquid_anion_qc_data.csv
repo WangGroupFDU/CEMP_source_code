@@ -1,0 +1,3 @@
+Name,SMILES,Anion_type,Energy_Hatree,Thermal_correction_to_Gibbs_Free_Energy_Hatree,Thermal_correction_to_Enthalpy_Hatree,Entropy_J_per_mol_K,HOMO_Hatree,LUMO_Hatree,Dipole_Debye,Gibbs_Free_Energy_Hatree,Enthalpy_Hatree,HOMO_LUMO_Gap_eV,Software,Theory_Level,Source
+acetate,CC(=O)[O-],carboxylate,-186.91,-0.019,-0.012,77.8,-0.189,-0.021,3.7,-186.929,-186.922,4.57,ORCA,demo-open-workflow,QC demo
+bromide,[Br-],halide,-2573.04,-0.001,-0.001,45.2,-0.176,-0.018,0.0,-2573.041,-2573.041,4.30,ORCA,demo-open-workflow,QC demo

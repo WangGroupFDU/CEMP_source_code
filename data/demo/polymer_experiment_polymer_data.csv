@@ -1,0 +1,3 @@
+Name,PSMILES,Atomization_Energy_eV,Bandgap_eV,Tg_K,Tm_K,Tensile_Strength_MPa,Youngs_Modulus_MPa,Reference
+polyethylene,[*]CC[*],,8.8,250.0,403.0,20.0,900.0,public demo
+polyethylene oxide,[*]CCO[*],,7.1,206.0,338.0,15.0,600.0,public demo

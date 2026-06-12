@@ -1,54 +1,44 @@
-import pandas as pd
+import os
+
 from mp_api.client import MPRester
-from pandas import DataFrame
-
-fields_not_requested=['material_id','is_magnetic', 'ordering', 'total_magnetization',
-                                                           'builder_meta', 'nsites', 'elements', 'nelements',
-                                                           'composition', 'composition_reduced', 'formula_pretty',
-                                                           'formula_anonymous', 'chemsys', 'volume',
-                                                           'density', 'density_atomic', 'symmetry',
-                                                           'property_name', 'deprecated', 'deprecation_reasons',
-                                                           'last_updated', 'origins', 'warnings', 'structure', 'task_ids',
-                                                           'uncorrected_energy_per_atom', 'energy_per_atom',
-                                                           'formation_energy_per_atom', 'energy_above_hull',
-                                                           'is_stable', 'equilibrium_reaction_energy_per_atom',
-                                                           'decomposes_to', 'xas', 'grain_boundaries', 'band_gap', 'cbm',
-                                                           'vbm', 'efermi', 'is_gap_direct', 'is_metal', 'es_source_calc_id',
-                                                           'bandstructure', 'dos', 'dos_energy_up', 'dos_energy_down',
-                                                           'total_magnetization_normalized_vol', 'total_magnetization_normalized_formula_units',
-                                                           'num_magnetic_sites', 'num_unique_magnetic_sites',
-                                                           'types_of_magnetic_species', 'k_voigt', 'k_reuss', 'k_vrh',
-                                                           'g_voigt', 'g_reuss', 'g_vrh', 'universal_anisotropy',
-                                                           'homogeneous_poisson', 'e_total', 'e_ionic', 'e_electronic',
-                                                           'n', 'e_ij_max', 'weighted_surface_energy_EV_PER_ANG2',
-                                                           'weighted_surface_energy', 'weighted_work_function',
-                                                           'surface_anisotropy', 'shape_factor', 'has_reconstructed',
-                                                           'possible_species', 'has_props', 'theoretical']
 
 
-def fetch_data_element():
-    with MPRester("BhxGe6a92hXHlEYNhc2jJp4fTytK9kKy") as mpr:
-        docs = mpr.summary.search(material_ids=["mp-149", "mp-13", "mp-22526"])
-        
-    
-    
-    keys = []
-    values = []
-    label = []
-
-    for doc in docs:
-        for field in doc:
-            
-            if field[0] != "fields_not_requested":
-                if field[0] == "material_id":
-                    for i in range(0, len(fields_not_requested)):
-                        label.append(field[1])
-                else:
-                    pass
-                keys.append(field[0])
-                values.append(field[1])
-            else:
-                pass
+def fetch_reference_materials(api_key):
+    """
+    功能目的：
+        使用调用者提供的 Materials Project API key 拉取少量参考材料。
+    输入参数：
+        api_key: 通过 MP_API_KEY 环境变量提供的 API key。
+    返回值：
+        Materials Project summary 文档列表。
+    关键流程：
+        查询固定 material_id，用于检查 mp-api 配置是否可用。
+    可能报错或边界情况：
+        公开仓库不保存 API key；缺少环境变量时 main 会提前退出。
+    """
+    with MPRester(api_key) as mpr:
+        return mpr.summary.search(material_ids=["mp-149", "mp-13", "mp-22526"])
 
 
-fetch_data_element()
+def main():
+    """
+    功能目的：
+        提供安全的 Materials Project 连接 smoke test。
+    输入参数：
+        无命令行参数，读取 MP_API_KEY 环境变量。
+    返回值：
+        无；成功时打印返回文档数量。
+    关键流程：
+        检查环境变量后再发起请求，避免导入模块时触发外部 API。
+    可能报错或边界情况：
+        API key 无权限、网络失败或 mp-api 版本不兼容时由 mp-api 抛出异常。
+    """
+    api_key = os.environ.get("MP_API_KEY", "").strip()
+    if not api_key:
+        raise SystemExit("MP_API_KEY is required for this smoke test.")
+    docs = fetch_reference_materials(api_key)
+    print(f"Fetched {len(docs)} Materials Project records.")
+
+
+if __name__ == "__main__":
+    main()

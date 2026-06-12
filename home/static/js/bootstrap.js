@@ -213,7 +213,7 @@
   var VERSION = '4.3.1';
   var DATA_KEY = 'bs.alert';
   var EVENT_KEY = "." + DATA_KEY;
-  var DATA_API_KEY = "<CHANGE_ME_API_KEY>";
+  var DATA_API_KEY = '.data-api';
   var JQUERY_NO_CONFLICT = $.fn[NAME];
   var Selector = {
     DISMISS: '[data-dismiss="alert"]'
@@ -4224,6 +4224,5 @@
   Object.defineProperty(exports, '__esModule', { value: true });
 
 }));
-
 
 

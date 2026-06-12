@@ -26,7 +26,7 @@ class CheckTaskStatusPreviewTests(TestCase):
         self.user = user_model.objects.create_user(
             username="md_preview_user",
             password="testpass123",
-            email="user@example.com",
+            email="support@localhost.invalid",
         )
         self.client.force_login(self.user)
 

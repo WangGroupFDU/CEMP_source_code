@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import PermissionDenied
+from django.conf import settings
 
 
 from django.contrib.auth.decorators import login_required
@@ -43,6 +44,29 @@ logger = logging.getLogger("django")
 
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 import json
+
+
+def get_public_email_connection(use_ssl=False):
+    """
+    功能目的：
+        使用 Django settings 构造邮件连接，避免源码中保存 SMTP 账号或密码。
+    输入参数：
+        use_ssl: 是否使用 SSL 连接。
+    返回值：
+        Django email backend connection。
+    关键流程：
+        从 CEMP_EMAIL_* 环境变量读取配置；公开 demo 默认使用 console backend。
+    可能报错或边界情况：
+        如果部署方启用真实 SMTP 但未配置账号或密码，发送邮件时会返回后端错误。
+    """
+    return get_connection(
+        host=settings.EMAIL_HOST or None,
+        port=settings.EMAIL_PORT,
+        username=settings.EMAIL_HOST_USER or None,
+        password=settings.EMAIL_HOST_PASSWORD or None,
+        use_ssl=use_ssl,
+        use_tls=settings.EMAIL_USE_TLS and not use_ssl,
+    )
 
 
 def _ensure_staff_user(request):
@@ -518,18 +542,11 @@ CEMP Team
 
             try:
                 
-                connection = get_connection(
-                    host="smtp.qq.com",
-                    port=465,
-                    username="user@example.com",
-                    password="<CHANGE_ME_SMTP_PASSWORD>",
-                    use_ssl=True,
-                    use_tls=False,
-                )
+                connection = get_public_email_connection(use_ssl=False)
                 email_message = EmailMessage(
                     subject,
                     message,
-                    "user@example.com",  
+                    settings.DEFAULT_FROM_EMAIL,
                     [user_email],
                     connection=connection,
                 )
@@ -657,9 +674,9 @@ def send_email_in_background(subject, message, from_email, recipient_list):
 def send_test_email(request):
     subject = "Test Email from Django"
     message = "This is a test email sent from your Django application."
-    from_email = "user@example.com"
+    from_email = settings.DEFAULT_FROM_EMAIL
     
-    recipient_list = ["user@example.com"]
+    recipient_list = [settings.DEFAULT_FROM_EMAIL]
 
     
     email_thread = threading.Thread(
@@ -733,28 +750,8 @@ def password_reset(request):
             )
 
             
-            if use_alternate_email == "yes":
-                
-                connection = get_connection(
-                    host="smtp.qq.com",
-                    port=465,
-                    username="user@example.com",
-                    password="<CHANGE_ME_SMTP_PASSWORD>",
-                    use_ssl=True,
-                    use_tls=False,  
-                )
-                from_email = "user@example.com"
-            else:
-                
-                connection = get_connection(
-                    host="smtp.gmail.com",
-                    port=587,
-                    username="user@example.com",
-                    password="your_default_app_password",
-                    use_tls=True,
-                    use_ssl=False,  
-                )
-                from_email = "user@example.com"
+            connection = get_public_email_connection(use_ssl=use_alternate_email == "yes")
+            from_email = settings.DEFAULT_FROM_EMAIL
 
             
             email_message = EmailMessage(
@@ -1236,18 +1233,11 @@ CEMP Team
 """
 
     try:
-        connection = get_connection(
-            host="smtp.qq.com",
-            port=465,
-            username="user@example.com",
-            password="<CHANGE_ME_SMTP_PASSWORD>",
-            use_ssl=True,
-            use_tls=False,
-        )
+        connection = get_public_email_connection(use_ssl=False)
         email_message = EmailMessage(
             subject,
             message,
-            "user@example.com",
+            settings.DEFAULT_FROM_EMAIL,
             [email],
             connection=connection,
         )

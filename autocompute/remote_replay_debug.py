@@ -752,7 +752,7 @@ def _get_debug_user():
     user_model = get_user_model()
     user, _ = user_model.objects.get_or_create(
         username="node_debug_replay",
-        defaults={"email": "user@example.com"},
+        defaults={"email": "support@localhost.invalid"},
     )
     if not user.has_usable_password():
         return user

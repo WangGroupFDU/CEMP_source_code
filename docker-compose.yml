@@ -1,0 +1,16 @@
+services:
+  cemp:
+    build: .
+    env_file:
+      - .env.example
+    ports:
+      - "8000:8000"
+    volumes:
+      - cemp_public_media:/app/media
+      - cemp_public_staticfiles:/app/staticfiles
+      - cemp_public_logs:/app/logs
+
+volumes:
+  cemp_public_media:
+  cemp_public_staticfiles:
+  cemp_public_logs:

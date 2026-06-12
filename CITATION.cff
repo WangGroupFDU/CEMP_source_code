@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use CEMP, please cite the associated manuscript and archived release."
+title: "CEMP: Clean Energy Materials Platform"
+type: software
+authors:
+  - family-names: "Wang Group"
+    affiliation: "Fudan University"
+repository-code: "https://github.com/WangGroupFDU/CEMP_source_code"
+url: "https://github.com/WangGroupFDU/CEMP_source_code"
+license: "Apache-2.0"
+version: "v1.0.0-paper-open"
+date-released: "2026-06-12"
+abstract: "CEMP is a Django-based clean energy materials data platform with database browsing, machine-learning prediction workflows, and optional computational chemistry workflow orchestration."
+preferred-citation:
+  type: article
+  title: "CEMP: Clean Energy Materials Platform for Materials Data, Machine-Learning Prediction, and Automated Computational Workflows"
+  authors:
+    - family-names: "Wang Group"
+      affiliation: "Fudan University"
+  year: 2026
+  notes: "Manuscript citation and DOI to be updated after publication."

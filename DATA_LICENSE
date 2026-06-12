@@ -1,0 +1,20 @@
+CEMP Public Data License
+
+The public demo data, public data manifests, data dictionaries, public model
+metadata, and versioned data/model assets referenced by this repository are
+licensed under the Creative Commons Attribution 4.0 International License
+(CC BY 4.0), unless a specific asset states otherwise in data/public_manifest.json.
+
+SPDX-License-Identifier: CC-BY-4.0
+
+License text:
+https://creativecommons.org/licenses/by/4.0/legalcode
+
+Human-readable summary:
+https://creativecommons.org/licenses/by/4.0/
+
+Attribution request:
+
+If you reuse the CEMP public data or model assets, cite the associated CEMP
+manuscript and the archived release DOI listed in data/public_manifest.json.
+The DOI is marked as TBD until the Zenodo archival deposit is completed.

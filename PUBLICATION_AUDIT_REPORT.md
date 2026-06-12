@@ -2,25 +2,44 @@
 
 ## Scope
 
-This directory is a publication-oriented source-code snapshot of CEMP. It is not a complete production deployment. Runtime databases, user uploads, task outputs, logs, real credentials, private node definitions, and internal operational backups are intentionally excluded or replaced with placeholders.
+This report records the checks expected before publishing the open CEMP
+manuscript-associated release. The release target is a reusable source package
+with local demo data, public data/model manifests, and external archival
+pointers for full paper-supporting assets.
 
-## Cleanup Actions
+## Current Release Policy
 
-- Removed notebook outputs and execution counts.
-- Removed Chinese comment-like blocks from source files where they were used as implementation notes.
-- Replaced Chinese internal Markdown documents with public placeholders.
-- Removed internal generated backup/audit directories from the public snapshot.
-- Replaced production credentials, SMTP passwords, deployment hosts, and absolute server paths with placeholders.
+- Software license: Apache-2.0.
+- Public data and model assets: CC BY 4.0 unless an asset-level manifest entry
+  states otherwise.
+- Local demo: SQLite plus bundled CSV files in `data/demo/`.
+- Full paper assets: GitHub Release and Zenodo archival, with DOI and SHA256
+  values recorded in `data/public_manifest.json`.
 
-## Removed Internal Directories
+## Safety Checks
 
-- `polymer/static/programe/notebook_charge_mapping_backup_20260428_134713`
-- `autocompute/static/MDAutocompute_programe_audit_reports`
+Before publishing a release, run:
 
-## Validation Checklist
+```bash
+python -m compileall -q .
+python manage.py check
+python manage.py test
+python manage.py verify_public_release --manifest data/public_manifest.json
+```
 
-- No notebook outputs should remain.
-- No known production SMTP password should remain.
-- No production database file is included.
-- No private media or task-result directory is included.
-- Source files are provided for paper-code inspection rather than direct deployment.
+Also run a repository-wide credential scan for Django insecure key prefixes,
+secret/key/password/token labels, private hosts, private IP ranges, user-local
+absolute paths, private database dumps, Fernet-like tokens, cloud provider keys,
+Google Maps browser keys, and Materials Project constructor calls with literal
+tokens. Any real credential, private host, user data, log, uploaded file, task
+result, or private database dump found by those checks must be removed before
+publishing.
+
+## Known Follow-Up Before Final Release
+
+- Replace all `TBD` DOI and checksum entries for full paper assets after Zenodo
+  deposition.
+- Confirm source permissions for each public data/model asset before assigning
+  CC BY 4.0.
+- Rotate the Materials Project key that appeared in earlier local source copies;
+  the current script reads `MP_API_KEY` from the environment.

@@ -56,7 +56,29 @@ if TEST_BOX_PATH not in sys.path:
     sys.path.append(TEST_BOX_PATH)
 
 
-from smipoly.smip import monc, polg
+try:
+    from smipoly.smip import monc, polg
+except ImportError:
+    monc = None
+    polg = None
+
+
+def _require_smipoly():
+    """
+    功能目的：
+        在调用聚合物生成/反应预测前检查 smipoly 是否可用。
+    输入参数：
+        无。
+    返回值：
+        monc、polg 两个 smipoly 模块对象。
+    关键流程：
+        公开 demo 不要求 smipoly 顶层可用；只有实际调用相关功能时才检查。
+    可能报错或边界情况：
+        未安装 smipoly 时抛出 RuntimeError，提示用户安装可选聚合物生成依赖。
+    """
+    if monc is None or polg is None:
+        raise RuntimeError("smipoly is required for polymer generation but is not installed.")
+    return monc, polg
 
 
 MOLFORMULA_PATTERN = re.compile(r'^[A-Z][A-Za-z0-9]*$')
@@ -1048,7 +1070,8 @@ def polymerization_prediction(request):
 
         try:
             
-            classified_df = monc.moncls(df, smiColn="SMILES")
+            monc_module, polg_module = _require_smipoly()
+            classified_df = monc_module.moncls(df, smiColn="SMILES")
         except Exception as e:
             return JsonResponse({
                 'error': 'Failed to classify monomers',
@@ -1060,7 +1083,7 @@ def polymerization_prediction(request):
 
         
         try:
-            polymer_df = polg.biplym(classified_df)
+            polymer_df = polg_module.biplym(classified_df)
         except Exception as e:
             return JsonResponse({
                 'error': 'Failed to generate polymers',

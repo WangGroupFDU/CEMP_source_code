@@ -8,7 +8,7 @@ echo "Testing Polymer Analysis Routes"
 echo "=========================================="
 echo ""
 
-BASE_URL="https://example.com/polymer"
+BASE_URL="http://localhost:8000/polymer"
 
 
 GREEN='\033[0;32m'

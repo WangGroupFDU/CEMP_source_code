@@ -1,7 +1,10 @@
-# Public Documentation Placeholder
+# Demo Login
 
-This internal document was removed from the public snapshot because it contained private operational notes or non-English comments that are not required for paper-code inspection.
+The public release uses an explicit local demo user instead of hidden auto-login
+behavior:
 
-Original relative path: `polymer/AUTO_LOGIN_DEPLOYMENT.md`
+```bash
+python manage.py seed_public_demo --username cemp_demo --password cemp_demo_local
+```
 
-Please refer to the top-level `README.md` and `SECURITY_PUBLICATION_NOTES.md` for the public description of this code release.
+Use `http://localhost:8000/api/token/` to obtain a token for API examples.

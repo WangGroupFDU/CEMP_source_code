@@ -17,7 +17,7 @@ from autocompute.remote_utils import (
     _write_worker_result_signal,
 )
 
-remote_IP = "user@<PRIVATE_HOST>:"
+remote_IP = "user@demo-host.invalid:"
 
 
 def run_task_immediately_remote(task_func, source_dir, download_dir, task, remote_target, remote_IP = remote_IP):

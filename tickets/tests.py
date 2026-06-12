@@ -12,7 +12,7 @@ from .models import Ticket, TicketMessage
 
 @override_settings(
     EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-    SITE_DOMAIN="https://example.com",
+    SITE_DOMAIN="http://localhost:8000",
     ROOT_URLCONF="cemp.test_urls",
 )
 class TicketViewsTests(TestCase):
@@ -22,17 +22,17 @@ class TicketViewsTests(TestCase):
         user_model = get_user_model()
         self.user = user_model.objects.create_user(
             username="ticket_user",
-            email="user@example.com",
+            email="support@localhost.invalid",
             password="Pass1234!",
         )
         self.other_user = user_model.objects.create_user(
             username="other_user",
-            email="user@example.com",
+            email="support@localhost.invalid",
             password="Pass1234!",
         )
         self.admin_user = user_model.objects.create_superuser(
             username="ticket_admin",
-            email="user@example.com",
+            email="support@localhost.invalid",
             password="Pass1234!",
         )
         self.request_factory = RequestFactory()

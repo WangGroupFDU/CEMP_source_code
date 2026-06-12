@@ -1,0 +1,23 @@
+CEMP - Clean Energy Materials Platform
+Copyright 2026 Wang Group, Fudan University
+
+This product includes software developed for the Clean Energy Materials Platform
+(CEMP). The source code is licensed under Apache-2.0.
+
+Public demo data and public data/model assets referenced by this repository are
+licensed under CC BY 4.0 unless a manifest entry states otherwise.
+
+Third-party software and data sources used by CEMP include Django, Django REST
+framework, django-cors-headers, django-cron, RDKit, pandas, scikit-learn,
+XGBoost, PyTorch, PyTorch Geometric, CairoSVG, Beautiful Soup, Vue, Vite,
+Element Plus, Axios, Materials Project data accessed through mp-api, and
+scientific tools such as ORCA, Gaussian, GROMACS, and Multiwfn when optional
+workflow modules are enabled. Their original licenses and citation requirements
+remain in force.
+
+Materials Project API keys are never stored in this repository. Users who run
+data-refresh scripts must provide their own key through MP_API_KEY.
+
+The external-scientific-software workflows are optional for the public demo.
+The local reproducibility path uses public demo data, public model assets, and
+precomputed records, so private servers are not required for the core checks.

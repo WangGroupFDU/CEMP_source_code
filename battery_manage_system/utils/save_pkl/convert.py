@@ -56,12 +56,6 @@ cut_off_voltage={
 
 
 
-from IPython.display import display, HTML
-
-
-display(HTML("<font color='red'>这是红色的文本</font>"))
-
-
 import re
 
 
@@ -315,7 +309,6 @@ def get_LN_data(index, file_path):
             if len(ys_discharge) != 1000:
                 print(f"length of ys is: {len(ys_discharge)}")
             if max(ys_discharge) > 300:
-                display(HTML("<font color='red'>放电容量的拟合数值大于300，请仔细检查</font>"))
                 print(f"循环号是:{cycle_num}")
                 
             plt.plot(
@@ -451,7 +444,6 @@ def store_data(battery_data_dict, save_path='media/bms/pkl_file/battery_data.pkl
 
 
     
-
 
 
 

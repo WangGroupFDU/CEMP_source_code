@@ -380,7 +380,7 @@
         Once a token is returned, it can be reused for other authenticated endpoints.
       </p>
 
-      <pre><code class="language-bash">curl -X POST "https://example.com/api/token/" \
+      <pre><code class="language-bash">curl -X POST "http://localhost:8000/api/token/" \
   -H "Content-Type: application/json" \
   -d '{
     "username": "YOUR_USERNAME",
@@ -389,7 +389,7 @@
 
       <pre><code class="language-python">import requests
 
-base_url = "https://example.com"
+base_url = "http://localhost:8000"
 
 response = requests.post(
     f"{base_url}/api/token/",
@@ -418,8 +418,8 @@ print(token)</code></pre>
 
       <pre><code class="language-python">import requests
 
-base_url = "https://example.com"
-token = "<CHANGE_ME_TOKEN>"
+base_url = "http://localhost:8000"
+token = "DEMO_TOKEN"
 
 headers = {
     "Authorization": f"Token {token}",

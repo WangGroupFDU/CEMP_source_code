@@ -69,10 +69,28 @@ def calMoldescriptor(sml):
         Descriptors_mol_list = []*10
     return Descriptors_mol_list
 
-import psi4
-from psikit import Psikit
+try:
+    import psi4
+    from psikit import Psikit
+except ImportError:
+    psi4 = None
+    Psikit = None
 
 def psi4Calculation(smiles, basis_sets="b3lyp/6-31pg**", method = "single-point"):
+    """
+    功能目的：
+        使用可选的 psi4/psikit 对 SMILES 进行量子化学计算。
+    输入参数：
+        smiles: 输入分子 SMILES；basis_sets: 计算基组；method: single-point 或 optimize。
+    返回值：
+        方法、基组、能量、HOMO/LUMO 和偶极矩列表。
+    关键流程：
+        公开 demo 不强制安装 psi4；只有调用该函数时才检查可选依赖。
+    可能报错或边界情况：
+        未安装 psi4/psikit 时抛出 RuntimeError，提示该功能属于可选外部科学软件路径。
+    """
+    if Psikit is None:
+        raise RuntimeError("psi4/psikit is required for psi4Calculation but is not installed.")
     pk = Psikit()
     pk.read_from_smiles(smiles)
     if method == "single-point":
@@ -99,7 +117,6 @@ pd.options.mode.chained_assignment = None
 from rdkit.Chem.Descriptors3D import Asphericity,Eccentricity,InertialShapeFactor,NPR1,NPR2,PMI1,PMI2,PMI3,RadiusOfGyration,SpherocityIndex
 from rdkit.Chem import AllChem, rdDistGeom
 from rdkit.ML.Descriptors.MoleculeDescriptors import MolecularDescriptorCalculator
-from psikit import Psikit
 from bs4 import BeautifulSoup, SoupStrainer
 import urllib.request
 pd.options.mode.chained_assignment = None
@@ -126,10 +143,32 @@ from sklearn.metrics import accuracy_score
 
 from rdkit import Chem
 from rdkit.Chem.rdmolops import GetAdjacencyMatrix
-from ILP import ILP
+try:
+    from ILP import ILP
+except ImportError:
+    ILP = None
+
+
+def _require_ilp():
+    """
+    功能目的：
+        在真正调用 ILP 预测流程时检查可选 ILP 包是否可用。
+    输入参数：
+        无。
+    返回值：
+        ILP 类。
+    关键流程：
+        顶层导入失败不会影响 Django 启动；调用预测功能时才报错。
+    可能报错或边界情况：
+        公开 demo 不随仓库安装 ILP 包，调用私有 ILP 流程时会抛出 RuntimeError。
+    """
+    if ILP is None:
+        raise RuntimeError("ILP package is required for this prediction workflow but is not installed.")
+    return ILP
 
 def modelPrediction(cation_smile, anion_smile):
-    m = ILP()
+    ilp_cls = _require_ilp()
+    m = ilp_cls()
     
     
     
@@ -145,7 +184,8 @@ def modelPrediction(cation_smile, anion_smile):
 
 
 def modelPredictionTest():
-    m = ILP()
+    ilp_cls = _require_ilp()
+    m = ilp_cls()
     
     
     

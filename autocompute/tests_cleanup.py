@@ -21,7 +21,7 @@ class MediaCleanupServiceTests(TestCase):
         self.user = get_user_model().objects.create_user(
             username="cleanup_user",
             password="testpass123",
-            email="user@example.com",
+            email="support@localhost.invalid",
         )
 
     def tearDown(self):
@@ -85,9 +85,9 @@ class MediaCleanupServiceTests(TestCase):
         mock_load_remote_server_pool.return_value = [
             {
                 "server_name": "AMD9654_supervisor_node",
-                "IP": "user@<PRIVATE_HOST>:",
+                "IP": "user@demo-host.invalid:",
                 "task_limit": 9,
-                "remote_target_dir": "/path/to/example",
+                "remote_target_dir": "/opt/cemp",
                 "order": 0,
             }
         ]
@@ -126,10 +126,10 @@ class MediaCleanupServiceTests(TestCase):
 
         mock_delete_remote_directory.assert_called_once()
         remote_delete_call = mock_delete_remote_directory.call_args[0]
-        self.assertEqual(remote_delete_call[0], "user@<PRIVATE_HOST>")
+        self.assertEqual(remote_delete_call[0], "user@demo-host.invalid")
         self.assertEqual(
             remote_delete_call[1],
-            f"/path/to/example/AutoCompute/QcCompute/Downloads/{folder_name}",
+            f"/opt/cemp/AutoCompute/QcCompute/Downloads/{folder_name}",
         )
 
     @mock.patch("autocompute.media_cleanup.delete_remote_directory")
@@ -147,9 +147,9 @@ class MediaCleanupServiceTests(TestCase):
         mock_load_remote_server_pool.return_value = [
             {
                 "server_name": "AMD9654_supervisor_node",
-                "IP": "user@<PRIVATE_HOST>:",
+                "IP": "user@demo-host.invalid:",
                 "task_limit": 9,
-                "remote_target_dir": "/path/to/example",
+                "remote_target_dir": "/opt/cemp",
                 "order": 0,
             }
         ]

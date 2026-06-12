@@ -240,7 +240,8 @@ def get_molecule_file(request):
         raise Http404("Component name not provided.")
 
     
-    file_path = f"/data/Gaussian_database/opt+freq/{component_name}.out"
+    safe_component_name = os.path.basename(component_name)
+    file_path = os.path.join(settings.GAUSSIAN_DATABASE_DIR, f"{safe_component_name}.out")
 
     
     if not os.path.exists(file_path):

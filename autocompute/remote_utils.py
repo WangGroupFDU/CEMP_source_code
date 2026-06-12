@@ -38,7 +38,7 @@ from autocompute.sqlite_retry import (
 from home.md_previews import build_md_preview_manifest
 
 
-remote_IP = "user@<PRIVATE_HOST>:"
+remote_IP = "user@demo-host.invalid:"
 
 MAX_RUNNING_LENGTH=3 
 

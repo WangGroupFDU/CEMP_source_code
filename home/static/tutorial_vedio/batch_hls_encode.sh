@@ -4,7 +4,7 @@
 
 
 
-SRC_DIR="/path/to/example/home/static/tutorial_vedio"
+SRC_DIR="/opt/cemp/home/static/tutorial_vedio"
 CRF=24
 FPS=30
 SEG=10

@@ -113,8 +113,8 @@ from autocompute.remote_utils import _load_remote_server_pool, _ssh_run_command
 
 
 
-GAUSS_DIR = Path("/data/Gaussian_database/opt+freq")
-ORCA_DIR = Path("/data/ORCA_database/opt+freq")
+GAUSS_DIR = Path(settings.GAUSSIAN_DATABASE_DIR)
+ORCA_DIR = Path(settings.ORCA_DATABASE_DIR)
 
 
 
@@ -128,8 +128,8 @@ logger = logging.getLogger('django')
 User = get_user_model()
 
 ALLOWED_ADMINS = {
-    'jifengwang': 'user@example.com',
-    'ywang':       'user@example.com',
+    'jifengwang': 'support@localhost.invalid',
+    'ywang':       'support@localhost.invalid',
 }
 
 ADMIN_CAPABILITY_LABELS = {
@@ -899,4 +899,3 @@ def tutorial_list(request):
     return render(request,               
                   'tutorials/tutorial_list.html',
                   context)
-

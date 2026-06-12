@@ -1,7 +1,7 @@
-# Public Documentation Placeholder
+# Tickets Module Public Notes
 
-This internal document was removed from the public snapshot because it contained private operational notes or non-English comments that are not required for paper-code inspection.
+The tickets app is included for source completeness and local Django checks.
+Public demo data does not include real ticket contents, messages, user support
+emails, or operational logs.
 
-Original relative path: `tickets/IMPLEMENTATION_PLAN.md`
-
-Please refer to the top-level `README.md` and `SECURITY_PUBLICATION_NOTES.md` for the public description of this code release.
+Do not include real support records in release assets.

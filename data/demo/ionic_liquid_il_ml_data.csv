@@ -1,0 +1,3 @@
+Name,SMILES,Anion_SMILES,Cation_SMILES,Cation_SMILES_type,Anion_SMILES_type,Conductivity_mS_per_cm,Tm_K,ECW_V,Type,Source
+ethylammonium acetate,CC(=O)[O-].CC[NH3+],CC(=O)[O-],CC[NH3+],alkylammonium,carboxylate,1.34,360.1,4.12,liquid,ML demo
+choline bromide,C[N+](C)(C)CCO.[Br-],[Br-],C[N+](C)(C)CCO,choline,halide,0.61,472.9,3.85,solid,ML demo

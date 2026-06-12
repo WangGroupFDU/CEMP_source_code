@@ -1,0 +1,25 @@
+name: cemp-public
+channels:
+  - pytorch
+  - pyg
+  - conda-forge
+dependencies:
+  - python=3.11
+  - django=4.2.3
+  - djangorestframework
+  - django-cors-headers
+  - django-cron
+  - cryptography
+  - pandas=1.5.3
+  - openpyxl
+  - numpy
+  - scikit-learn
+  - xgboost=1.7.6
+  - beautifulsoup4
+  - cairosvg=2.7.0
+  - rdkit=2023.03.2
+  - pytorch
+  - pyg
+  - pip
+  - pip:
+      - mp-api

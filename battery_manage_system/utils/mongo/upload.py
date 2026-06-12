@@ -21,7 +21,7 @@ def convert_numpy(obj):
     return obj
 
 
-pkl_path = "/path/to/example/media/bms/pkl_file/battery_data_full_0225_modified_sort_by_cathode.pkl"
+pkl_path = "/opt/cemp/media/bms/pkl_file/battery_data_full_0225_modified_sort_by_cathode.pkl"
 with open(pkl_path, "rb") as f:
     data = pickle.load(f)
 

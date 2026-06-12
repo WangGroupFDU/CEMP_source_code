@@ -10,6 +10,7 @@ media/
 logs/
 cache/
 staticfiles/
+release_assets/
 node_modules/
 dist/
 dist.backup*/
@@ -34,5 +35,8 @@ dist.backup*/
 *.zip
 *.npy
 *.pkl
+*.joblib
 *.pt
 *.pth
+*.h5
+*.onnx

@@ -47,7 +47,7 @@ class MoleculePropertySimilaritySearchTests(TestCase):
         self.user = get_user_model().objects.create_user(
             username="molecule_lookup_user",
             password="testpass123",
-            email="user@example.com",
+            email="support@localhost.invalid",
         )
         self.factory = APIRequestFactory()
 
@@ -135,7 +135,7 @@ class MaterialRecommendationSearchTests(TestCase):
         self.user = get_user_model().objects.create_user(
             username="material_recommend_user",
             password="testpass123",
-            email="user@example.com",
+            email="support@localhost.invalid",
         )
         self.factory = APIRequestFactory()
 
@@ -264,7 +264,7 @@ class RemoteSchedulerTests(TestCase):
         self.user = get_user_model().objects.create_user(
             username="scheduler_user",
             password="testpass123",
-            email="user@example.com",
+            email="support@localhost.invalid",
         )
 
     def tearDown(self):
@@ -275,8 +275,8 @@ class RemoteSchedulerTests(TestCase):
 
         self._write_server_pool(
             [
-                self._server("server_a", "user@<PRIVATE_IP>:", 7, "/srv/a"),
-                self._server("server_b", "user@<PRIVATE_IP>:", 10, "/srv/b"),
+                self._server("server_a", "user@demo-host.invalid:", 7, "/srv/a"),
+                self._server("server_b", "user@demo-host.invalid:", 10, "/srv/b"),
             ]
         )
         for _ in range(4):
@@ -295,8 +295,8 @@ class RemoteSchedulerTests(TestCase):
 
         self._write_server_pool(
             [
-                self._server("server_a", "user@<PRIVATE_IP>:", 4, "/srv/a"),
-                self._server("server_b", "user@<PRIVATE_IP>:", 4, "/srv/b"),
+                self._server("server_a", "user@demo-host.invalid:", 4, "/srv/a"),
+                self._server("server_b", "user@demo-host.invalid:", 4, "/srv/b"),
             ]
         )
         older_task = self._create_task(status="success", server_name="server_a")
@@ -314,8 +314,8 @@ class RemoteSchedulerTests(TestCase):
 
         self._write_server_pool(
             [
-                self._server("server_a", "user@<PRIVATE_IP>:", 1, "/srv/a", capabilities=[GAUSSIAN_HTQC]),
-                self._server("server_b", "user@<PRIVATE_IP>:", 1, "/srv/b", capabilities=[GAUSSIAN_HTQC]),
+                self._server("server_a", "user@demo-host.invalid:", 1, "/srv/a", capabilities=[GAUSSIAN_HTQC]),
+                self._server("server_b", "user@demo-host.invalid:", 1, "/srv/b", capabilities=[GAUSSIAN_HTQC]),
             ]
         )
         self._create_task(status="pending", server_name="server_a")
@@ -345,7 +345,7 @@ class RemoteSchedulerTests(TestCase):
             [
                 self._server(
                     "server_retry",
-                    "user@<PRIVATE_IP>:",
+                    "user@demo-host.invalid:",
                     3,
                     "/srv/retry",
                     capabilities=[GAUSSIAN_HTQC],
@@ -387,10 +387,10 @@ class RemoteSchedulerTests(TestCase):
 
         self._write_server_pool(
             [
-                self._server("server_a", "user@<PRIVATE_IP>:", 1, "/srv/a_root", capabilities=[GAUSSIAN_HTQC]),
+                self._server("server_a", "user@demo-host.invalid:", 1, "/srv/a_root", capabilities=[GAUSSIAN_HTQC]),
                 self._server(
                     "server_b",
-                    "user@<PRIVATE_IP>:",
+                    "user@demo-host.invalid:",
                     2,
                     "/srv/b_root",
                     capabilities=[GAUSSIAN_HTQC, ORCA_HTQC, POLYMER_GENERATION],
@@ -440,7 +440,7 @@ class RemoteSchedulerTests(TestCase):
         self.assertEqual(task.server_name, "server_b")
         self.assertEqual(task.status, "success")
         self.assertEqual(captured_call["server_name"], "server_b")
-        self.assertEqual(captured_call["remote_IP"], "user@<PRIVATE_IP>:")
+        self.assertEqual(captured_call["remote_IP"], "user@demo-host.invalid:")
         self.assertEqual(
             captured_call["remote_target"],
             "/srv/b_root/AutoCompute/QcCompute/Downloads",
@@ -486,14 +486,14 @@ class RemoteSchedulerTests(TestCase):
             [
                 self._server(
                     "server_gaussian",
-                    "user@<PRIVATE_IP>:",
+                    "user@demo-host.invalid:",
                     10,
                     "/srv/gaussian",
                     capabilities=[GAUSSIAN_HTQC],
                 ),
                 self._server(
                     "server_orca",
-                    "user@<PRIVATE_IP>:",
+                    "user@demo-host.invalid:",
                     10,
                     "/srv/orca",
                     capabilities=[ORCA_HTQC],
@@ -517,7 +517,7 @@ class RemoteSchedulerTests(TestCase):
             [
                 self._server(
                     "server_disabled",
-                    "user@<PRIVATE_IP>:",
+                    "user@demo-host.invalid:",
                     10,
                     "/srv/a",
                     enabled=False,
@@ -525,7 +525,7 @@ class RemoteSchedulerTests(TestCase):
                 ),
                 self._server(
                     "server_enabled",
-                    "user@<PRIVATE_IP>:",
+                    "user@demo-host.invalid:",
                     10,
                     "/srv/b",
                     capabilities=[GAUSSIAN_HTQC],
@@ -547,14 +547,14 @@ class RemoteSchedulerTests(TestCase):
             [
                 self._server(
                     "server_a",
-                    "user@<PRIVATE_IP>:",
+                    "user@demo-host.invalid:",
                     10,
                     "/srv/a",
                     capabilities=[GAUSSIAN_HTQC],
                 ),
                 self._server(
                     "server_b",
-                    "user@<PRIVATE_IP>:",
+                    "user@demo-host.invalid:",
                     10,
                     "/srv/b",
                     capabilities=[GAUSSIAN_HTQC],
@@ -597,7 +597,7 @@ class RemoteSchedulerTests(TestCase):
             [
                 self._server(
                     "server_visual",
-                    "user@<PRIVATE_IP>:",
+                    "user@demo-host.invalid:",
                     10,
                     "/srv/visual",
                     capabilities=[VISUALIZATION_ANALYSIS],
@@ -636,7 +636,7 @@ class RemoteSchedulerTests(TestCase):
             [
                 self._server(
                     "server_md",
-                    "user@<PRIVATE_IP>:",
+                    "user@demo-host.invalid:",
                     10,
                     "/srv/md",
                     capabilities=[MD_GROMACS_GAUSSIAN],
@@ -703,7 +703,7 @@ class RemoteSchedulerTests(TestCase):
             [
                 self._server(
                     "server_a",
-                    "user@<PRIVATE_IP>:",
+                    "user@demo-host.invalid:",
                     3,
                     "/srv/a",
                     capabilities=[GAUSSIAN_HTQC],
@@ -766,7 +766,7 @@ class RemoteSchedulerTests(TestCase):
         )
         self.assertEqual(next_task.status, "success")
         self.assertEqual(next_task.server_name, "server_a")
-        self.assertEqual(captured_call["remote_IP"], "user@<PRIVATE_IP>:")
+        self.assertEqual(captured_call["remote_IP"], "user@demo-host.invalid:")
         self.assertEqual(
             captured_call["remote_target"],
             "/srv/a/AutoCompute/QcCompute/Downloads",
@@ -786,7 +786,7 @@ class RemoteSchedulerTests(TestCase):
             [
                 self._server(
                     "server_retry",
-                    "user@<PRIVATE_IP>:",
+                    "user@demo-host.invalid:",
                     3,
                     "/srv/retry",
                     capabilities=[GAUSSIAN_HTQC],
@@ -1087,7 +1087,7 @@ class RemoteSchedulerTests(TestCase):
             [
                 self._server(
                     "server_gaussian",
-                    "user@<PRIVATE_IP>:",
+                    "user@demo-host.invalid:",
                     2,
                     "/srv/gaussian",
                     capabilities=[GAUSSIAN_HTQC],
@@ -1438,7 +1438,7 @@ class RemoteQCSubmissionViewTests(TestCase):
         self.user = get_user_model().objects.create_user(
             username=f"remote_submit_{uuid.uuid4().hex[:8]}",
             password="testpass123",
-            email="user@example.com",
+            email="support@localhost.invalid",
         )
         self.temp_media_root = tempfile.mkdtemp(prefix="cemp_remote_submit_")
 
@@ -1487,13 +1487,9 @@ class RemoteQCSubmissionViewTests(TestCase):
         )
         request.user = self.user
 
-        fake_process = mock.Mock()
-        fake_process.pid = 4321
-
         with override_settings(MEDIA_ROOT=self.temp_media_root), mock.patch.object(
             autocompute_views.subprocess,
             "Popen",
-            return_value=fake_process,
         ) as popen_mock:
             response = view_func(request)
 
@@ -1504,13 +1500,19 @@ class RemoteQCSubmissionViewTests(TestCase):
         self.assertEqual(task.remote_type, "remote")
         self.assertEqual(task.status, "queuing")
         self.assertIsNone(task.server_name)
-        self.assertEqual(task.pid, 4321)
+        self.assertIsNone(task.pid)
+        popen_mock.assert_not_called()
 
-        command = popen_mock.call_args[0][0]
-        self.assertEqual(command[2], "new_execute_long_task_generic_remote")
-        self.assertTrue(command[4].endswith(expected_source_suffix))
-        self.assertEqual(command[6], expected_func_path)
-        self.assertEqual(command[7], autocompute_views.REMOTE_QC_DOWNLOADS_TARGET)
+        request_path = Path(task.folder_path) / remote_utils.REMOTE_DISPATCH_REQUEST_FILENAME
+        request_payload = json.loads(request_path.read_text(encoding="utf-8"))
+        self.assertEqual(request_payload["task_id"], task.task_id)
+        self.assertTrue(request_payload["source_dir"].endswith(expected_source_suffix))
+        self.assertEqual(request_payload["download_dir"], task.folder_path)
+        self.assertEqual(request_payload["func_path"], expected_func_path)
+        self.assertEqual(
+            request_payload["remote_target_subpath"],
+            autocompute_views.REMOTE_QC_DOWNLOADS_TARGET,
+        )
 
     def _build_excel_upload(self, filename: str) -> SimpleUploadedFile:
 
@@ -1536,7 +1538,7 @@ class OrcaManualModeXYZParsingTests(TestCase):
         self.user = get_user_model().objects.create_user(
             username=f"orca_xyz_{uuid.uuid4().hex[:8]}",
             password="testpass123",
-            email="user@example.com",
+            email="support@localhost.invalid",
         )
 
     def test_parse_xyz_content_accepts_valid_standard_xyz(self):

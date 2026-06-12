@@ -20,7 +20,7 @@
         <router-link to="/visualization" class="nav-link">
           Visualization
         </router-link>
-        <a href="https://example.com/" class="nav-link">
+        <a href="http://localhost:8000/" class="nav-link">
           Home
         </a>
 

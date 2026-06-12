@@ -33,7 +33,7 @@ class RemoteReplayDebugTests(TestCase):
         self.user = get_user_model().objects.create_user(
             username="replay_debug_user",
             password="testpass123",
-            email="user@example.com",
+            email="support@localhost.invalid",
         )
 
     def tearDown(self):
@@ -76,12 +76,12 @@ class RemoteReplayDebugTests(TestCase):
 
         server = {
             "server_name": "server_a",
-            "IP": "user@<PRIVATE_IP>:",
+            "IP": "user@demo-host.invalid:",
             "remote_target_dir": "/srv/cemp",
             "ssh_port": 22,
             "enabled": True,
             "capabilities": ["gaussian_htqc"],
-            "remote_login": "user@<PRIVATE_IP>",
+            "remote_login": "user@demo-host.invalid",
             "task_limit": 3,
             "order": 0,
         }
@@ -128,23 +128,23 @@ class RemoteReplayDebugTests(TestCase):
 
         source_server = {
             "server_name": "source_server",
-            "IP": "user@<PRIVATE_IP>:",
+            "IP": "user@demo-host.invalid:",
             "remote_target_dir": "/srv/source",
             "ssh_port": 22,
             "enabled": True,
             "capabilities": ["gaussian_htqc"],
-            "remote_login": "user@<PRIVATE_IP>",
+            "remote_login": "user@demo-host.invalid",
             "task_limit": 3,
             "order": 0,
         }
         target_server = {
             "server_name": "target_server",
-            "IP": "user@<PRIVATE_IP>:",
+            "IP": "user@demo-host.invalid:",
             "remote_target_dir": "/srv/target",
             "ssh_port": 22,
             "enabled": True,
             "capabilities": ["gaussian_htqc"],
-            "remote_login": "user@<PRIVATE_IP>",
+            "remote_login": "user@demo-host.invalid",
             "task_limit": 3,
             "order": 1,
         }
@@ -222,23 +222,23 @@ class RemoteReplayDebugTests(TestCase):
 
         source_server = {
             "server_name": "source_server",
-            "IP": "user@<PRIVATE_IP>:",
+            "IP": "user@demo-host.invalid:",
             "remote_target_dir": "/srv/source",
             "ssh_port": 22,
             "enabled": True,
             "capabilities": ["gaussian_htqc"],
-            "remote_login": "user@<PRIVATE_IP>",
+            "remote_login": "user@demo-host.invalid",
             "task_limit": 3,
             "order": 0,
         }
         target_server = {
             "server_name": "target_server",
-            "IP": "user@<PRIVATE_IP>:",
+            "IP": "user@demo-host.invalid:",
             "remote_target_dir": "/srv/target",
             "ssh_port": 22,
             "enabled": True,
             "capabilities": ["gaussian_htqc"],
-            "remote_login": "user@<PRIVATE_IP>",
+            "remote_login": "user@demo-host.invalid",
             "task_limit": 3,
             "order": 1,
         }
@@ -308,23 +308,23 @@ class RemoteReplayDebugTests(TestCase):
 
         source_server = {
             "server_name": "source_server",
-            "IP": "user@<PRIVATE_IP>:",
+            "IP": "user@demo-host.invalid:",
             "remote_target_dir": "/srv/source",
             "ssh_port": 22,
             "enabled": True,
             "capabilities": ["md_gromacs_gaussian"],
-            "remote_login": "user@<PRIVATE_IP>",
+            "remote_login": "user@demo-host.invalid",
             "task_limit": 3,
             "order": 0,
         }
         target_server = {
             "server_name": "target_server",
-            "IP": "user@<PRIVATE_IP>:",
+            "IP": "user@demo-host.invalid:",
             "remote_target_dir": "/srv/target",
             "ssh_port": 22,
             "enabled": True,
             "capabilities": ["md_gromacs_gaussian"],
-            "remote_login": "user@<PRIVATE_IP>",
+            "remote_login": "user@demo-host.invalid",
             "task_limit": 3,
             "order": 1,
         }

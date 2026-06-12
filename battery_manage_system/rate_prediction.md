@@ -1,7 +1,8 @@
-# Public Documentation Placeholder
+# Battery Rate Prediction Notes
 
-This internal document was removed from the public snapshot because it contained private operational notes or non-English comments that are not required for paper-code inspection.
+Battery prediction code is included as part of the CEMP source release. Public
+model assets and scalers must be listed in `data/public_manifest.json` before
+they are used for manuscript-level reproduction.
 
-Original relative path: `battery_manage_system/rate_prediction.md`
-
-Please refer to the top-level `README.md` and `SECURITY_PUBLICATION_NOTES.md` for the public description of this code release.
+For the local demo path, use the bundled CSV data and precomputed examples
+instead of external compute infrastructure.

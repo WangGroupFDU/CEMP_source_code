@@ -198,13 +198,6 @@ def parse_keys(input_str):
 
 
 
-print(parse_keys("1,3,5:10"))  
-print(parse_keys("5:10,3,1"))  
-
-
-
-
-
 @hybrid_login_required  
 def visualize_battery_data(request):
     context = {}
@@ -336,8 +329,9 @@ import torch
 
 import matplotlib.font_manager as fm
 
-fm.fontManager.addfont("/usr/share/fonts/truetype/times.ttf")  
-fm.fontManager.addfont("/usr/share/fonts/truetype/simsun.ttc")
+for font_path in ["/usr/share/fonts/truetype/times.ttf", "/usr/share/fonts/truetype/simsun.ttc"]:
+    if os.path.exists(font_path):
+        fm.fontManager.addfont(font_path)
 
 
 
@@ -379,7 +373,7 @@ def bms_short_prediction(request):
         print(params)
         print(predictions[:10])
         try:
-            filename = "/path/to/example/battery_manage_system/predictions.npy"
+            filename = "/opt/cemp/battery_manage_system/predictions.npy"
             np.save(filename, prediction_data)
         except Exception as e:
             print(e)
@@ -419,7 +413,7 @@ def get_pkl_files():
 def load_pkl_file(filename):
     print(filename)
     pkl_path = os.path.join(settings.MEDIA_ROOT, "bms", "pkl_file", filename)
-    pkl_path = "/path/to/example/media/bms/pkl_file/battery_data_full_0225_modified_sort_by_cathode_copy.pkl"
+    pkl_path = "/opt/cemp/media/bms/pkl_file/battery_data_full_0225_modified_sort_by_cathode_copy.pkl"
     with open(pkl_path, "rb") as f:
         pkl = pickle.load(f)
         return pkl

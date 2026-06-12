@@ -23,7 +23,7 @@
         <router-link to="/prediction" class="nav-link">
           Prediction
         </router-link>
-        <a href="https://example.com/" class="nav-link">
+        <a href="http://localhost:8000/" class="nav-link">
           Home
         </a>
 

@@ -1,7 +1,13 @@
-# Public Documentation Placeholder
+# Polymer Module Public Deployment Checklist
 
-This internal document was removed from the public snapshot because it contained private operational notes or non-English comments that are not required for paper-code inspection.
+Use the top-level installation workflow:
 
-Original relative path: `polymer/DEPLOYMENT_CHECKLIST.md`
+```bash
+python manage.py migrate
+python manage.py load_public_data --manifest data/public_manifest.json --mode demo
+python manage.py seed_public_demo --username cemp_demo --password cemp_demo_local
+```
 
-Please refer to the top-level `README.md` and `SECURITY_PUBLICATION_NOTES.md` for the public description of this code release.
+The bundled polymer demo records are in `data/demo/`. Full polymer data and
+model assets should be archived through the release asset workflow described in
+`docs/data.md`.

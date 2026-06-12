@@ -51,11 +51,11 @@ def convert_legacy_json_response(legacy_response):
 def _permission_denied_response(required_permission):
     permission_name = str(required_permission).strip()
     if permission_name == "auto_compute_permission":
-        message = "You do not have permission to submit autocompute tasks. Please contact user@example.com to request access."
+        message = "You do not have permission to submit autocompute tasks. Please contact support@localhost.invalid to request access."
     elif permission_name == "gaussian_permission":
-        message = "You do not have permission to access Gaussian related task. Please contact user@example.com to request access."
+        message = "You do not have permission to access Gaussian related task. Please contact support@localhost.invalid to request access."
     else:
-        message = "You do not have permission to access this CEMP task. Please contact user@example.com to request access."
+        message = "You do not have permission to access this CEMP task. Please contact support@localhost.invalid to request access."
     return Response(
         {
             "error": message,

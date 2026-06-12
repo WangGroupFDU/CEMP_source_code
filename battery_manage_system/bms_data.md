@@ -1,7 +1,12 @@
-# Public Documentation Placeholder
+# Battery Data Module
 
-This internal document was removed from the public snapshot because it contained private operational notes or non-English comments that are not required for paper-code inspection.
+The public demo includes a small battery experiment metadata table in
+`data/demo/bms_experiment_result.csv`. It is loaded with:
 
-Original relative path: `battery_manage_system/bms_data.md`
+```bash
+python manage.py load_public_data --manifest data/public_manifest.json --mode demo
+```
 
-Please refer to the top-level `README.md` and `SECURITY_PUBLICATION_NOTES.md` for the public description of this code release.
+The full paper-supporting battery table is listed in
+`data/public_manifest.json` and should be archived with the complete public data
+package before manuscript resubmission.
