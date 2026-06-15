@@ -4,10 +4,10 @@ CEMP is a Django-based clean energy materials platform for database browsing,
 materials query APIs, machine-learning prediction workflows, and optional
 computational chemistry workflow orchestration.
 
-This repository is the open-source `main` release for the manuscript-associated
-CEMP platform. The source code is released under Apache-2.0. Public demo data,
-public data manifests, public data dictionaries, and public data/model assets are
-released under CC BY 4.0 unless a specific manifest entry states otherwise.
+This repository contains the public release of the CEMP platform associated with
+the manuscript. The source code is released under Apache-2.0. Public demo data,
+data manifests, data dictionaries, and data/model assets are released under CC BY
+4.0 unless a specific manifest entry states otherwise.
 
 ## Quick Start
 
@@ -70,12 +70,11 @@ python manage.py runserver
 
 ## Public Data and Models
 
-The repository stores demo CSV files and public database CSV assets directly in
-GitHub where file size permits. Model artifacts that are not suitable as regular
-repository files can be attached to the GitHub Release. The manifest records the
-expected public snapshot baseline.
-Experimental or theoretical calculation datasets are counted as data points; ML
-datasets are counted as rows.
+The repository includes demo CSV files and public database CSV assets directly
+where file size permits. Larger model artifacts can be attached to the GitHub
+Release. The manifest records the expected public snapshot baseline.
+Experimental and theoretical calculation datasets are counted as data points; ML
+datasets are reported as rows.
 
 | Public table | Count type | Expected count |
 | --- | --- | ---: |
@@ -86,11 +85,11 @@ datasets are counted as rows.
 | `polymer_experiment_polymer_data` | data points | 13,116 |
 | `polymer_calculated_monomer_data` | data points | 10,519 |
 | `polymer_calculated_polymer_data` | data points | 1,000 |
+| `polymer_predicted_omg_deepsa_cemp_property` | rows | 213,581 |
 | `battery_manage_system_bms_experiment_result` | data points | 39 |
 
 Additional GitHub CSV assets in `data/public/` include the full public paper
-database tables, Autocompute small-molecule database exports, and `213,581` rows
-of ML-predicted OMG polymer properties.
+database tables and Autocompute small-molecule database exports.
 
 ## Local Release Commands
 
@@ -102,7 +101,7 @@ python manage.py verify_public_release --manifest data/public_manifest.json
 
 `load_public_data` imports bundled demo CSV assets into SQLite. `seed_public_demo`
 creates a local demo user and token. `verify_public_release` checks local demo
-files, SHA256 values, count metadata, and release-language constraints.
+files, SHA256 values, count metadata, and release wording.
 
 ## API Example
 
@@ -147,9 +146,6 @@ npm run build
 ```
 
 ## Citation
-
-Use `CITATION.cff` for software citation metadata. After the manuscript release
-is finalized, update the manuscript reference and release tag if needed.
 
 ## Licenses
 
