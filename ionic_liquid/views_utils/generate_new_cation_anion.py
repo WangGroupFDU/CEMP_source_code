@@ -37,7 +37,6 @@ from rdkit import DataStructs
 import matplotlib.pyplot as plt
 import itertools
 from itertools import product
-from rdkit.Contrib.SA_Score import sascorer
 from rdkit.Chem import Descriptors, rdMolDescriptors
 from rdkit.DataStructs.cDataStructs import TanimotoSimilarity
 from rdkit.Chem import Draw
@@ -64,6 +63,11 @@ from sklearn.decomposition import PCA
 from rdkit import RDLogger
 import warnings
 import operator
+
+from .rdkit_contrib import load_sascorer
+
+
+sascorer = load_sascorer()
 
 IPythonConsole.ipython_useSVG = True
 logger = RDLogger.logger()
@@ -426,5 +430,4 @@ def generate_new_cation_anion(cation_core_excel, anion_core_excel, cation_backbo
 
     filtered_df_new_cation.to_csv(cation_output_csv, index=False)
     filtered_df_new_anion.to_csv(anion_output_csv, index=False)
-
 

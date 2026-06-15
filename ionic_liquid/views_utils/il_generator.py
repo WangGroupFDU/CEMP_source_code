@@ -43,7 +43,6 @@ from rdkit import DataStructs
 import matplotlib.pyplot as plt
 import itertools
 from itertools import product
-from rdkit.Contrib.SA_Score import sascorer
 from rdkit.Chem import Descriptors, rdMolDescriptors
 from rdkit.DataStructs.cDataStructs import TanimotoSimilarity
 from rdkit.Chem import Draw
@@ -78,6 +77,10 @@ from pathlib import Path
 from .generate_core_fragment import preprocess_core_fragment 
 from .generate_new_cation_anion import generate_new_cation_anion 
 from .generate_predict_new_IL import generate_predict_new_IL 
+from .rdkit_contrib import load_sascorer
+
+
+sascorer = load_sascorer()
 
 
 
@@ -202,7 +205,6 @@ def generate_il_by_fragments(request):
       'message': f'Ionic liquid generation failed: {str(e)}',
       'traceback': traceback.format_exc()
     }, status=500)
-
 
 
 
