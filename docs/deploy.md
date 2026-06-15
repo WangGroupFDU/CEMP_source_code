@@ -37,6 +37,16 @@ quay.io/condaforge/miniforge3:23.11.0-0
 This avoids depending on Docker Hub for the default public image build. If a
 site-local mirror is required, set `CEMP_BASE_IMAGE` before building.
 
+On Linux servers where Docker build containers cannot resolve external DNS while
+the host itself can, keep:
+
+```text
+CEMP_BUILD_NETWORK=host
+```
+
+This setting affects the image build step only. The running service still uses
+normal Compose networking and publishes only `CEMP_HOST_PORT`.
+
 ## Port Selection
 
 The container listens on port `8000` internally. The host port is controlled by
@@ -86,6 +96,7 @@ set at least:
 
 ```text
 CEMP_HOST_PORT=18080
+CEMP_BUILD_NETWORK=host
 CEMP_ALLOWED_HOSTS=127.0.0.1,localhost,0.0.0.0,<server-ip-or-domain>
 CEMP_CSRF_TRUSTED_ORIGINS=http://localhost:18080,http://127.0.0.1:18080,http://<server-ip-or-domain>:18080
 CEMP_SITE_DOMAIN=http://<server-ip-or-domain>:18080
@@ -178,6 +189,8 @@ Fixes:
 - configure the Docker daemon proxy or registry mirror if required by the site;
 - set `CEMP_BASE_IMAGE` to a site-local mirror of
   `quay.io/condaforge/miniforge3:23.11.0-0`.
+- set `CEMP_BUILD_NETWORK=host` when the host can resolve package endpoints but
+  Docker build containers cannot.
 
 ### Conda Packages Cannot Be Downloaded
 

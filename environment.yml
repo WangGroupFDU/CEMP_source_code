@@ -8,7 +8,6 @@ dependencies:
   - django=4.2.3
   - djangorestframework
   - django-cors-headers
-  - django-cron
   - cryptography
   - pandas=1.5.3
   - openpyxl
@@ -22,4 +21,5 @@ dependencies:
   - pyg
   - pip
   - pip:
+      - django-cron
       - mp-api

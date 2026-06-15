@@ -49,6 +49,7 @@ Important variables:
 | `CEMP_SECRET_KEY` | Django secret key for a deployment. |
 | `CEMP_HOST_PORT` | Host port published by Docker Compose. |
 | `CEMP_BASE_IMAGE` | Container base image or site-local mirror. |
+| `CEMP_BUILD_NETWORK` | Docker build network mode; use `host` on Linux hosts with container DNS issues. |
 | `CEMP_DEMO_FERNET_SEED` | Local seed used to derive the demo Fernet key. |
 | `CEMP_FERNET_KEY` | Explicit Fernet key for persistent deployments. |
 | `CEMP_SQLITE_PATH` | SQLite database path. |

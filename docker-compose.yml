@@ -2,12 +2,19 @@ services:
   cemp:
     build:
       context: .
+      network: ${CEMP_BUILD_NETWORK:-host}
       args:
         CEMP_BASE_IMAGE: ${CEMP_BASE_IMAGE:-quay.io/condaforge/miniforge3:23.11.0-0}
     env_file:
-      - .env.example
+      - path: .env.example
+        required: true
+      - path: .env
+        required: false
     environment:
       CEMP_DEBUG: ${CEMP_DEBUG:-true}
+      CEMP_HOST_PORT: ${CEMP_HOST_PORT:-8000}
+      CEMP_BASE_IMAGE: ${CEMP_BASE_IMAGE:-quay.io/condaforge/miniforge3:23.11.0-0}
+      CEMP_BUILD_NETWORK: ${CEMP_BUILD_NETWORK:-host}
       CEMP_SECRET_KEY: ${CEMP_SECRET_KEY:-change-this-local-demo-secret}
       CEMP_DEMO_FERNET_SEED: ${CEMP_DEMO_FERNET_SEED:-change-this-local-demo-fernet-seed}
       CEMP_SQLITE_PATH: ${CEMP_SQLITE_PATH:-/app/public_demo.sqlite3}
