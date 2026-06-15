@@ -18,6 +18,7 @@ dependencies:
   - cairosvg=2.7.0
   - rdkit=2023.03.2
   - pytorch
+  - cpuonly
   - pyg
   - pip
   - pip:
