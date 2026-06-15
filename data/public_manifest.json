@@ -296,6 +296,142 @@
       "description": "CEMP paper public battery experiment data."
     },
     {
+      "name": "paper_crystal_al_cleaned",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/crystal_al_cleaned.csv",
+      "django_model": "crystals.Crystal",
+      "bytes": 2074591,
+      "sha256": "41bdb1e833f62d53425c7eaba24f9f476ad9b72a78330b9f2307f9bf1c517647",
+      "license": "CC-BY-4.0",
+      "citation": "",
+      "required_for": [
+        "paper",
+        "crystal_database"
+      ],
+      "description": "CEMP paper public Materials Project-derived crystal database rows for AL-containing materials.",
+      "rows": 7797
+    },
+    {
+      "name": "paper_crystal_ba_cleaned",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/crystal_ba_cleaned.csv",
+      "django_model": "crystals.Crystal",
+      "bytes": 2238241,
+      "sha256": "b93ce16d4dee1ee437e3b1584a5b6c6e0a21c1029c97c681050dd8ef7c2616a3",
+      "license": "CC-BY-4.0",
+      "citation": "",
+      "required_for": [
+        "paper",
+        "crystal_database"
+      ],
+      "description": "CEMP paper public Materials Project-derived crystal database rows for BA-containing materials.",
+      "rows": 8334
+    },
+    {
+      "name": "paper_crystal_ca_cleaned",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/crystal_ca_cleaned.csv",
+      "django_model": "crystals.Crystal",
+      "bytes": 2278106,
+      "sha256": "3d570446aaf32fccd88498e69ccd5aebfde4bd94cb2cbe018bb5c1f2d8e300e7",
+      "license": "CC-BY-4.0",
+      "citation": "",
+      "required_for": [
+        "paper",
+        "crystal_database"
+      ],
+      "description": "CEMP paper public Materials Project-derived crystal database rows for CA-containing materials.",
+      "rows": 8421
+    },
+    {
+      "name": "paper_crystal_k_cleaned",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/crystal_k_cleaned.csv",
+      "django_model": "crystals.Crystal",
+      "bytes": 2128094,
+      "sha256": "6848fa872c782402c243d2727f98451b964ee22ad1d530bd937d7bb26c2e26bc",
+      "license": "CC-BY-4.0",
+      "citation": "",
+      "required_for": [
+        "paper",
+        "crystal_database"
+      ],
+      "description": "CEMP paper public Materials Project-derived crystal database rows for K-containing materials.",
+      "rows": 8034
+    },
+    {
+      "name": "paper_crystal_li_cleaned",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/crystal_li_cleaned.csv",
+      "django_model": "crystals.Crystal",
+      "bytes": 5942345,
+      "sha256": "18919aa682860ce8763f7ee285b3239cd543a0dd4bdff5683a9fe5d6ec310068",
+      "license": "CC-BY-4.0",
+      "citation": "",
+      "required_for": [
+        "paper",
+        "crystal_database"
+      ],
+      "description": "CEMP paper public Materials Project-derived crystal database rows for LI-containing materials.",
+      "rows": 21574
+    },
+    {
+      "name": "paper_crystal_mg_cleaned",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/crystal_mg_cleaned.csv",
+      "django_model": "crystals.Crystal",
+      "bytes": 5137596,
+      "sha256": "955233c929a7e4e28310e167dc2ebe390b6ea437d872bf9a815ffe6410c94137",
+      "license": "CC-BY-4.0",
+      "citation": "",
+      "required_for": [
+        "paper",
+        "crystal_database"
+      ],
+      "description": "CEMP paper public Materials Project-derived crystal database rows for MG-containing materials.",
+      "rows": 19007
+    },
+    {
+      "name": "paper_crystal_na_cleaned",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/crystal_na_cleaned.csv",
+      "django_model": "crystals.Crystal",
+      "bytes": 3475171,
+      "sha256": "bc13f8d8f7a137ba47bf8c56ae461ad68ba33e25d183c0b2e36ff202f0dabadd",
+      "license": "CC-BY-4.0",
+      "citation": "",
+      "required_for": [
+        "paper",
+        "crystal_database"
+      ],
+      "description": "CEMP paper public Materials Project-derived crystal database rows for NA-containing materials.",
+      "rows": 12792
+    },
+    {
+      "name": "paper_crystal_zn_cleaned",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/crystal_zn_cleaned.csv",
+      "django_model": "crystals.Crystal",
+      "bytes": 1839603,
+      "sha256": "89eb39a6d5bceaadf349f2566dcf4ef86001e62030eee38e851346882aebfb42",
+      "license": "CC-BY-4.0",
+      "citation": "",
+      "required_for": [
+        "paper",
+        "crystal_database"
+      ],
+      "description": "CEMP paper public Materials Project-derived crystal database rows for ZN-containing materials.",
+      "rows": 6905
+    },
+    {
       "name": "paper_model_weights_and_scalers",
       "version": "2026-06-12",
       "format": "archive",

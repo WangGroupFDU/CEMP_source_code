@@ -92,7 +92,7 @@ database dump is not committed.
 | Small molecules | `data/public/autocompute_cation_qc.csv`, `data/public/autocompute_anion_qc.csv`, `data/public/autocompute_electrolyte_qc.csv`, `data/public/autocompute_li_electrolyte_qc.csv`, `data/public/autocompute_metal_anion_binding_energy.csv`, `data/public/autocompute_example_small_molecules.csv` | No, use `--mode paper` for the paper-linked subset | Public small-molecule database exports corresponding to `/autocompute/Database`. |
 | Ionic liquids | `data/demo/ionic_liquid_*.csv`, `data/public/paper_ionic_liquid_il.csv`, `data/public/paper_ionic_liquid_il_ml_data.csv`, `data/public/paper_ionic_liquid_cation_qc_data.csv`, `data/public/paper_ionic_liquid_anion_qc_data.csv`, `data/public/autocompute_ionic_liquid_qc.csv` | Demo files with `--mode demo`; paper files with `--mode paper` | Includes ionic-liquid structures, ML rows, cation QC rows, anion QC rows, and the Autocompute ionic-liquid web-database copy. |
 | Polymers | `data/demo/polymer_*.csv`, `data/public/paper_polymer_experiment_polymer_data.csv`, `data/public/paper_polymer_calculated_monomer_data.csv`, `data/public/paper_polymer_calculated_polymer_data.csv`, `data/public/polymer_predicted_omg_deepsa_cemp_property.csv` | Demo files with `--mode demo`; paper-linked CSV files with `--mode paper`; prediction CSV stays file-based | Includes experimental polymer properties, calculated monomer/polymer properties, and 213,581 OMG polymer ML prediction rows. |
-| Crystals | No public crystal CSV snapshot in `data/public/` for this release | Not imported by `load_public_data` | Crystal prediction model weights are public in `release_assets/cemp_public_model_assets.tar.gz`; optional Materials Project refresh scripts require a user-provided `MP_API_KEY`. |
+| Crystals | `data/public/crystal_al_cleaned.csv`, `data/public/crystal_ba_cleaned.csv`, `data/public/crystal_ca_cleaned.csv`, `data/public/crystal_k_cleaned.csv`, `data/public/crystal_li_cleaned.csv`, `data/public/crystal_mg_cleaned.csv`, `data/public/crystal_na_cleaned.csv`, `data/public/crystal_zn_cleaned.csv` | Paper files with `--mode paper` | Materials Project-derived crystal database snapshots for Al, Ba, Ca, K, Li, Mg, Na, and Zn-containing materials. Crystal prediction model weights are public in `release_assets/cemp_public_model_assets.tar.gz`; optional Materials Project refresh scripts require a user-provided `MP_API_KEY`. |
 | Battery data | `data/demo/bms_experiment_result.csv`, `data/public/paper_bms_experiment_result.csv` | Demo file with `--mode demo`; paper file with `--mode paper` | Public battery experiment records used for database browsing and release checks. |
 | Release manifest | `data/public_manifest.json` | Read by loader and verifier | Records paths, SHA256 checksums, licenses, count metadata, and release grouping. |
 
@@ -148,6 +148,14 @@ chemistry tables and ML-generated datasets are reported as rows.
 | `paper_polymer_calculated_polymer_data` | `data/public/paper_polymer_calculated_polymer_data.csv` | rows | 1,000 |
 | `polymer_predicted_omg_deepsa_cemp_property` | `data/public/polymer_predicted_omg_deepsa_cemp_property.csv` | rows | 213,581 |
 | `paper_bms_experiment_result` | `data/public/paper_bms_experiment_result.csv` | data points | 39 |
+| `paper_crystal_al_cleaned` | `data/public/crystal_al_cleaned.csv` | rows | 7,797 |
+| `paper_crystal_ba_cleaned` | `data/public/crystal_ba_cleaned.csv` | rows | 8,334 |
+| `paper_crystal_ca_cleaned` | `data/public/crystal_ca_cleaned.csv` | rows | 8,421 |
+| `paper_crystal_k_cleaned` | `data/public/crystal_k_cleaned.csv` | rows | 8,034 |
+| `paper_crystal_li_cleaned` | `data/public/crystal_li_cleaned.csv` | rows | 21,574 |
+| `paper_crystal_mg_cleaned` | `data/public/crystal_mg_cleaned.csv` | rows | 19,007 |
+| `paper_crystal_na_cleaned` | `data/public/crystal_na_cleaned.csv` | rows | 12,792 |
+| `paper_crystal_zn_cleaned` | `data/public/crystal_zn_cleaned.csv` | rows | 6,905 |
 | `autocompute_cation_qc` | `data/public/autocompute_cation_qc.csv` | rows | 431 |
 | `autocompute_anion_qc` | `data/public/autocompute_anion_qc.csv` | rows | 63 |
 | `autocompute_ionic_liquid_qc` | `data/public/autocompute_ionic_liquid_qc.csv` | rows | 1,065 |
@@ -158,6 +166,7 @@ chemistry tables and ML-generated datasets are reported as rows.
 
 The Autocompute rows correspond to the public small-molecule database exposed by
 the CEMP web database pages and are committed as CSV files under `data/public/`.
+The crystal CSV assets contain 92,864 Materials Project-derived rows in total.
 
 Count definitions:
 

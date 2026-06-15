@@ -141,7 +141,8 @@ class Command(BaseCommand):
         返回值：
             通过 stdout 输出每个资产的导入结果。
         关键流程：
-            过滤 required_for 中包含 mode 的本地 CSV 资产，必要时清空表，再逐个导入。
+            过滤 required_for 中包含 mode 的本地 CSV 资产；每个模型只清空一次，
+            再逐个导入，避免同一数据表由多个 CSV 组成时被后续文件覆盖。
         可能报错或边界情况：
             模型归档等非 CSV 资产缺少 local_path 时会跳过，不影响 demo 导入。
         """
@@ -153,6 +154,7 @@ class Command(BaseCommand):
         assets = manifest.get("assets", [])
         mode = options["mode"]
         loaded = 0
+        cleared_models = set()
 
         with transaction.atomic():
             for asset in assets:
@@ -170,8 +172,10 @@ class Command(BaseCommand):
                     raise CommandError(f"Required data file not found: {csv_path}")
 
                 model = resolve_model(asset["django_model"])
-                if not options["append"]:
+                model_label = model._meta.label_lower
+                if not options["append"] and model_label not in cleared_models:
                     model.objects.all().delete()
+                    cleared_models.add(model_label)
                 count = load_csv(model, csv_path)
                 loaded += count
                 expected_count = expected_asset_count(asset)

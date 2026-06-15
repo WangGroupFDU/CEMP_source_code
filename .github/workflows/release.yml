@@ -30,6 +30,10 @@ jobs:
           test -f "$NOTES"
 
           if gh release view "$RELEASE_TAG" --repo "$REPOSITORY" >/dev/null 2>&1; then
+            gh release edit "$RELEASE_TAG" \
+              --repo "$REPOSITORY" \
+              --title "CEMP ${RELEASE_TAG}" \
+              --notes-file "$NOTES"
             gh release upload "$RELEASE_TAG" "$ASSET" --repo "$REPOSITORY" --clobber
           else
             gh release create "$RELEASE_TAG" "$ASSET" \

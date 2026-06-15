@@ -30,7 +30,7 @@ The CSV files are grouped by data type as follows:
 | Small molecules | `autocompute_cation_qc.csv`, `autocompute_anion_qc.csv`, `autocompute_electrolyte_qc.csv`, `autocompute_li_electrolyte_qc.csv`, `autocompute_metal_anion_binding_energy.csv`, `autocompute_example_small_molecules.csv` |
 | Ionic liquids | `paper_ionic_liquid_il.csv`, `paper_ionic_liquid_il_ml_data.csv`, `paper_ionic_liquid_cation_qc_data.csv`, `paper_ionic_liquid_anion_qc_data.csv`, `autocompute_ionic_liquid_qc.csv` |
 | Polymers | `paper_polymer_experiment_polymer_data.csv`, `paper_polymer_calculated_monomer_data.csv`, `paper_polymer_calculated_polymer_data.csv`, `polymer_predicted_omg_deepsa_cemp_property.csv` |
-| Crystals | No public crystal CSV snapshot is bundled in `data/public/`; crystal prediction weights are in `release_assets/cemp_public_model_assets.tar.gz`. |
+| Crystals | `crystal_al_cleaned.csv`, `crystal_ba_cleaned.csv`, `crystal_ca_cleaned.csv`, `crystal_k_cleaned.csv`, `crystal_li_cleaned.csv`, `crystal_mg_cleaned.csv`, `crystal_na_cleaned.csv`, `crystal_zn_cleaned.csv` |
 | Battery data | `paper_bms_experiment_result.csv` |
 
 | Asset | Count type | Count |
@@ -43,6 +43,14 @@ The CSV files are grouped by data type as follows:
 | `paper_polymer_calculated_monomer_data.csv` | rows | 10,519 |
 | `paper_polymer_calculated_polymer_data.csv` | rows | 1,000 |
 | `paper_bms_experiment_result.csv` | data points | 39 |
+| `crystal_al_cleaned.csv` | rows | 7,797 |
+| `crystal_ba_cleaned.csv` | rows | 8,334 |
+| `crystal_ca_cleaned.csv` | rows | 8,421 |
+| `crystal_k_cleaned.csv` | rows | 8,034 |
+| `crystal_li_cleaned.csv` | rows | 21,574 |
+| `crystal_mg_cleaned.csv` | rows | 19,007 |
+| `crystal_na_cleaned.csv` | rows | 12,792 |
+| `crystal_zn_cleaned.csv` | rows | 6,905 |
 | `autocompute_cation_qc.csv` | rows | 431 |
 | `autocompute_anion_qc.csv` | rows | 63 |
 | `autocompute_ionic_liquid_qc.csv` | rows | 1,065 |
@@ -58,6 +66,8 @@ The manuscript-supporting public database tables are committed as CSV files in
 `data/public/` and represented in `data/public_manifest.json` as paper assets:
 
 - paper public database CSV files with SHA256 checksums and count metadata;
+- Materials Project-derived crystal database CSV files for Al, Ba, Ca, K, Li,
+  Mg, Na, and Zn-containing materials;
 - Autocompute small-molecule database CSV files with source attribution;
 - model weights and scalers used by public prediction examples, committed as
   `release_assets/cemp_public_model_assets.tar.gz` and attached to the tagged
@@ -95,6 +105,7 @@ The minimum baseline recorded for the paper snapshot is:
 | `polymer_calculated_monomer_data` | rows | 10,519 |
 | `polymer_calculated_polymer_data` | rows | 1,000 |
 | `battery_manage_system_bms_experiment_result` | data points | 39 |
+| `crystals_crystal` | rows | 92,864 |
 
 ## Source Attribution
 
