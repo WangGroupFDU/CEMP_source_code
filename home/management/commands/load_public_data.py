@@ -109,15 +109,15 @@ def load_csv(model, csv_path):
 def expected_asset_count(asset):
     """
     功能目的：
-        读取 manifest 中的资产计数字段。
+        读取 manifest 中用于数据库导入校验的记录数字段。
     输入参数：
         asset: 单个 manifest asset 字典。
     返回值：
         优先返回 rows；若不存在则返回 data_points；二者都不存在时返回 None。
     关键流程：
-        ML 数据保留 rows 语义，实验或理论计算数据使用 data_points 语义。
+        数据库导入校验使用 CSV 行数；实验 data_points 只用于发布统计，不用于导入。
     可能报错或边界情况：
-        若 manifest 同时提供两个字段，rows 优先用于兼容旧 ML 数据资产。
+        旧 demo 资产可能只有 data_points，且其值等于 demo CSV 行数，因此保留回退。
     """
     if asset.get("rows") is not None:
         return asset.get("rows")

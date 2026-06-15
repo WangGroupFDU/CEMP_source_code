@@ -62,22 +62,41 @@ def count_csv_rows(path):
         return sum(1 for _ in reader)
 
 
+def count_csv_data_points(path, columns):
+    """
+    功能目的：
+        统计实验数据表中指定性质列的非空数据点数量。
+    输入参数：
+        path: CSV 文件路径。
+        columns: 需要统计的性质列名列表。
+    返回值：
+        指定列中非空、非 null 标记的单元格总数。
+    关键流程：
+        使用 DictReader 按列读取；先检查 manifest 指定列是否都存在，再逐行统计。
+    可能报错或边界情况：
+        如果 manifest 指定了不存在的列，会抛出 ValueError，防止静默少统计。
+    """
+    with path.open("r", encoding="utf-8-sig", newline="") as handle:
+        reader = csv.DictReader(handle)
+        if not reader.fieldnames:
+            return 0
+
+        missing_columns = [column for column in columns if column not in reader.fieldnames]
+        if missing_columns:
+            raise ValueError(f"data point columns not found: {', '.join(missing_columns)}")
+
+        count = 0
+        for row in reader:
+            for column in columns:
+                value = (row.get(column) or "").strip()
+                if value and value.lower() not in {"nan", "none", "null"}:
+                    count += 1
+        return count
+
+
 def resolve_model(model_path):
     app_label, model_name = model_path.split(".", 1)
     return apps.get_model(app_label, model_name)
-
-
-def expected_asset_count(asset):
-    """
-    功能目的：读取 manifest 中的预期计数字段。
-    输入参数：asset，单个 manifest asset 字典。
-    返回值：rows 或 data_points 的值；没有计数字段时返回 None。
-    关键流程：ML 数据使用 rows；实验与理论计算数据使用 data_points。
-    边界情况：为了兼容旧 manifest，同时存在时 rows 优先。
-    """
-    if asset.get("rows") is not None:
-        return asset.get("rows")
-    return asset.get("data_points")
 
 
 class Command(BaseCommand):
@@ -139,19 +158,45 @@ class Command(BaseCommand):
             if expected_sha256 and sha256_file(local_path) != expected_sha256:
                 failures.append(f"{asset.get('name')}: sha256 mismatch")
 
-            expected_count = expected_asset_count(asset)
-            if asset.get("format") == "csv" and expected_count is not None:
+            expected_rows = asset.get("rows")
+            expected_data_points = asset.get("data_points")
+            if asset.get("format") == "csv" and expected_rows is not None:
                 actual_rows = count_csv_rows(local_path)
-                if actual_rows != expected_count:
-                    failures.append(f"{asset.get('name')}: expected {expected_count} records, found {actual_rows}")
+                if actual_rows != expected_rows:
+                    failures.append(f"{asset.get('name')}: expected {expected_rows} rows, found {actual_rows}")
+
+            if asset.get("format") == "csv" and expected_data_points is not None:
+                data_point_columns = asset.get("data_point_columns")
+                if data_point_columns:
+                    try:
+                        actual_data_points = count_csv_data_points(local_path, data_point_columns)
+                    except ValueError as exc:
+                        failures.append(f"{asset.get('name')}: {exc}")
+                    else:
+                        if actual_data_points != expected_data_points:
+                            failures.append(
+                                f"{asset.get('name')}: expected {expected_data_points} data points, "
+                                f"found {actual_data_points}"
+                            )
+                elif expected_rows is None:
+                    actual_rows = count_csv_rows(local_path)
+                    if actual_rows != expected_data_points:
+                        failures.append(
+                            f"{asset.get('name')}: expected {expected_data_points} records, found {actual_rows}"
+                        )
 
             model_path = asset.get("django_model")
             if model_path and check_demo:
                 try:
                     model = resolve_model(model_path)
                     db_count = model.objects.count()
-                    if expected_count is not None and db_count not in {0, expected_count}:
-                        failures.append(f"{asset.get('name')}: database has {db_count} records, expected {expected_count}")
+                    expected_db_count = expected_rows
+                    if expected_db_count is None and not asset.get("data_point_columns"):
+                        expected_db_count = expected_data_points
+                    if expected_db_count is not None and db_count not in {0, expected_db_count}:
+                        failures.append(
+                            f"{asset.get('name')}: database has {db_count} records, expected {expected_db_count}"
+                        )
                 except DatabaseError as exc:
                     failures.append(f"{asset.get('name')}: database check failed: {exc}")
 

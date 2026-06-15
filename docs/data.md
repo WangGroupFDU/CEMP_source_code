@@ -20,26 +20,26 @@ python manage.py verify_public_release --manifest data/public_manifest.json
 ## GitHub Public CSV Assets
 
 The repository also includes public CSV assets in `data/public/`.
-Experimental or theoretical-calculation datasets are counted as `data_points`.
-ML-generated prediction datasets are counted as `rows`.
+Experimental datasets are counted as measured property `data_points`. Quantum
+chemistry and ML-generated datasets are counted as `rows`.
 
 | Asset | Count type | Count |
 | --- | --- | ---: |
-| `paper_ionic_liquid_il.csv` | data points | 1,065 |
+| `paper_ionic_liquid_il.csv` | rows | 1,065 |
 | `paper_ionic_liquid_il_ml_data.csv` | rows | 100,000 |
-| `paper_ionic_liquid_cation_qc_data.csv` | data points | 3,774 |
-| `paper_ionic_liquid_anion_qc_data.csv` | data points | 2,220 |
-| `paper_polymer_experiment_polymer_data.csv` | data points | 13,116 |
-| `paper_polymer_calculated_monomer_data.csv` | data points | 10,519 |
-| `paper_polymer_calculated_polymer_data.csv` | data points | 1,000 |
+| `paper_ionic_liquid_cation_qc_data.csv` | rows | 3,774 |
+| `paper_ionic_liquid_anion_qc_data.csv` | rows | 2,220 |
+| `paper_polymer_experiment_polymer_data.csv` | data points | 21,402 |
+| `paper_polymer_calculated_monomer_data.csv` | rows | 10,519 |
+| `paper_polymer_calculated_polymer_data.csv` | rows | 1,000 |
 | `paper_bms_experiment_result.csv` | data points | 39 |
-| `autocompute_cation_qc.csv` | data points | 431 |
-| `autocompute_anion_qc.csv` | data points | 63 |
-| `autocompute_ionic_liquid_qc.csv` | data points | 1,065 |
-| `autocompute_electrolyte_qc.csv` | data points | 1,397 |
-| `autocompute_li_electrolyte_qc.csv` | data points | 4,197 |
-| `autocompute_metal_anion_binding_energy.csv` | data points | 498 |
-| `autocompute_example_small_molecules.csv` | data points | 4 |
+| `autocompute_cation_qc.csv` | rows | 431 |
+| `autocompute_anion_qc.csv` | rows | 63 |
+| `autocompute_ionic_liquid_qc.csv` | rows | 1,065 |
+| `autocompute_electrolyte_qc.csv` | rows | 1,397 |
+| `autocompute_li_electrolyte_qc.csv` | rows | 4,197 |
+| `autocompute_metal_anion_binding_energy.csv` | rows | 498 |
+| `autocompute_example_small_molecules.csv` | rows | 4 |
 | `polymer_predicted_omg_deepsa_cemp_property.csv` | rows | 213,581 |
 
 ## Paper Data and Model Assets
@@ -70,13 +70,13 @@ The minimum baseline recorded for the paper snapshot is:
 
 | Table | Count type | Count |
 | --- | --- | ---: |
-| `ionic_liquid_il` | data points | 1,065 |
+| `ionic_liquid_il` | rows | 1,065 |
 | `ionic_liquid_il_ml_data` | rows | 100,000 |
-| `ionic_liquid_cation_qc_data` | data points | 3,774 |
-| `ionic_liquid_anion_qc_data` | data points | 2,220 |
-| `polymer_experiment_polymer_data` | data points | 13,116 |
-| `polymer_calculated_monomer_data` | data points | 10,519 |
-| `polymer_calculated_polymer_data` | data points | 1,000 |
+| `ionic_liquid_cation_qc_data` | rows | 3,774 |
+| `ionic_liquid_anion_qc_data` | rows | 2,220 |
+| `polymer_experiment_polymer_data` | data points | 21,402 |
+| `polymer_calculated_monomer_data` | rows | 10,519 |
+| `polymer_calculated_polymer_data` | rows | 1,000 |
 | `battery_manage_system_bms_experiment_result` | data points | 39 |
 
 ## Source Attribution

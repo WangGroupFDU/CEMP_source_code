@@ -73,23 +73,30 @@ python manage.py runserver
 The repository includes demo CSV files and public database CSV assets directly
 where file size permits. Larger model artifacts can be attached to the GitHub
 Release. The manifest records the expected public snapshot baseline.
-Experimental and theoretical calculation datasets are counted as data points; ML
-datasets are reported as rows.
+Experimental datasets are counted as measured property data points. Quantum
+chemistry tables and ML-generated datasets are reported as rows.
 
-| Public table | Count type | Expected count |
+| Public asset | Count type | Expected count |
 | --- | --- | ---: |
-| `ionic_liquid_il` | data points | 1,065 |
-| `ionic_liquid_il_ml_data` | rows | 100,000 |
-| `ionic_liquid_cation_qc_data` | data points | 3,774 |
-| `ionic_liquid_anion_qc_data` | data points | 2,220 |
-| `polymer_experiment_polymer_data` | data points | 13,116 |
-| `polymer_calculated_monomer_data` | data points | 10,519 |
-| `polymer_calculated_polymer_data` | data points | 1,000 |
+| `paper_ionic_liquid_il` | rows | 1,065 |
+| `paper_ionic_liquid_il_ml_data` | rows | 100,000 |
+| `paper_ionic_liquid_cation_qc_data` | rows | 3,774 |
+| `paper_ionic_liquid_anion_qc_data` | rows | 2,220 |
+| `paper_polymer_experiment_polymer_data` | data points | 21,402 |
+| `paper_polymer_calculated_monomer_data` | rows | 10,519 |
+| `paper_polymer_calculated_polymer_data` | rows | 1,000 |
 | `polymer_predicted_omg_deepsa_cemp_property` | rows | 213,581 |
-| `battery_manage_system_bms_experiment_result` | data points | 39 |
+| `paper_bms_experiment_result` | data points | 39 |
+| `autocompute_cation_qc` | rows | 431 |
+| `autocompute_anion_qc` | rows | 63 |
+| `autocompute_ionic_liquid_qc` | rows | 1,065 |
+| `autocompute_electrolyte_qc` | rows | 1,397 |
+| `autocompute_li_electrolyte_qc` | rows | 4,197 |
+| `autocompute_metal_anion_binding_energy` | rows | 498 |
+| `autocompute_example_small_molecules` | rows | 4 |
 
-Additional GitHub CSV assets in `data/public/` include the full public paper
-database tables and Autocompute small-molecule database exports.
+The Autocompute rows correspond to the public small-molecule database exposed by
+the CEMP web database pages and are committed as CSV files under `data/public/`.
 
 ## Local Release Commands
 
