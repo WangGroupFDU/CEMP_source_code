@@ -13,7 +13,7 @@ services:
     environment:
       CEMP_DEBUG: ${CEMP_DEBUG:-true}
       CEMP_HOST_PORT: ${CEMP_HOST_PORT:-8000}
-      CEMP_CONTAINER_PORT: ${CEMP_CONTAINER_PORT:-8000}
+      CEMP_CONTAINER_PORT: ${CEMP_HOST_PORT:-8000}
       CEMP_BASE_IMAGE: ${CEMP_BASE_IMAGE:-quay.io/condaforge/miniforge3:23.11.0-0}
       CEMP_BUILD_NETWORK: ${CEMP_BUILD_NETWORK:-host}
       CEMP_SECRET_KEY: ${CEMP_SECRET_KEY:-change-this-local-demo-secret}
@@ -28,8 +28,7 @@ services:
       CEMP_ENABLE_MYSQL: ${CEMP_ENABLE_MYSQL:-false}
       CEMP_EMAIL_BACKEND: ${CEMP_EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
       CEMP_DEFAULT_FROM_EMAIL: ${CEMP_DEFAULT_FROM_EMAIL:-CEMP Platform <noreply@localhost>}
-    ports:
-      - "${CEMP_HOST_PORT:-8000}:${CEMP_CONTAINER_PORT:-8000}"
+    network_mode: host
     volumes:
       - cemp_public_media:/app/media
       - cemp_public_staticfiles:/app/staticfiles

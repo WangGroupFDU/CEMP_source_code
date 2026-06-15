@@ -28,8 +28,8 @@ http://localhost:8000
 ```
 
 On a shared server, choose a free host port and update `.env`, for example
-`CEMP_HOST_PORT=18080`. Full Docker and CentOS deployment notes are in
-`docs/deploy.md`.
+`CEMP_HOST_PORT=18080`. If Docker bridge networking fails on CentOS, use the
+host-network Compose file documented in `docs/deploy.md`.
 
 Demo credentials:
 

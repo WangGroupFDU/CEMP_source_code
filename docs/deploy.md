@@ -73,6 +73,11 @@ CEMP_CSRF_TRUSTED_ORIGINS=http://localhost:18080,http://127.0.0.1:18080,http://<
 CEMP_SITE_DOMAIN=http://<server-ip-or-domain>:18080
 ```
 
+When using `docker-compose.host-network.yml`, Docker does not publish ports.
+Instead, Django listens directly on the host network. In that mode,
+`CEMP_HOST_PORT` is also used as the Django listen port, so choose a port that is
+free on the host before starting the container.
+
 If firewalld is enabled and remote browser access is required, open the selected
 host port:
 
@@ -110,6 +115,17 @@ docker compose up -d --build
 
 The first build creates a conda environment from `environment.yml`. This can
 take several minutes and requires access to conda-forge.
+
+If Docker bridge networking is broken on the host, use the host-network Compose
+file instead:
+
+```bash
+docker compose -f docker-compose.host-network.yml up -d --build
+```
+
+This mode is intended for servers where Docker reports missing iptables
+`DOCKER` chains during network creation. It avoids creating a bridge network and
+binds Django directly to `CEMP_HOST_PORT` on the host.
 
 ## Validation
 
@@ -155,6 +171,14 @@ http://<server-ip-or-domain>:18080
 ```
 
 No database port is published by the public demo Compose file.
+
+With `docker-compose.host-network.yml`, the open port is simply:
+
+```text
+<CEMP_HOST_PORT>/tcp on the Docker host
+```
+
+No Docker port publishing rule is created in host-network mode.
 
 ## Common Failures
 
@@ -206,6 +230,27 @@ Fixes:
 - confirm `curl -I https://conda.anaconda.org/conda-forge/` works;
 - configure conda mirror/proxy according to the host network policy;
 - rebuild with `docker compose build --no-cache` after fixing network access.
+
+### Docker Bridge Network Cannot Be Created
+
+Symptom:
+
+```text
+failed to create network ... iptables: No chain/target/match by that name
+```
+
+Fix options:
+
+- restart Docker and retry the normal Compose file if you control the host;
+- or use the host-network Compose file:
+
+```bash
+docker compose -f docker-compose.host-network.yml up -d --build
+```
+
+In host-network mode, set `CEMP_HOST_PORT` to the actual host port and update
+`CEMP_ALLOWED_HOSTS`, `CEMP_CSRF_TRUSTED_ORIGINS`, and `CEMP_SITE_DOMAIN` to
+match that port.
 
 ### DisallowedHost or CSRF Errors
 

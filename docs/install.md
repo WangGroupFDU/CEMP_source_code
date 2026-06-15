@@ -22,7 +22,11 @@ Open `http://localhost:8000`.
 
 For a shared server, set `CEMP_HOST_PORT` and host/CSRF values in `.env` before
 starting Docker. See `docs/deploy.md` for CentOS, firewall, registry, and
-port-selection notes.
+port-selection notes. If Docker cannot create a bridge network on CentOS, use:
+
+```bash
+docker compose -f docker-compose.host-network.yml up -d --build
+```
 
 ## Conda
 
@@ -48,6 +52,7 @@ Important variables:
 | --- | --- |
 | `CEMP_SECRET_KEY` | Django secret key for a deployment. |
 | `CEMP_HOST_PORT` | Host port published by Docker Compose. |
+| `CEMP_CONTAINER_PORT` | Container listen port; default `8000`. |
 | `CEMP_BASE_IMAGE` | Container base image or site-local mirror. |
 | `CEMP_BUILD_NETWORK` | Docker build network mode; use `host` on Linux hosts with container DNS issues. |
 | `CEMP_DEMO_FERNET_SEED` | Local seed used to derive the demo Fernet key. |
