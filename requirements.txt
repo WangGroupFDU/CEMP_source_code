@@ -4,6 +4,7 @@ django-cors-headers
 django-cron
 cryptography
 pandas==1.5.3
+pymongo
 openpyxl
 numpy
 rdkit==2023.3.2

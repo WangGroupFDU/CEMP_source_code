@@ -10,6 +10,7 @@ dependencies:
   - django-cors-headers
   - cryptography
   - pandas=1.5.3
+  - pymongo
   - openpyxl
   - numpy
   - scikit-learn
