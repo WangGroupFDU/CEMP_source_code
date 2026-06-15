@@ -2,7 +2,7 @@
 
 ## License
 
-Public CEMP data, model metadata, and archived data/model assets are released
+Public CEMP data, model metadata, and public data/model assets are released
 under CC BY 4.0 unless an asset-level manifest entry states otherwise.
 
 ## Bundled Demo Assets
@@ -25,6 +25,14 @@ ML-generated prediction datasets are counted as `rows`.
 
 | Asset | Count type | Count |
 | --- | --- | ---: |
+| `paper_ionic_liquid_il.csv` | data points | 1,065 |
+| `paper_ionic_liquid_il_ml_data.csv` | rows | 100,000 |
+| `paper_ionic_liquid_cation_qc_data.csv` | data points | 3,774 |
+| `paper_ionic_liquid_anion_qc_data.csv` | data points | 2,220 |
+| `paper_polymer_experiment_polymer_data.csv` | data points | 13,116 |
+| `paper_polymer_calculated_monomer_data.csv` | data points | 10,519 |
+| `paper_polymer_calculated_polymer_data.csv` | data points | 1,000 |
+| `paper_bms_experiment_result.csv` | data points | 39 |
 | `autocompute_cation_qc.csv` | data points | 431 |
 | `autocompute_anion_qc.csv` | data points | 63 |
 | `autocompute_ionic_liquid_qc.csv` | data points | 1,065 |
@@ -34,29 +42,18 @@ ML-generated prediction datasets are counted as `rows`.
 | `autocompute_example_small_molecules.csv` | data points | 4 |
 | `polymer_predicted_omg_deepsa_cemp_property.csv` | rows | 213,581 |
 
-## Full Paper Assets
+## Paper Data and Model Assets
 
-The full manuscript-supporting public data and model package is represented in
-`data/public_manifest.json` as paper assets. These assets are intended for
-GitHub Release and Zenodo archival:
+The manuscript-supporting public database tables are committed as CSV files in
+`data/public/` and represented in `data/public_manifest.json` as paper assets:
 
-- public SQLite data snapshot: `cemp_public_data.sqlite3`, 32,903,168 bytes,
-  SHA256 `307ace04834599f4e3d2adce3f092bd810e54e7e73686d3d63e8863712386bab`;
-- CSV/XLSX exports for ionic liquid, polymer, crystal, and battery tables;
-- model weights and scalers used by public prediction examples:
+- paper public database CSV files with SHA256 checksums and count metadata;
+- Autocompute small-molecule database CSV files with source attribution;
+- model weights and scalers used by public prediction examples, attached to the
+  GitHub Release when not committed as regular files:
   `cemp_public_model_assets.tar.gz`, 11,545,465 bytes,
   SHA256 `2f502c0b71a6da151265482ec4461b25a969a9417343b7580bfad0f2f7a9d007`;
-- SHA256 checksum file;
 - data dictionary and source-attribution notes.
-
-The DOI is `TBD` until the Zenodo deposit is completed. After archival, update:
-
-```text
-data/public_manifest.json
-docs/availability_statement.md
-README.md
-GitHub Release notes
-```
 
 ## Data Dictionary Policy
 

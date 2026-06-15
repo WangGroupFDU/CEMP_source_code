@@ -4,10 +4,10 @@ CEMP is a Django-based clean energy materials platform for database browsing,
 materials query APIs, machine-learning prediction workflows, and optional
 computational chemistry workflow orchestration.
 
-This repository is the open-source release branch for the manuscript-associated
+This repository is the open-source `main` release for the manuscript-associated
 CEMP platform. The source code is released under Apache-2.0. Public demo data,
-public data manifests, public data dictionaries, and archived data/model assets
-are released under CC BY 4.0 unless a specific manifest entry states otherwise.
+public data manifests, public data dictionaries, and public data/model assets are
+released under CC BY 4.0 unless a specific manifest entry states otherwise.
 
 ## Quick Start
 
@@ -60,14 +60,15 @@ python manage.py runserver
 | `autocompute/` | Optional QC/MD workflow orchestration and task-management modules. |
 | `data/demo/` | Small local demo CSV assets for smoke tests and API examples. |
 | `data/public/` | Public GitHub CSV assets, including Autocompute small molecules and polymer ML predictions. |
-| `data/public_manifest.json` | Versioned data/model manifest, checksums, licenses, and archival pointers. |
+| `data/public_manifest.json` | Versioned data/model manifest, checksums, licenses, and release pointers. |
 | `docs/` | Installation, data, API, reproducibility, and availability notes. |
 
 ## Public Data and Models
 
-The repository stores demo CSV files and selected GitHub-hosted public CSV
-assets directly. Larger data/model artifacts remain intended for GitHub Release
-and Zenodo archival. The manifest records the expected public snapshot baseline.
+The repository stores demo CSV files and public database CSV assets directly in
+GitHub where file size permits. Model artifacts that are not suitable as regular
+repository files can be attached to the GitHub Release. The manifest records the
+expected public snapshot baseline.
 Experimental or theoretical calculation datasets are counted as data points; ML
 datasets are counted as rows.
 
@@ -82,13 +83,9 @@ datasets are counted as rows.
 | `polymer_calculated_polymer_data` | data points | 1,000 |
 | `battery_manage_system_bms_experiment_result` | data points | 39 |
 
-Additional GitHub CSV assets in `data/public/` include Autocompute
-small-molecule database exports and `213,581` rows of ML-predicted OMG polymer
-properties.
-
-The Zenodo DOI is marked as `TBD` until the archival deposit is completed.
-After upload, update `data/public_manifest.json`, `docs/data.md`, and
-`docs/availability_statement.md` with the DOI, asset checksums, and release URL.
+Additional GitHub CSV assets in `data/public/` include the full public paper
+database tables, Autocompute small-molecule database exports, and `213,581` rows
+of ML-predicted OMG polymer properties.
 
 ## Local Release Commands
 
@@ -146,8 +143,8 @@ npm run build
 
 ## Citation
 
-Use `CITATION.cff` for software citation metadata. After the manuscript and
-Zenodo archive are finalized, update the citation DOI and manuscript reference.
+Use `CITATION.cff` for software citation metadata. After the manuscript release
+is finalized, update the manuscript reference and release tag if needed.
 
 ## Licenses
 

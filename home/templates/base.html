@@ -1,639 +1,2064 @@
 <!DOCTYPE html>
 {% load static %}
-<html>
+<html lang="en">
 <head>
-  
-  <meta charset="utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-  
-  <meta name="keywords" content="CEMP, Clean Energy Materials Platform, high-throughput computation, machine learning, polymer database,
-   ionic liquids, crystals, quantum chemistry, molecular dynamics, energy materials,
-    高通量计算, 材料数据库, 人工智能模型, 聚合物, 离子液体, 晶体, 电池材料, 清洁能源材料" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CEMP: Clean Energy Materials Platform</title>
+  <meta name="description" content="Clean Energy Materials Platform integrates materials databases, AI models, online tools, and research agents.">
+  <link rel="icon" href="{% static 'images/homepage_20260612_161705/cemp-logo.png' %}" type="image/png">
+  <style>
+    /* 全局变量用于保持科研平台风格稳定，避免依赖装饰性颜色效果。 */
+    :root {
+      --ink: #17202a;
+      --muted: #657383;
+      --line: #d9e0e7;
+      --paper: #ffffff;
+      --wash: #f5f7fa;
+      --teal: #0f766e;
+      --teal-soft: #dff4ef;
+      --blue: #2559c7;
+      --blue-soft: #e7eefc;
+      --amber: #b76e00;
+      --amber-soft: #fff1d6;
+      --green: #2f7d32;
+      --green-soft: #e7f4e8;
+      --red: #b64332;
+      --shadow: 0 18px 50px rgba(24, 39, 75, 0.12);
+      --radius: 8px;
+      --max: 1480px;
+    }
 
-  <meta name="description" content="CEMP (Clean Energy Materials Platform) 是一个开放获取的清洁能源材料平台，集成高通量计算、
-  分子动力学模拟、量子化学计算、多尺度机器学习模型和大规模数据库。平台覆盖小分子、聚合物、离子液体和晶体四大类材料，支持自动化计算工作流、性质预测与可视化，
-  为快速筛选、结构-性能关系分析和多目标优化提供数字化生态系统。CEMP aims to accelerate clean energy materials discovery by
-   unifying high-throughput online calculation, FAIR-compliant multi-source databases, and robust AI models." />
-   
-  <meta name="author" content="Wang Jifeng, Ju Jiazhe, Wang Ying - Fudan University" />
-  <title>CEMP: Clean Energy Materials Platform | 在线材料计算平台</title>
+    * {
+      box-sizing: border-box;
+    }
 
-  
-  <link rel="stylesheet" type="text/css"
-    href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.1.3/assets/owl.carousel.min.css" />
+    html {
+      scroll-behavior: smooth;
+    }
 
-  
-  <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}" />
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+      line-height: 1.55;
+      letter-spacing: 0;
+    }
 
-  
-  
-  
-  <link href="{% static 'css/responsive.css' %}" rel="stylesheet" />
-  
-  <link href="{% static 'css/responsive.css' %}" rel="stylesheet" />
-  
-  <link href="{% static 'css/style.css' %}" rel="stylesheet" />
-  <script type="text/javascript" src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
-   
-  <script type="text/javascript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-</head>
+    img {
+      max-width: 100%;
+      display: block;
+    }
 
-<style>
-  .tutorial-download {
-      margin-top: 20px;
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .skip-link {
+      position: absolute;
+      left: 16px;
+      top: -48px;
+      z-index: 20;
+      padding: 10px 14px;
+      color: #ffffff;
+      background: var(--ink);
+      border-radius: var(--radius);
+    }
+
+    .skip-link:focus {
+      top: 16px;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid rgba(217, 224, 231, 0.85);
+      backdrop-filter: blur(16px);
+    }
+
+    .nav-wrap {
+      max-width: var(--max);
+      min-height: 76px;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 220px;
+    }
+
+    .brand img {
+      width: 42px;
+      height: 42px;
+    }
+
+    .brand strong {
+      font-size: 17px;
+      line-height: 1.05;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .brand span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: none;
+    }
+
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .nav-menu a {
+      padding: 9px 8px;
+      border-radius: var(--radius);
+      color: #263545;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .nav-menu a:hover,
+    .nav-menu a:focus {
+      color: var(--teal);
+      background: var(--teal-soft);
+      outline: none;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .menu-toggle {
+      display: none;
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      color: var(--ink);
+      background: #ffffff;
+      cursor: pointer;
+    }
+
+    .menu-toggle span {
+      display: block;
+      width: 18px;
+      height: 2px;
+      margin: 4px auto;
+      background: currentColor;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 10px 16px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      font-weight: 800;
+      white-space: nowrap;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+    }
+
+    .button.primary {
+      color: #ffffff;
+      background: var(--teal);
+      box-shadow: 0 10px 22px rgba(15, 118, 110, 0.22);
+    }
+
+    .button.secondary {
+      color: var(--teal);
+      border-color: #98cec7;
+      background: #ffffff;
+    }
+
+    .button.dark {
+      color: #ffffff;
+      background: var(--ink);
+    }
+
+    .button.agent {
+      color: #ffffff;
+      background: var(--blue);
+      box-shadow: 0 10px 22px rgba(37, 99, 235, 0.2);
+    }
+
+    .button.small {
+      min-height: 36px;
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+
+    main {
+      overflow: hidden;
+    }
+
+    .section {
+      padding: 82px 32px;
+    }
+
+    .section.compact {
+      padding-top: 56px;
+      padding-bottom: 56px;
+    }
+
+    .section-inner {
+      max-width: var(--max);
+      margin: 0 auto;
+    }
+
+    .hero {
+      min-height: calc(100vh - 76px);
+      padding: 30px 32px 44px;
+      display: block;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.94) 48%, rgba(247,250,250,0.9) 100%),
+        url("{% static 'images/homepage_20260612_161705/cemp-background-logo.png' %}") right 7% top 82px / min(42vw, 520px) auto no-repeat;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero-shell {
+      max-width: var(--max);
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .hero-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(480px, 0.92fr);
+      gap: 56px;
+      align-items: start;
+    }
+
+    .hero-main {
+      padding-top: 0;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 16px;
+      color: var(--teal);
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 32px;
+      height: 2px;
+      background: var(--teal);
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      max-width: 980px;
       margin-bottom: 20px;
-  }
-    
-    .navbar-nav .nav-link {
-    font-size: 18px;   
-  }
-  
-  .nav-item.dropdown .dropdown-toggle {
-    color: #F26611 !important;
-  }
-  
-  #mobileUserDropdown {
-    color: #F26611 !important;
-    border-color: #F26611 !important;
-  }
-</style>
+      font-size: 52px;
+      line-height: 1.06;
+      font-weight: 900;
+    }
 
+    .lead {
+      max-width: 820px;
+      margin-bottom: 28px;
+      color: #405060;
+      font-size: 19px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 34px;
+    }
+
+    .proof-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      max-width: 860px;
+      margin-bottom: 0;
+    }
+
+    .proof-item {
+      padding: 14px 14px 13px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.88);
+    }
+
+    .proof-item strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .proof-item span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .hero-workbench {
+      position: relative;
+      padding: 22px;
+      border: 1px solid rgba(217, 224, 231, 0.95);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: var(--shadow);
+    }
+
+    .agent-panel {
+      min-height: 620px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .workbench-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .workbench-head h2 {
+      margin-bottom: 0;
+      font-size: 18px;
+    }
+
+    .agent-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      color: var(--blue);
+      background: var(--blue-soft);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .agent-status-pill::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: currentColor;
+    }
+
+    .workflow-showcase {
+      margin-top: 26px;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: minmax(250px, 0.36fr) minmax(0, 0.64fr);
+      gap: 22px;
+      align-items: stretch;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 14px 32px rgba(24, 39, 75, 0.08);
+    }
+
+    .workflow-showcase-copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 4px 0;
+    }
+
+    .workflow-kicker {
+      color: var(--teal);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .workflow-showcase-copy h2 {
+      margin-bottom: 10px;
+      font-size: 22px;
+      line-height: 1.15;
+    }
+
+    .workflow-showcase-copy p {
+      margin-bottom: 0;
+      color: #4b5b6c;
+      font-size: 14px;
+    }
+
+    .workflow-preview {
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .workflow-preview-controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 0;
+    }
+
+    .workflow-preview-button {
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      color: #405060;
+      background: #ffffff;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .workflow-preview-button.is-active {
+      color: #ffffff;
+      border-color: var(--teal);
+      background: var(--teal);
+    }
+
+    .workflow-preview-frame {
+      position: relative;
+      min-height: 320px;
+      aspect-ratio: 16 / 8.6;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    .workflow-preview-frame img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      padding: 14px;
+      object-fit: contain;
+      object-position: center;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .workflow-preview-frame img.is-active {
+      opacity: 1;
+    }
+
+    .agent-chat {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .agent-context {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .agent-context span {
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      color: #405060;
+      background: #ffffff;
+      font-size: 12px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .chat-window {
+      display: flex;
+      flex: 1;
+      min-height: 312px;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #f8fafc;
+    }
+
+    .chat-message {
+      max-width: 88%;
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .chat-message.agent {
+      align-self: flex-start;
+      color: #223142;
+      background: #ffffff;
+      border: 1px solid var(--line);
+    }
+
+    .chat-message.user {
+      align-self: flex-end;
+      color: #ffffff;
+      background: var(--teal);
+    }
+
+    .agent-suggestions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .agent-suggestions button {
+      min-height: 40px;
+      padding: 9px 10px;
+      border: 1px solid #98cec7;
+      border-radius: var(--radius);
+      color: var(--teal);
+      background: #ffffff;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .agent-input {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #ffffff;
+    }
+
+    .agent-prompt-text {
+      min-width: 0;
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .agent-go-link {
+      min-height: 36px;
+      padding: 8px 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius);
+      color: #ffffff;
+      background: var(--ink);
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+
+
+    .user-menu {
+      position: relative;
+    }
+
+    .user-menu summary {
+      min-height: 36px;
+      padding: 8px 12px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid #98cec7;
+      border-radius: var(--radius);
+      color: var(--teal);
+      background: #ffffff;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .user-menu summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .user-menu-panel {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 15;
+      min-width: 190px;
+      padding: 8px;
+      display: grid;
+      gap: 4px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #ffffff;
+      box-shadow: var(--shadow);
+    }
+
+    .user-menu-panel a,
+    .user-menu-panel button {
+      width: 100%;
+      padding: 9px 10px;
+      border: 0;
+      border-radius: var(--radius);
+      color: var(--ink);
+      background: #ffffff;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .user-menu-panel a:hover,
+    .user-menu-panel button:hover {
+      background: var(--wash);
+    }
+
+    .chart-canvas-wrap {
+      height: 260px;
+      padding-top: 8px;
+    }
+
+    .email-modal[hidden] {
+      display: none;
+    }
+
+    .email-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(15, 23, 42, 0.42);
+    }
+
+    .email-modal-dialog {
+      width: min(100%, 460px);
+      border-radius: var(--radius);
+      background: #ffffff;
+      box-shadow: var(--shadow);
+    }
+
+    .email-modal-head,
+    .email-modal-actions {
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .email-modal-actions {
+      justify-content: flex-end;
+      border-top: 1px solid var(--line);
+      border-bottom: 0;
+    }
+
+    .email-modal-body {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .email-form-row {
+      display: grid;
+      gap: 6px;
+    }
+
+    .email-form-row label {
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .email-form-row input {
+      min-height: 40px;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      font: inherit;
+    }
+
+    .email-error {
+      min-height: 16px;
+      color: #b91c1c;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .section-title {
+      max-width: 780px;
+      margin-bottom: 34px;
+    }
+
+    .section-title.center {
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+    }
+
+    .section-title h2 {
+      margin-bottom: 12px;
+      font-size: clamp(30px, 3.2vw, 44px);
+      line-height: 1.08;
+      font-weight: 900;
+    }
+
+    .section-title p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .route-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .route-card {
+      min-height: 316px;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #ffffff;
+      box-shadow: 0 10px 24px rgba(24, 39, 75, 0.06);
+    }
+
+    .route-media {
+      aspect-ratio: 16 / 9;
+      min-height: 0;
+      display: grid;
+      place-items: center;
+      background: var(--wash);
+      border-bottom: 1px solid var(--line);
+      overflow: hidden;
+    }
+
+    .route-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 10px;
+    }
+
+    .route-media.contain img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .route-card-body {
+      padding: 20px;
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+    }
+
+    .route-card h3 {
+      margin-bottom: 10px;
+      font-size: 21px;
+      line-height: 1.18;
+    }
+
+    .route-card p {
+      margin-bottom: 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .route-links {
+      margin-top: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .text-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--teal);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .text-link::after {
+      content: "→";
+      font-size: 15px;
+    }
+
+    .route-link-list {
+      margin-top: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .route-link-list a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--teal);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .route-link-list a::after {
+      content: "→";
+      font-size: 15px;
+    }
+
+    .band {
+      background: var(--wash);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .capability-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .capability-card {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #ffffff;
+    }
+
+    .capability-kicker {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      color: var(--amber);
+      background: var(--amber-soft);
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .capability-card h3 {
+      margin-bottom: 8px;
+      font-size: 18px;
+      line-height: 1.22;
+    }
+
+    .capability-card p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 34px;
+    }
+
+    .pipeline-step {
+      position: relative;
+      min-height: 168px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #ffffff;
+    }
+
+    .pipeline-step::after {
+      content: "";
+      position: absolute;
+      top: 38px;
+      right: -12px;
+      width: 12px;
+      height: 2px;
+      background: var(--line);
+    }
+
+    .pipeline-step:last-child::after {
+      display: none;
+    }
+
+    .pipeline-step .number {
+      width: 36px;
+      height: 36px;
+      margin-bottom: 16px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: #ffffff;
+      background: var(--teal);
+      font-weight: 900;
+    }
+
+    .pipeline-step h3 {
+      margin-bottom: 8px;
+      font-size: 16px;
+      line-height: 1.22;
+    }
+
+    .pipeline-step p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .database-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .database-panel {
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #ffffff;
+      box-shadow: 0 10px 28px rgba(24, 39, 75, 0.06);
+    }
+
+    .database-panel h2 {
+      margin-bottom: 12px;
+      font-size: 34px;
+      line-height: 1.1;
+    }
+
+    .database-panel p {
+      color: var(--muted);
+    }
+
+    .database-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .dataset-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .dataset-card {
+      min-height: 206px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--teal);
+      border-radius: var(--radius);
+      background: #ffffff;
+    }
+
+    .dataset-card img {
+      width: 62px;
+      height: 62px;
+      margin-bottom: 18px;
+      padding: 10px;
+      border-radius: 18px;
+      background: var(--teal-soft);
+      object-fit: contain;
+    }
+
+    .dataset-card h3 {
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    .dataset-card p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .activity-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .activity-card {
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #ffffff;
+    }
+
+    .activity-card h3 {
+      margin-bottom: 18px;
+      font-size: 18px;
+    }
+
+    .mini-chart {
+      height: 220px;
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      padding: 16px 0 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .bar {
+      flex: 1;
+      min-width: 24px;
+      border-radius: 5px 5px 0 0;
+      background: linear-gradient(180deg, #75c7c1, var(--teal));
+    }
+
+    .bar.blue {
+      background: linear-gradient(180deg, #8fb5f2, var(--blue));
+    }
+
+    .chart-labels {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .paper-callout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 24px;
+      align-items: center;
+      padding: 28px;
+      border: 1px solid #f1d5a4;
+      border-radius: var(--radius);
+      background: var(--amber-soft);
+    }
+
+    .paper-callout h2 {
+      margin-bottom: 10px;
+      font-size: 28px;
+      line-height: 1.15;
+    }
+
+    .paper-callout p {
+      margin-bottom: 0;
+      color: #60430f;
+    }
+
+    .legacy-info-section {
+      padding: 72px 24px 42px;
+      color: #ffffff;
+      background: #343434;
+    }
+
+    .legacy-footer-grid {
+      max-width: var(--max);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 28px;
+    }
+
+    .legacy-footer-col h3 {
+      margin: 0 0 14px;
+      color: #ffffff;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .legacy-footer-col ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .legacy-footer-col li {
+      margin-bottom: 8px;
+    }
+
+    .legacy-footer-col a {
+      color: #ffffff;
+      font-size: 14px;
+    }
+
+    .legacy-footer-col a:hover,
+    .legacy-footer-col a:focus {
+      color: #dff4ef;
+      text-decoration: underline;
+    }
+
+    .fudan-identity {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 9px;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: var(--radius);
+      background: #ffffff;
+      color: var(--ink);
+    }
+
+    .legacy-footer-col .fudan-identity:hover,
+    .legacy-footer-col .fudan-identity:focus {
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .fudan-mark {
+      width: 176px;
+      max-width: 100%;
+      display: block;
+    }
+
+    .fudan-identity span {
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .legacy-license {
+      max-width: var(--max);
+      margin: 30px auto 0;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.45);
+      color: #ffffff;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .legacy-license a {
+      color: #ffffff;
+      text-decoration: underline;
+    }
+
+    .footer_section {
+      padding: 18px 24px 24px;
+      color: #111827;
+      background: #ffffff;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .footer_section p {
+      margin: 4px 0;
+    }
+
+    .footer_section a {
+      color: var(--teal);
+      font-weight: 800;
+    }
+
+    @media (max-width: 1060px) {
+      .nav-menu {
+        position: fixed;
+        inset: 76px 16px auto 16px;
+        display: none;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #ffffff;
+        box-shadow: var(--shadow);
+      }
+
+      .nav-menu.is-open {
+        display: flex;
+      }
+
+      .nav-menu a {
+        padding: 12px;
+      }
+
+      .menu-toggle {
+        display: inline-block;
+      }
+
+      .hero {
+        min-height: auto;
+        background:
+          linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.92)),
+          url("{% static 'images/homepage_20260612_161705/cemp-background-logo.png' %}") right 12px top 96px / 280px auto no-repeat;
+      }
+
+      .hero-grid,
+      .workflow-showcase,
+      .database-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .workflow-preview-controls {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .route-grid,
+      .capability-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .pipeline {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .pipeline-step::after {
+        display: none;
+      }
+
+      .legacy-footer-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 680px) {
+      .nav-wrap {
+        min-height: 68px;
+        padding: 0 16px;
+        gap: 12px;
+      }
+
+      .brand {
+        min-width: 0;
+      }
+
+      .brand strong {
+        font-size: 14px;
+      }
+
+      .brand span {
+        display: none;
+      }
+
+      .hero {
+        padding: 46px 18px 36px;
+      }
+
+      .section {
+        padding: 56px 18px;
+      }
+
+      .section.compact {
+        padding-top: 42px;
+        padding-bottom: 42px;
+      }
+
+      h1 {
+        font-size: 34px;
+      }
+
+      .lead {
+        font-size: 16px;
+      }
+
+      .proof-row,
+      .route-grid,
+      .capability-grid,
+      .pipeline,
+      .dataset-grid,
+      .activity-grid,
+      .legacy-footer-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .agent-context,
+      .agent-suggestions,
+      .agent-input {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-workbench {
+        padding: 16px;
+      }
+
+      .workflow-showcase {
+        padding: 16px;
+      }
+
+      .workflow-preview-controls {
+        grid-template-columns: 1fr;
+      }
+
+      .workflow-preview-frame {
+        min-height: 220px;
+      }
+
+      .chart-canvas-wrap {
+        height: 220px;
+      }
+
+      .paper-callout {
+        grid-template-columns: 1fr;
+      }
+
+      .mini-chart {
+        height: 160px;
+      }
+
+      .chart-labels {
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
 
-  <div class="hero_area">
-    
-    <header class="header_section">
-      <div class="container">
+  <header class="site-header" aria-label="Main navigation">
+    <div class="nav-wrap">
+      <a class="brand" href="{% url 'home:homepage' %}">
+        <img src="{% static 'images/homepage_20260612_161705/cemp-logo.png' %}" alt="CEMP logo">
+        <strong>
+          CEMP
+          <span>Clean Energy Materials Platform</span>
+        </strong>
+      </a>
 
-        <nav class="navbar navbar-expand-lg custom_nav-container pt-3">
-          <a class="navbar-brand" href= "">
-            <img src="{% static 'images/dlogo.png' %}" alt=""/><span>
-              Clean Energy Materials
-            </span>
-          </a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
+      <nav class="nav-menu" id="navMenu" aria-label="Primary">
+        <a href="{% url 'autocompute:index' %}">Autocompute</a>
+        <a href="/ionic_liquid/database">Ionic Liquids</a>
+        <a href="/polymer/polymer_database/experiment_polymer_database">Polymers</a>
+        <a href="/crystals/app">Crystals</a>
+        <a href="{% url 'bms:battery_manage_system' %}">Battery Manage System</a>
+        <a href="{% url 'home:query' %}">Query</a>
+        <a href="{% url 'tickets:list' %}">Tickets</a>
+        <a href="https://agent.cleanenergymaterials.cn" target="_blank" rel="noopener noreferrer">Agent</a>
+        {% if show_admin %}
+        <a href="/admin/">Admin</a>
+        {% endif %}
+      </nav>
 
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <div class="d-flex ml-auto flex-column flex-lg-row align-items-center">
-              <ul class="navbar-nav ">
-                <li class="nav-item active">
-                  <a class="nav-link" href="{% url 'autocompute:index' %}">Autocompute</a>
-                </li>
-                <li class="nav-item active">
-                  
-                  <a class="nav-link" href="/ionic_liquid/database">
-                    Ionic Liquids</a>
-                </li>
-                <li class="nav-item">
-                  
-                  <a class="nav-link" href="/polymer/polymer_database/experiment_polymer_database">Polymers</a>
-                  
-                </li>
-                <li class="nav-item">
-                  
-                  <a class="nav-link" href="/crystals/app">Crystals </a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'bms:battery_manage_system' %}">Battery Manage System</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'home:query' %}">Query</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'tickets:list' %}">Tickets</a>
-                </li>
-                
-                
-                
-                
-                <li class="nav-item">
-                  
-		    <a class="nav-link"
-                    href="https://cempagent.vip.cpolar.cn"
-                    target="_blank"
-                    rel="noopener noreferrer">
-                    Agent
-                  </a>
-                  
-                </li>
+      <div class="header-actions">
+        {% if user.is_authenticated %}
+        <details class="user-menu">
+          <summary>{{ user.username }}</summary>
+          <div class="user-menu-panel">
+            <button type="button" data-email-modal-trigger>Modify Email Address</button>
+            <a href="{% url 'register:logout' %}">Quit</a>
+          </div>
+        </details>
+        {% else %}
+        <a class="button secondary small" href="{% url 'register:login' %}">Log In</a>
+        {% endif %}
+        <button class="menu-toggle" type="button" id="menuToggle" aria-controls="navMenu" aria-expanded="false" aria-label="Open navigation">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </header>
 
-                
-                
-
-                {% if show_admin %}
-                <li class="nav-item">
-                  <a class="nav-link" href="/admin/">Admin</a>
-                </li>
-                {% endif %}
-              </ul>
-              <form class="form-inline my-2 my-lg-0 ml-0 ml-lg-4 mb-3 mb-lg-0">
-                <button class="btn  my-2 my-sm-0 nav_search-btn" type="submit"></button>
-              </form>
-              
-              {% if not user.is_authenticated %}
-              <div class="ml-3 d-none d-lg-block">
-                <a href="{% url 'register:login' %}" class="btn btn-outline-primary">
-                  Log In
-                </a>
+  <main id="main">
+    <section class="hero" aria-labelledby="heroTitle">
+      <div class="hero-shell">
+        <div class="hero-grid">
+          <div class="hero-main">
+            <div class="eyebrow">Research infrastructure for clean energy materials</div>
+            <h1 id="heroTitle">Databases, AI models, Tools and Agents for Clean Energy Materials</h1>
+            <p class="lead">
+              CEMP unifies high-throughput quantum chemistry, molecular dynamics, searchable materials databases,
+              machine-learning prediction, and an AI Agent for reproducible research workflows.
+            </p>
+            <div class="hero-actions">
+              <a class="button primary" href="{% url 'autocompute:index' %}">Start AutoCompute</a>
+              <a class="button secondary" href="#materials">Explore Materials</a>
+              <a class="button dark" href="{% url 'home:tutorial_list' %}">Watch Tutorial</a>
+              <a class="button agent" href="https://agent.cleanenergymaterials.cn" target="_blank" rel="noopener noreferrer">Ask CEMPAgent</a>
+            </div>
+            <div class="proof-row" aria-label="Current CEMP platform snapshot">
+              <div class="proof-item">
+                <strong id="registeredUsersCount" data-fallback-value="{{ registered_users }}">{{ registered_users }}</strong>
+                <span>registered users</span>
               </div>
-              {% endif %}
+              <div class="proof-item">
+                <strong id="successfulTasksCount" data-fallback-value="{{ successful_tasks }}">{{ successful_tasks }}</strong>
+                <span>successful tasks</span>
+              </div>
+              <div class="proof-item">
+                <strong id="databaseFilesCount" data-fallback-value="{{ database_files }}">{{ database_files }}</strong>
+                <span>database files</span>
+              </div>
+              <div class="proof-item">
+                <strong>QC/MD</strong>
+                <span>workflow engines</span>
+              </div>
             </div>
           </div>
-          
-          {% if user.is_authenticated %}
-          <div class="nav-item dropdown d-none d-lg-block">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDarkDropdownMenuLink" role="button"
-              data-bs-toggle="dropdown" aria-expanded="false">
-                {{ user.username }}
-            </a>
-            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
-                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modifyEmailModal">Modify Email Address</a></li>
-                <li><a class="dropdown-item" href="{% url 'register:logout' %}">Quit</a></li>
-            </ul>
-          </div>
-          
-          {% endif %}
 
-        </nav>
-      </div>
-    </header>
-    
-  </div>
-  <section class="service_section layout_padding ">
-    <div class="container">
-      
-      <div class="position-relative mb-3">
-        <h2 class="custom_heading text-center mb-0">Our Focuses</h2>
-        {% if not user.is_authenticated %}
-        
-        <div class="position-absolute d-block d-lg-none" style="top: 50%; right: 0; transform: translateY(-50%);">
-          <a href="{% url 'register:login' %}" class="btn btn-outline-primary btn-sm">
-            Log In
-          </a>
+          <aside class="hero-workbench agent-panel" aria-label="CEMPAgent chat preview">
+            <div class="workbench-head">
+              <h2>CEMPAgent</h2>
+              <span class="agent-status-pill">Online</span>
+            </div>
+            <div class="agent-chat">
+              <div class="agent-context" aria-label="CEMPAgent capability groups">
+                <span>Materials Q&amp;A</span>
+                <span>Workflow planning</span>
+                <span>Task support</span>
+              </div>
+              <div class="chat-window" aria-label="CEMPAgent conversation preview">
+                <div class="chat-message agent">
+                  Hello, I am CEMPAgent. I can help you choose databases, build workflows, inspect task status,
+                  and plan clean-energy materials screening.
+                </div>
+                <div class="chat-message user">
+                  Find polymer electrolyte candidates with high ionic conductivity.
+                </div>
+                <div class="chat-message agent">
+                  I can start by combining polymer records, computed descriptors, and prediction models. Then I will
+                  suggest AutoCompute tasks for missing descriptors.
+                </div>
+              </div>
+              <div class="agent-suggestions" aria-label="Suggested CEMPAgent prompts">
+                <button type="button">Plan a QC workflow</button>
+                <button type="button">Search ionic liquids</button>
+                <button type="button">Review task status</button>
+                <button type="button">Predict battery aging</button>
+              </div>
+              <div class="agent-input" aria-label="CEMPAgent entry">
+                <span class="agent-prompt-text">Ask CEMPAgent about materials, models, workflows, or task status.</span>
+                <a class="agent-go-link" href="https://agent.cleanenergymaterials.cn" target="_blank" rel="noopener noreferrer">Go to CEMPAgent</a>
+              </div>
+            </div>
+          </aside>
         </div>
-        {% else %}
-        
-        <div class="position-absolute d-block d-lg-none" style="top: 50%; right: 0; transform: translateY(-50%);">
-          <div class="dropdown">
-            <a class="btn btn-outline-primary btn-sm dropdown-toggle" href="#" id="mobileUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              {{ user.username }}
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="mobileUserDropdown">
-              <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modifyEmailModal">Modify Email Address</a></li>
-              <li><a class="dropdown-item" href="{% url 'register:logout' %}">Quit</a></li>
-            </ul>
+
+        <div class="workflow-showcase" aria-label="CEMP function showcase">
+          <div class="workflow-showcase-copy">
+            <div>
+              <span class="workflow-kicker">CEMP platform functions</span>
+              <h2>Explore databases, prediction tools, visualization, and online computation in one platform.</h2>
+              <p>
+                CEMP connects searchable materials records, property prediction models, visual analysis, and QC/MD
+                workflows for clean-energy materials research.
+              </p>
+            </div>
+            <div class="workflow-preview-controls" role="tablist" aria-label="CEMP function preview type">
+              <button class="workflow-preview-button is-active" type="button" data-workflow-index="0" role="tab" aria-selected="true">Polymer database</button>
+              <button class="workflow-preview-button" type="button" data-workflow-index="1" role="tab" aria-selected="false">Molecule query</button>
+              <button class="workflow-preview-button" type="button" data-workflow-index="2" role="tab" aria-selected="false">Visualization</button>
+              <button class="workflow-preview-button" type="button" data-workflow-index="3" role="tab" aria-selected="false">QC workflow</button>
+              <button class="workflow-preview-button" type="button" data-workflow-index="4" role="tab" aria-selected="false">MD workflow</button>
+            </div>
           </div>
-        </div>
-        {% endif %}
-      </div>
-      <p class="custom_heading-text">
-        We are particularly interested in clean energy materials and AI-guided battery management system.
-      </p>
-        <p class="custom_heading-text">
-          📢 <strong>New Release!</strong><br>
-          Our paper on the <strong>CEMP</strong> platform has been officially published:<br>
-          <em><strong>CEMP: A platform unifying high-throughput online calculation, databases, and predictive models for clean energy materials</strong></em><br>
-          <a href="http://arxiv.org/abs/2507.04423" target="_blank" style="color: #007bff; text-decoration: underline;">
-            Read on arXiv →
-          </a>
-        </p>
-        <p class="custom_heading-text">CEMP Registered Users: <b>{{ user_count }}</b></p>
-      
-    <section class="analytics_section my-4">
-        <div class="row gx-3">  
-          
-          <div class="col-md-6 d-flex align-items-center">
-            <canvas id="taskStatsChart" class="w-100"></canvas>
+          <div class="workflow-preview">
+            <div class="workflow-preview-frame">
+              <img class="is-active" data-workflow-image="0" src="{% static 'images/homepage_20260612_161705/polymer-database-showcase.png' %}" alt="CEMP polymer database interface">
+              <img data-workflow-image="1" src="{% static 'images/homepage_20260612_161705/database-molecule-query-showcase.png' %}" alt="CEMP database molecule query interface">
+              <img data-workflow-image="2" src="{% static 'images/homepage_20260612_161705/visualization-showcase.png' %}" alt="CEMP data visualization interface">
+              <img data-workflow-image="3" src="{% static 'images/homepage_20260612_161705/autocompute-htqc-qccompute.png' %}" alt="Quantum chemistry AutoCompute workflow">
+              <img data-workflow-image="4" src="{% static 'images/homepage_20260612_161705/autocompute-htmd-mdcompute.png' %}" alt="Molecular dynamics AutoCompute workflow">
+            </div>
           </div>
-    
-        
-        <div class="col-md-6 d-flex align-items-center">
-          <canvas id="gaussStatsChart" class="w-100"></canvas>
         </div>
       </div>
     </section>
 
-    
-    <script src="{% static 'js/chart.min.js' %}"></script>
+    <section class="section" id="compute">
+      <div class="section-inner">
+        <div class="section-title center">
+          <h2>Start with the CEMP module that matches your research task.</h2>
+          <p>
+            Access online computation, materials exploration, battery analysis, and AI-assisted support from the
+            main research entry points.
+          </p>
+        </div>
 
-    <script>
-      
-      async function fetchJSON(url) {
-          const resp = await fetch(url);
-          return await resp.json();
-      }
-      
-      
-      async function initTaskChart() {
-          const data = await fetchJSON("{% url 'home:calculate_task_quarterly_counts' %}");
-          const ctx  = document.getElementById('taskStatsChart').getContext('2d');
-      
-          window.taskChart = new Chart(ctx, {
-              type: 'bar',
-              data: {
-                  labels: data.labels,
-                  datasets: [{
-                      type: 'bar',
-                      label: 'Cumulative Number of Successful Tasks',
-                      data: data.counts,
-                      backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                      borderWidth: 1
-                  }, {
-                      type: 'line',
-                      label: 'Trend',
-                      data: data.counts,
-                      tension: 0.3,
-                      fill: false
-                  }]
-              },
-              options: {
-                  responsive: true,
-                  plugins: {
-                      legend: { position: 'top' },
-                      title: { display: true, text: 'Successful ComputeTasks' }
-                  },
-                  scales: {
-                      y: { beginAtZero: true }
-                  }
-              }
-          });
-      }
-      
-      async function refreshTaskChart() {
-          const data = await fetchJSON("{% url 'home:calculate_task_quarterly_counts' %}");
-          taskChart.data.labels               = data.labels;
-          taskChart.data.datasets[0].data     = data.counts;
-          taskChart.data.datasets[1].data     = data.counts;
-          taskChart.update();
-      }
-      
-      
-      async function initGaussChart() {
-          const data = await fetchJSON("{% url 'home:task_number_quarterly_counts' %}");
-          const ctx  = document.getElementById('gaussStatsChart').getContext('2d');
-      
-          window.gaussChart = new Chart(ctx, {
-              type: 'bar',
-              data: {
-                  labels: data.labels,
-                  datasets: [{
-                      type: 'bar',
-                      label: 'Cumulative files',
-                      data: data.counts,
-                      backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                      borderWidth: 1
-                  }, {
-                      type: 'line',
-                      label: 'Trend',
-                      data: data.counts,
-                      tension: 0.3,
-                      fill: false
-                  }]
-              },
-              options: {
-                  responsive: true,
-                  plugins: {
-                      legend: { position: 'top' },
-                      title: { display: true, text: 'Quarterly cumulative growth of database' }
-                  },
-                  scales: {
-                      y: { beginAtZero: true }
-                  }
-              }
-          });
-      }
-      
-      async function refreshGaussChart() {
-          const data = await fetchJSON("{% url 'home:task_number_quarterly_counts' %}");
-          gaussChart.data.labels               = data.labels;
-          gaussChart.data.datasets[0].data     = data.counts;
-          gaussChart.data.datasets[1].data     = data.counts;
-          gaussChart.update();
-      }
-      
-      
-      Promise.all([initTaskChart(), initGaussChart()])
-            .then(() => {
-                
-                setInterval(refreshTaskChart, 60_000);
-                setInterval(refreshGaussChart, 60_000);
-            });
-      </script>
+        <div class="route-grid">
+          <article class="route-card">
+            <div class="route-media">
+              <img src="{% static 'images/homepage_20260612_161705/route-computations-generated.png' %}" alt="Scientific illustration of remote computation workflows">
+            </div>
+            <div class="route-card-body">
+              <h3>Run computations</h3>
+              <p>Submit QC, MD, redox, binding-energy, pKa/pKb, and polymer simulation workflows through one task system.</p>
+              <div class="route-link-list">
+                <a href="{% url 'autocompute:index' %}">AutoCompute</a>
+                <a href="{% url 'home:query' %}">Task Query</a>
+              </div>
+            </div>
+          </article>
 
+          <article class="route-card">
+            <div class="route-media contain">
+              <img src="{% static 'images/homepage_20260612_161705/route-materials-generated.png' %}" alt="Scientific illustration of material exploration and property prediction">
+            </div>
+            <div class="route-card-body">
+              <h3>Explore materials</h3>
+              <p>Explore ionic liquids, polymers, and crystals for property search, structure-property analysis, and property prediction.</p>
+              <div class="route-link-list">
+                <a href="/ionic_liquid/database">Ionic Liquids</a>
+                <a href="/polymer/polymer_database/experiment_polymer_database">Polymers</a>
+                <a href="/crystals/app">Crystals</a>
+              </div>
+            </div>
+          </article>
 
-      <div class=" layout_padding2">
-        <div class="card-deck">
-          
-          <a class="card" href="{% url 'autocompute:index' %}">
-            <img class="card-img-top" src="{% static 'images/Autocompute_logo.jpg' %}" alt="Card image cap" />
-            <div class="card-body">
-              <h5 class="card-title">Autocompute</h5>
-              <p class="card-text">
-                Autocompute accelerates the design of target molecular structures. 
-                Researchers can explore molecule databases and execute automated workflows for calculations.
-              </p>
+          <article class="route-card">
+            <div class="route-media">
+              <img src="{% static 'images/homepage_20260612_161705/route-bms-generated.png' %}" alt="Scientific illustration of battery management and prediction">
             </div>
-          </a>
-          
-          <a class="card" href="{% url 'ionic_liquid:ionic_liquid_base' %}">
-            <img class="card-img-top" src="{% static 'images/card-item-1.png' %}" alt="Card image cap" />
-            <div class="card-body">
-              <h5 class="card-title">Ionic Liquids</h5>
-              <p class="card-text">
-                Ionic liquids are functional green energy materials. You can search and explore the fundamental physical
-                and chemical properties of ionic liquids with varying cations and anions.
-              </p>
+            <div class="route-card-body">
+              <h3>Battery Manage System</h3>
+              <p>Analyze battery testing data, visualize cycling behavior, identify aging patterns, and predict short- or long-term performance.</p>
+              <div class="route-link-list">
+                <a href="{% url 'bms:battery_manage_system' %}">Battery Manage System</a>
+              </div>
             </div>
-          </a>
-          <a class="card" href="{% url 'polymer:display' %}">
-            <img class="card-img-top" src="{% static 'images/card-item-2.png' %}" alt="Card image cap" />
-            <div class="card-body">
-              <h5 class="card-title">Polymers</h5>
-              <p class="card-text">
-                Polymers are critical clean energy materials. You can oversee and discover more
-                functionalities of polymers in this module.
-              </p>
-            </div>
-          </a>
-          <a class="card" href="{% url 'crystals:crystal_display' %}">
-            <img class="card-img-top" src="{% static 'images/card-item-3.png' %}" alt="Card image cap" />
-            <div class="card-body">
-              <h5 class="card-title">Crystals</h5>
-              <p class="card-text">
-                Crystals are magic materials, which you can always discover new phenomenons
-                and create new research directions.
-              </p>
-            </div>
-          </a>
-
-          <a class="card" href="{% url 'bms:battery_manage_system' %}">
-            <img class="card-img-top" src="{% static 'images/card-item-4.png' %}" alt="Card image cap" />
-            <div class="card-body">
-              <h5 class="card-title">Battery Manage System</h5>
-              <p class="card-text">
-                Battery with AI is a brand-new research area, which will help us build
-                an intelligent and energy efficient power supply system.
-              </p>
-            </div>
-          </a>
-
+          </article>
         </div>
       </div>
-      <div class="d-flex justify-content-center my-4">
-        <a href="{% url 'home:tutorial_list' %}" class="btn btn-dark btn-lg">
-          Watch the <strong>CEMP Tutorial</strong> →
-        </a>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="info_section layout_padding_bottom" style="color:white;">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-3">
-          <h5>
-              Materials
-          </h5>
-          <ul>
-            <li>
-              <a href="{% url 'autocompute:index' %}" style="color: white;">
-              AutoCompute
-              </a>
-            </li>
-            <li>
-              
-              <a href="/ionic_liquid/database" style="color: white;">
-              Ionic Liquid
-              </a>
-            </li>
-            <li>
-              <a href="{% url 'polymer:display' %}" style="color: white;">
-              Polymers
-              </a>
-            </li>
-            <li>
-              <a href="{% url 'crystals:crystal_display' %}" style="color: white;">
-              Crystals
-              </a>
-            </li>
-            <li>
-              <a href="{% url 'bms:battery_manage_system' %}" style="color: white;">
-              Battery Manage System
-              </a>
-            </li>
-            <li>
-              <a href="{% url 'home:API_introduction' %}" style="color: white;">
-              API
-              </a>
-            </li>
-          </ul>
+    <section class="section band" id="models">
+      <div class="section-inner">
+        <div class="section-title">
+          <h2>Platform capabilities organized for clean-energy materials research.</h2>
+          <p>
+            CEMP combines high-throughput computation, curated materials data, predictive models, and AI assistance
+            for reproducible discovery workflows.
+          </p>
         </div>
-        <div class="col-md-3">
-          <h5>
-            About
-          </h5>
-          <ul>
-            <li>
-              <a href="{% url 'home:tutorial_list' %}" style="color: white;">
-              Tutorial Videos
-              </a>
-            </li>
-            <li>
-              <a href="{% url 'contributor:contributor' %}" style="color: white;">
-              Contributors
-              </a>
-            </li>
-            <li>
-              <a href="{% url 'home:news_and_updates' %}" style="color: white;">
-              News and Updates
-              </a>
-            </li>
-            <li>
-              <a href="{% url 'home:how_to_cite' %}" style="color: white;">
-              How to Cite
-              </a>
-            </li>
-            <li>
-              <a href="{% static 'download/CEMP_Introduction.pdf' %}" download aria-label="Download User Tutorial " style="color: white;">
-                Terms of Use
-              </a>
-            </li>
-            <li>
-              <a href="https://cempforum.vip.cpolar.cn" download aria-label="Download User Tutorial " style="color: white;">
-                Forum
-              </a>
-            </li>
-          </ul>
+
+        <div class="capability-grid">
+          <div class="capability-card">
+            <span class="capability-kicker">Compute</span>
+            <h3>Quantum chemistry workflows</h3>
+            <p>Gaussian and ORCA task generation, remote execution, correction, extraction, and result download.</p>
+          </div>
+          <div class="capability-card">
+            <span class="capability-kicker">Compute</span>
+            <h3>Molecular dynamics workflows</h3>
+            <p>Polymer and small-molecule simulation setup, charge mapping, topology creation, and post-analysis.</p>
+          </div>
+          <div class="capability-card">
+            <span class="capability-kicker">Data</span>
+            <h3>Materials exploration and prediction</h3>
+            <p>Unified access to ionic liquids, polymers, crystals, computed records, prediction tools, and downloadable datasets.</p>
+          </div>
+          <div class="capability-card">
+            <span class="capability-kicker">AI</span>
+            <h3>Prediction and assistance</h3>
+            <p>Property models, battery management models, workflow guidance, and Agent-assisted task support.</p>
+          </div>
         </div>
-        <div class="col-md-3">
-          <h5 style="color: white;">
-            Fudan University
-          </h5>
-          <ul>
-            <li>
-              <a href="https://polymer.fudan.edu.cn/" target="_blank" style="color: white;">
-                Department of Macromolecular Science
-              </a>
-            </li>
-          </ul>
+
+        <div class="pipeline" id="workflow" aria-label="CEMP computation pipeline">
+          <div class="pipeline-step">
+            <span class="number">1</span>
+            <h3>Define material</h3>
+            <p>Draw, upload, or select a molecule, polymer repeat unit, ionic liquid, or crystal.</p>
+          </div>
+          <div class="pipeline-step">
+            <span class="number">2</span>
+            <h3>Select workflow</h3>
+            <p>Choose QC, MD, descriptor extraction, redox, binding energy, pKa/pKb, or BMS analysis.</p>
+          </div>
+          <div class="pipeline-step">
+            <span class="number">3</span>
+            <h3>Dispatch compute</h3>
+            <p>Submit to the CEMP remote queue and follow task state from submission to completion.</p>
+          </div>
+          <div class="pipeline-step">
+            <span class="number">4</span>
+            <h3>Inspect results</h3>
+            <p>Review logs, figures, structured outputs, downloadable files, and task provenance.</p>
+          </div>
+          <div class="pipeline-step">
+            <span class="number">5</span>
+            <h3>Reuse data</h3>
+            <p>Feed descriptors and results back into database search, model prediction, and screening.</p>
+          </div>
         </div>
-        <div class="col-md-3">
-          <div class="social_container">
-            <h5 style="color: white;">
-              Follow Us
-            </h5>
-            <div class="social-box">
-              <a href="https://www.fudan.edu.cn">
-                <img src="{% static 'images/fudan_logo.png' %}" alt="">
-              </a>
+      </div>
+    </section>
+
+    <section class="section" id="materials">
+        <div class="section-inner database-layout">
+          <div class="database-panel">
+            <div class="eyebrow">Materials and research modules</div>
+            <h2>Explore CEMP materials and battery research modules.</h2>
+            <p>
+              Ionic liquids, polymers, crystals, and battery management are first-class CEMP modules. Each module
+              provides searchable records, prediction tools, and downstream workflows for clean-energy materials research.
+            </p>
+            <div class="database-actions">
+              <a class="button primary" href="/ionic_liquid/database">Ionic Liquids</a>
+              <a class="button secondary" href="/polymer/polymer_database/experiment_polymer_database">Polymers</a>
+              <a class="button secondary" href="/crystals/app">Crystals</a>
+              <a class="button secondary" href="{% url 'bms:battery_manage_system' %}">Battery Manage System</a>
+            </div>
+          </div>
+
+        <div class="dataset-grid">
+          <a class="dataset-card" href="/ionic_liquid/database">
+            <img src="{% static 'images/homepage_20260612_161705/ionic-liquids-icon.png' %}" alt="Ionic liquids icon">
+            <h3>Ionic liquids</h3>
+            <p>Search cation/anion structures and physicochemical properties, then use prediction tools for green electrolyte discovery.</p>
+          </a>
+          <a class="dataset-card" href="/polymer/polymer_database/experiment_polymer_database">
+            <img src="{% static 'images/homepage_20260612_161705/polymer-topology-icon.png' %}" alt="Polymer topology icon">
+            <h3>Polymers</h3>
+            <p>Explore experimental records, repeat-unit construction, topology generation, and polymer property prediction workflows.</p>
+          </a>
+          <a class="dataset-card" href="/crystals/app">
+            <img src="{% static 'images/homepage_20260612_161705/crystal-display-icon.png' %}" alt="Crystal structure icon">
+            <h3>Crystals</h3>
+            <p>Inspect crystal structures, elements, space groups, and prediction-ready descriptors for inorganic energy materials.</p>
+          </a>
+          <a class="dataset-card" href="{% url 'bms:battery_manage_system' %}">
+            <img src="{% static 'images/homepage_20260612_161705/bms-database-icon.png' %}" alt="Battery database icon">
+            <h3>Battery Manage System</h3>
+            <p>Use battery datasets, aging curves, EIS, pattern recognition, and lifecycle prediction to support battery management research.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section band compact" id="activity">
+      <div class="section-inner">
+        <div class="section-title center">
+          <h2>Track platform activity and data growth.</h2>
+          <p>
+            CEMP reports cumulative successful tasks and database growth to make platform usage and data coverage transparent.
+          </p>
+        </div>
+
+        <div class="activity-grid">
+          <div class="activity-card">
+            <h3>Successful ComputeTasks</h3>
+            <div class="chart-canvas-wrap" aria-label="Cumulative successful task growth chart">
+              <canvas id="taskStatsChart"></canvas>
+            </div>
+          </div>
+          <div class="activity-card">
+            <h3>Quarterly cumulative database growth</h3>
+            <div class="chart-canvas-wrap" aria-label="Cumulative database file growth chart">
+              <canvas id="databaseStatsChart"></canvas>
             </div>
           </div>
         </div>
       </div>
-      <hr style="border-color: white;"> 
-      <div style="text-align: center; color: white;">
-        <p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
-          <a property="dct:title" rel="cc:attributionURL" href="http://localhost:8000" style="color: white;">
-            Clean Energy Materials Project
-          </a> is licensed under
-          <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block; color: white;">
-            Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
-            
-            <img style="height:22px; margin-left:3px; vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1" alt="">
-            <img style="height:22px; margin-left:3px; vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1" alt="">
-            <img style="height:22px; margin-left:3px; vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/nc.svg?ref=chooser-v1" alt="">
-            <img style="height:22px; margin-left:3px; vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1" alt="">
-          </a>
-        </p>
+    </section>
+
+    <section class="section" id="resources">
+      <div class="section-inner">
+        <div class="paper-callout">
+          <div>
+            <h2>CEMP platform paper is now published on arXiv.</h2>
+            <p>
+              “CEMP: A platform unifying high-throughput online calculation, databases, and predictive models
+              for clean energy materials”
+            </p>
+          </div>
+          <a class="button dark" href="http://arxiv.org/abs/2507.04423" target="_blank" rel="noopener noreferrer">Read Paper</a>
+        </div>
       </div>
+    </section>
+  </main>
+
+  <section class="legacy-info-section" aria-label="Footer navigation">
+    <div class="legacy-footer-grid">
+      <div class="legacy-footer-col">
+        <h3>Materials</h3>
+        <ul>
+          <li><a href="{% url 'autocompute:index' %}">AutoCompute</a></li>
+          <li><a href="/ionic_liquid/database">Ionic Liquid</a></li>
+          <li><a href="/polymer/polymer_database/experiment_polymer_database">Polymers</a></li>
+          <li><a href="/crystals/app">Crystals</a></li>
+          <li><a href="{% url 'bms:battery_manage_system' %}">Battery Manage System</a></li>
+          <li><a href="{% url 'home:API_introduction' %}">API</a></li>
+        </ul>
+      </div>
+      <div class="legacy-footer-col">
+        <h3>About</h3>
+        <ul>
+          <li><a href="{% url 'home:tutorial_list' %}">Tutorial Videos</a></li>
+          <li><a href="{% url 'contributor:contributor' %}">Contributors</a></li>
+          <li><a href="{% url 'home:news_and_updates' %}">News and Updates</a></li>
+          <li><a href="{% url 'home:how_to_cite' %}">How to Cite</a></li>
+          <li><a href="{% static 'download/CEMP_Introduction.pdf' %}">Terms of Use</a></li>
+          <li><a href="https://cempforum.vip.cpolar.cn">Forum</a></li>
+        </ul>
+      </div>
+      <div class="legacy-footer-col">
+        <h3>Fudan University</h3>
+        <ul>
+          <li><a href="https://polymer.fudan.edu.cn/" target="_blank" rel="noopener noreferrer">Department of Macromolecular Science</a></li>
+        </ul>
+      </div>
+      <div class="legacy-footer-col">
+        <h3>Follow Us</h3>
+        <a class="fudan-identity" href="https://www.fudan.edu.cn" target="_blank" rel="noopener noreferrer" aria-label="Fudan University">
+          <img class="fudan-mark" src="{% static 'images/homepage_20260612_161705/fudan-logo-official.png' %}" alt="Fudan University logo">
+          <span>Fudan University</span>
+        </a>
+      </div>
+    </div>
+    <div class="legacy-license">
+      <p>
+        <a href="{% url 'home:homepage' %}">Clean Energy Materials Project</a>
+        source code is licensed under
+        <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="license noopener noreferrer">Apache-2.0</a>;
+        public data assets are licensed under
+        <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="license noopener noreferrer">CC BY 4.0</a>.
+      </p>
     </div>
   </section>
 
-  
-  {% if user.is_authenticated %}
-  <div class="modal fade" id="modifyEmailModal" tabindex="-1" aria-labelledby="modifyEmailModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modifyEmailModalLabel">Modify Email Address</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form id="modifyEmailForm">
-            {% csrf_token %}
-            <div class="mb-3">
-              <label class="form-label">Current Email:</label>
-              <div class="text-muted">{{ user.email }}</div>
-            </div>
-            <div class="mb-3">
-              <label for="newEmail" class="form-label">New Email Address</label>
-              <input type="email" class="form-control" id="newEmail" name="new_email" required>
-              <div class="invalid-feedback" id="newEmailError"></div>
-            </div>
-            <div class="mb-3">
-              <label for="currentPassword" class="form-label">Current Password</label>
-              <input type="password" class="form-control" id="currentPassword" name="password" required>
-              <div class="invalid-feedback" id="passwordError"></div>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" onclick="submitEmailChange()">Update Email</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
-  
-  <section class="container-fluid footer_section">
+  <section class="footer_section">
     <p>
       Copyright &copy; 2022 All Rights Reserved By
       <a href="https://ywangpolymer.fudan.edu.cn/_upload/tpl/12/df/4831/template4831/index.html">Wang Group</a>
     </p>
-    <p>
-      localhost
-    </p>
+    <p>cleanenergymaterials.cn</p>
+    <p>Clean Energy Materials Platform</p>
   </section>
-  
+
+  <script src="{% static 'js/chart.min.js' %}"></script>
+
+
+  {% if user.is_authenticated %}
+  <div class="email-modal" id="modifyEmailModal" hidden aria-labelledby="modifyEmailModalLabel" role="dialog" aria-modal="true">
+    <div class="email-modal-dialog">
+      <div class="email-modal-head">
+        <h2 id="modifyEmailModalLabel">Modify Email Address</h2>
+        <button class="button secondary small" type="button" data-email-modal-close>Close</button>
+      </div>
+      <form id="modifyEmailForm">
+        {% csrf_token %}
+        <div class="email-modal-body">
+          <div class="email-form-row">
+            <label>Current Email</label>
+            <span>{{ user.email }}</span>
+          </div>
+          <div class="email-form-row">
+            <label for="newEmail">New Email Address</label>
+            <input type="email" id="newEmail" name="new_email" required>
+            <div class="email-error" id="newEmailError"></div>
+          </div>
+          <div class="email-form-row">
+            <label for="currentPassword">Current Password</label>
+            <input type="password" id="currentPassword" name="password" required>
+            <div class="email-error" id="passwordError"></div>
+          </div>
+        </div>
+        <div class="email-modal-actions">
+          <button class="button secondary small" type="button" data-email-modal-close>Cancel</button>
+          <button class="button primary small" type="submit">Update Email</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
 
   <script>
-    function submitEmailChange() {
+    // 紧凑屏幕下的移动端导航切换逻辑。
+    const menuToggle = document.getElementById("menuToggle");
+    const navMenu = document.getElementById("navMenu");
+    const workflowButtons = Array.from(document.querySelectorAll(".workflow-preview-button"));
+    const workflowImages = Array.from(document.querySelectorAll("[data-workflow-image]"));
+    let activeWorkflowIndex = 0;
+    let workflowTimer = null;
 
-        document.getElementById('newEmailError').innerHTML = '';
-        document.getElementById('passwordError').innerHTML = '';
-        document.getElementById('newEmail').classList.remove('is-invalid');
-        document.getElementById('currentPassword').classList.remove('is-invalid');
+    menuToggle.addEventListener("click", () => {
+      const isOpen = navMenu.classList.toggle("is-open");
+      menuToggle.setAttribute("aria-expanded", String(isOpen));
+    });
 
-        const formData = new FormData();
-        formData.append('new_email', document.getElementById('newEmail').value);
-        formData.append('password', document.getElementById('currentPassword').value);
-        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    navMenu.addEventListener("click", (event) => {
+      if (event.target.tagName === "A") {
+        navMenu.classList.remove("is-open");
+        menuToggle.setAttribute("aria-expanded", "false");
+      }
+    });
 
-        fetch("{% url 'register:modify_email' %}", {
-            method: 'POST',
-            body: formData,
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
+    function setWorkflowPreview(index) {
+      activeWorkflowIndex = index;
 
-                let successMessage = 'Email successfully changed to ' + data.new_email;
+      workflowButtons.forEach((button, buttonIndex) => {
+        const isActive = buttonIndex === activeWorkflowIndex;
+        button.classList.toggle("is-active", isActive);
+        button.setAttribute("aria-selected", String(isActive));
+      });
 
-
-                if (data.limited_access) {
-                    successMessage += '\n\nWarning: Users with these domains will have limited authorization - only able to download database and not able to submit autocompute tasks.\n\nFull Authorization: Please use educational (*.edu.*), military (*.mil.*), or government (*.gov.*) domains to get full functionality.';
-                }
-
-
-                alert(successMessage);
-
-
-                var modal = bootstrap.Modal.getInstance(document.getElementById('modifyEmailModal'));
-                modal.hide();
-
-                document.getElementById('modifyEmailForm').reset();
-
-                location.reload();
-            } else {
-
-                if (data.errors) {
-                    if (data.errors.new_email) {
-                        document.getElementById('newEmailError').innerHTML = data.errors.new_email.join('<br>');
-                        document.getElementById('newEmail').classList.add('is-invalid');
-                    }
-                    if (data.errors.password) {
-                        document.getElementById('passwordError').innerHTML = data.errors.password.join('<br>');
-                        document.getElementById('currentPassword').classList.add('is-invalid');
-                    }
-                }
-                if (data.message) {
-                    alert('Error: ' + data.message);
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred, please try again later');
-        });
+      workflowImages.forEach((image, imageIndex) => {
+        image.classList.toggle("is-active", imageIndex === activeWorkflowIndex);
+      });
     }
 
+    function startWorkflowRotation() {
+      window.clearInterval(workflowTimer);
+      workflowTimer = window.setInterval(() => {
+        const nextIndex = (activeWorkflowIndex + 1) % workflowImages.length;
+        setWorkflowPreview(nextIndex);
+      }, 6000);
+    }
 
-    document.getElementById('modifyEmailModal').addEventListener('show.bs.modal', function () {
-        document.getElementById('modifyEmailForm').reset();
-        document.getElementById('newEmailError').innerHTML = '';
-        document.getElementById('passwordError').innerHTML = '';
-        document.getElementById('newEmail').classList.remove('is-invalid');
-        document.getElementById('currentPassword').classList.remove('is-invalid');
+    workflowButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const nextIndex = Number(button.dataset.workflowIndex);
+
+        if (Number.isFinite(nextIndex)) {
+          setWorkflowPreview(nextIndex);
+          startWorkflowRotation();
+        }
+      });
     });
-  </script>
 
-  
+    if (workflowImages.length > 1) {
+      startWorkflowRotation();
+    }
+
+    // 生产端统计接口每 60 秒刷新一次完整整数值。
+    const liveStatIds = {
+      registeredUsers: "registeredUsersCount",
+      successfulTasks: "successfulTasksCount",
+      databaseFiles: "databaseFilesCount",
+    };
+
+    function setCompleteNumber(id, value) {
+      const target = document.getElementById(id);
+      const number = Number(value);
+
+      if (!target || !Number.isFinite(number)) {
+        return;
+      }
+
+      target.textContent = String(Math.trunc(number));
+      target.dataset.fallbackValue = target.textContent;
+    }
+
+    async function fetchJSON(url) {
+      const response = await fetch(url, { cache: "no-store" });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${url}`);
+      }
+
+      return response.json();
+    }
+
+    async function refreshLiveStats() {
+      const payload = await fetchJSON("{% url 'home:homepage_stats' %}");
+      setCompleteNumber(liveStatIds.registeredUsers, payload.registered_users);
+      setCompleteNumber(liveStatIds.successfulTasks, payload.successful_tasks);
+      setCompleteNumber(liveStatIds.databaseFiles, payload.database_files);
+    }
+
+    function createGrowthChart(canvasId, chartTitle, datasetLabel, color) {
+      const canvas = document.getElementById(canvasId);
+
+      if (!canvas || typeof Chart === "undefined") {
+        return null;
+      }
+
+      return new Chart(canvas.getContext("2d"), {
+        type: "bar",
+        data: {
+          labels: [],
+          datasets: [
+            {
+              type: "bar",
+              label: datasetLabel,
+              data: [],
+              backgroundColor: color,
+              borderWidth: 0,
+            },
+            {
+              type: "line",
+              label: "Trend",
+              data: [],
+              borderColor: "#223142",
+              backgroundColor: "transparent",
+              tension: 0.32,
+              pointRadius: 3,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: "top" },
+            title: { display: true, text: chartTitle },
+          },
+          scales: {
+            y: { beginAtZero: true },
+          },
+        },
+      });
+    }
+
+    const taskStatsChart = createGrowthChart(
+      "taskStatsChart",
+      "Successful ComputeTasks",
+      "Cumulative successful tasks",
+      "rgba(15, 118, 110, 0.62)"
+    );
+    const databaseStatsChart = createGrowthChart(
+      "databaseStatsChart",
+      "Quarterly cumulative database growth",
+      "Cumulative database files",
+      "rgba(37, 99, 235, 0.62)"
+    );
+
+    async function refreshGrowthChart(chart, url) {
+      if (!chart) {
+        return;
+      }
+
+      const payload = await fetchJSON(url);
+      chart.data.labels = payload.labels || [];
+      chart.data.datasets[0].data = payload.counts || [];
+      chart.data.datasets[1].data = payload.counts || [];
+      chart.update();
+    }
+
+    async function refreshHomepageData() {
+      await Promise.all([
+        refreshLiveStats(),
+        refreshGrowthChart(taskStatsChart, "{% url 'home:calculate_task_quarterly_counts' %}"),
+        refreshGrowthChart(databaseStatsChart, "{% url 'home:task_number_quarterly_counts' %}"),
+      ]);
+    }
+
+    refreshHomepageData();
+    window.setInterval(refreshHomepageData, 60000);
+
+    const emailModal = document.getElementById("modifyEmailModal");
+    const emailModalTriggers = Array.from(document.querySelectorAll("[data-email-modal-trigger]"));
+    const emailModalCloseButtons = Array.from(document.querySelectorAll("[data-email-modal-close]"));
+    const modifyEmailForm = document.getElementById("modifyEmailForm");
+
+    function setEmailModalOpen(isOpen) {
+      if (!emailModal) {
+        return;
+      }
+
+      emailModal.hidden = !isOpen;
+    }
+
+    function resetEmailFormErrors() {
+      const newEmailError = document.getElementById("newEmailError");
+      const passwordError = document.getElementById("passwordError");
+
+      if (newEmailError) {
+        newEmailError.textContent = "";
+      }
+
+      if (passwordError) {
+        passwordError.textContent = "";
+      }
+    }
+
+    emailModalTriggers.forEach((trigger) => {
+      trigger.addEventListener("click", () => {
+        resetEmailFormErrors();
+        setEmailModalOpen(true);
+      });
+    });
+
+    emailModalCloseButtons.forEach((button) => {
+      button.addEventListener("click", () => setEmailModalOpen(false));
+    });
+
+    if (emailModal) {
+      emailModal.addEventListener("click", (event) => {
+        if (event.target === emailModal) {
+          setEmailModalOpen(false);
+        }
+      });
+    }
+
+    if (modifyEmailForm) {
+      modifyEmailForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        resetEmailFormErrors();
+
+        const formData = new FormData(modifyEmailForm);
+
+        try {
+          const response = await fetch("{% url 'register:modify_email' %}", {
+            method: "POST",
+            body: formData,
+          });
+          const payload = await response.json();
+
+          if (payload.success) {
+            let successMessage = `Email successfully changed to ${payload.new_email}`;
+
+            if (payload.limited_access) {
+              successMessage += "\n\nWarning: Users with these domains will have limited authorization - only able to download database and not able to submit autocompute tasks.\n\nFull Authorization: Please use educational (*.edu.*), military (*.mil.*), or government (*.gov.*) domains to get full functionality.";
+            }
+
+            window.alert(successMessage);
+            setEmailModalOpen(false);
+            modifyEmailForm.reset();
+            window.location.reload();
+            return;
+          }
+
+          if (payload.errors?.new_email) {
+            document.getElementById("newEmailError").innerHTML = payload.errors.new_email.join("<br>");
+          }
+
+          if (payload.errors?.password) {
+            document.getElementById("passwordError").innerHTML = payload.errors.password.join("<br>");
+          }
+
+          if (payload.message) {
+            window.alert(`Error: ${payload.message}`);
+          }
+        } catch (error) {
+          window.alert("An error occurred, please try again later");
+        }
+      });
+    }
+
+  </script>
 </body>
 </html>

@@ -28,18 +28,16 @@ Expected result:
 
 ## Paper Asset Reproduction
 
-After Zenodo/GitHub Release archival is complete:
+For paper-data reproduction:
 
-1. Download the release assets listed in `data/public_manifest.json`.
-2. Verify SHA256 checksums.
-3. Load the public SQLite snapshot or import CSV/XLSX exports.
-4. Extract `cemp_public_model_assets.tar.gz`; if the model files are not placed
+1. Verify SHA256 checksums for the CSV assets listed in `data/public_manifest.json`.
+2. Import the public CSV files from `data/public/` or load the bundled demo path
+   first for a smaller smoke test.
+3. Extract `cemp_public_model_assets.tar.gz`; if the model files are not placed
    under `ionic_liquid/static/model`, set `CEMP_IL_MODEL_DIR` to the extracted
    model directory.
-5. Run the documented figure/table reproduction scripts.
-6. Confirm table-row baselines listed in `docs/data.md`.
-
-The paper asset DOI is `TBD` until archival is completed.
+4. Run the documented figure/table reproduction scripts.
+5. Confirm table baselines listed in `docs/data.md`.
 
 ## Optional Compute Workflows
 

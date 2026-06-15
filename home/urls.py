@@ -13,7 +13,8 @@ sitemaps = {
 
 urlpatterns = [
     path('', views.home, name = 'homepage'),
-    path("task_number_quarterly_counts/", views.quarterly_counts, name="task_number_quarterly_counts"), 
+    path("homepage_stats/", views.homepage_stats, name="homepage_stats"),
+    path("task_number_quarterly_counts/", views.quarterly_counts, name="task_number_quarterly_counts"),
     path("calculate_task_quarterly_counts/", views.calculate_task_quarterly_counts, name="calculate_task_quarterly_counts"), 
 
     path('API_introduction/', views.API_introduction_view, name = 'API_introduction'),

@@ -13,7 +13,7 @@ def main():
     关键流程：
         只输出检查步骤，不修改任何文件。
     可能报错或边界情况：
-        该脚本不替代人工审计和 Zenodo/GitHub Release 发布流程。
+        该脚本不替代人工审计、CSV 导出和 GitHub Release 发布流程。
     """
     print("python -m compileall -q .")
     print("python manage.py check")

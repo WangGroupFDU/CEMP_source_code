@@ -58,7 +58,7 @@ def _resolve_model_paths():
     输入参数：无，优先读取 CEMP_IL_MODEL_DIR 环境变量。
     返回值：包含 ECW、Tm 和 conductivity 三个模型路径的字典。
     关键流程：默认使用仓库内 ionic_liquid/static/model；若模型资产从
-    GitHub Release/Zenodo 解压到其他目录，可通过 CEMP_IL_MODEL_DIR 指定。
+    GitHub Release 解压到其他目录，可通过 CEMP_IL_MODEL_DIR 指定。
     边界情况：模型文件缺失时抛出 FileNotFoundError，API 会返回明确错误信息。
     """
     default_model_dir = Path(settings.BASE_DIR) / "ionic_liquid" / "static" / "model"

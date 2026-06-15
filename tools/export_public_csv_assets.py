@@ -52,6 +52,58 @@ TABLE_EXPORTS = [
 ]
 
 
+PAPER_TABLE_EXPORTS = [
+    {
+        "name": "paper_ionic_liquid_qc",
+        "table": "ionic_liquid_il",
+        "output": "paper_ionic_liquid_il.csv",
+        "count_key": "data_points",
+    },
+    {
+        "name": "paper_ionic_liquid_ml",
+        "table": "ionic_liquid_il_ml_data",
+        "output": "paper_ionic_liquid_il_ml_data.csv",
+        "count_key": "rows",
+    },
+    {
+        "name": "paper_cation_qc",
+        "table": "ionic_liquid_cation_qc_data",
+        "output": "paper_ionic_liquid_cation_qc_data.csv",
+        "count_key": "data_points",
+    },
+    {
+        "name": "paper_anion_qc",
+        "table": "ionic_liquid_anion_qc_data",
+        "output": "paper_ionic_liquid_anion_qc_data.csv",
+        "count_key": "data_points",
+    },
+    {
+        "name": "paper_polymer_experiment",
+        "table": "polymer_experiment_polymer_data",
+        "output": "paper_polymer_experiment_polymer_data.csv",
+        "count_key": "data_points",
+    },
+    {
+        "name": "paper_polymer_calculated_monomer",
+        "table": "polymer_calculated_monomer_data",
+        "output": "paper_polymer_calculated_monomer_data.csv",
+        "count_key": "data_points",
+    },
+    {
+        "name": "paper_polymer_calculated_polymer",
+        "table": "polymer_calculated_polymer_data",
+        "output": "paper_polymer_calculated_polymer_data.csv",
+        "count_key": "data_points",
+    },
+    {
+        "name": "paper_bms_experiment",
+        "table": "battery_manage_system_bms_experiment_result",
+        "output": "paper_bms_experiment_result.csv",
+        "count_key": "data_points",
+    },
+]
+
+
 def sha256_file(path):
     """
     功能目的：计算公开数据文件的 SHA256。
@@ -154,27 +206,39 @@ def main():
     功能目的：导出 GitHub 公开发布所需的 CSV 数据资产。
     输入参数：
         --sqlite-path: 完整 CEMP SQLite 数据库路径。
+        --paper-sqlite-path: 已脱敏的论文公开 SQLite 快照；未提供时使用 --sqlite-path。
         --polymer-prediction-csv: OMG polymer ML 预测结果 CSV。
         --output-dir: 公开 CSV 输出目录，默认 data/public。
     返回值：向 stdout 输出 JSON 摘要，供同步 manifest。
-    关键流程：先导出 autocompute/Database 白名单小分子表，再规范化 polymer ML CSV。
+    关键流程：先导出论文支撑公开数据库表，再导出 autocompute/Database 白名单小分子表，
+        最后规范化 polymer ML CSV。
     边界情况：不会导出用户、token、session、任务、日志、ticket 或上传文件表。
     """
     parser = argparse.ArgumentParser(description="Export public CEMP CSV data assets.")
     parser.add_argument("--sqlite-path", required=True)
+    parser.add_argument("--paper-sqlite-path")
     parser.add_argument("--polymer-prediction-csv", required=True)
     parser.add_argument("--output-dir", default="data/public")
     args = parser.parse_args()
 
     sqlite_path = Path(args.sqlite_path).expanduser().resolve()
+    paper_sqlite_path = Path(args.paper_sqlite_path or args.sqlite_path).expanduser().resolve()
     polymer_prediction_csv = Path(args.polymer_prediction_csv).expanduser().resolve()
     output_dir = Path(args.output_dir).expanduser()
     if not sqlite_path.is_file():
         raise SystemExit(f"SQLite database not found: {sqlite_path}")
+    if not paper_sqlite_path.is_file():
+        raise SystemExit(f"Paper SQLite database not found: {paper_sqlite_path}")
     if not polymer_prediction_csv.is_file():
         raise SystemExit(f"Polymer prediction CSV not found: {polymer_prediction_csv}")
 
     summaries = []
+    with sqlite3.connect(str(paper_sqlite_path)) as connection:
+        for item in PAPER_TABLE_EXPORTS:
+            output_path = output_dir / item["output"]
+            count = export_sqlite_table(connection, item["table"], output_path)
+            summaries.append(describe_asset(item["name"], output_path, item["count_key"], count))
+
     with sqlite3.connect(str(sqlite_path)) as connection:
         for item in TABLE_EXPORTS:
             output_path = output_dir / item["output"]

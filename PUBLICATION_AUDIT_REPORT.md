@@ -4,8 +4,8 @@
 
 This report records the checks expected before publishing the open CEMP
 manuscript-associated release. The release target is a reusable source package
-with local demo data, public data/model manifests, and external archival
-pointers for full paper-supporting assets.
+with local demo data, public data/model manifests, and GitHub-hosted
+paper-supporting assets.
 
 ## Current Release Policy
 
@@ -13,8 +13,10 @@ pointers for full paper-supporting assets.
 - Public data and model assets: CC BY 4.0 unless an asset-level manifest entry
   states otherwise.
 - Local demo: SQLite plus bundled CSV files in `data/demo/`.
-- Full paper assets: GitHub Release and Zenodo archival, with DOI and SHA256
-  values recorded in `data/public_manifest.json`.
+- Full paper database assets: CSV files committed under `data/public/`, with
+  SHA256 values and count metadata recorded in `data/public_manifest.json`.
+- Full paper model assets: GitHub Release attachments when the files are not
+  suitable as regular repository files.
 
 ## Safety Checks
 
@@ -37,8 +39,8 @@ publishing.
 
 ## Known Follow-Up Before Final Release
 
-- Replace all `TBD` DOI and checksum entries for full paper assets after Zenodo
-  deposition.
+- Replace release-specific `TBD` commit/tag/checksum entries for full paper
+  assets before final publication.
 - Confirm source permissions for each public data/model asset before assigning
   CC BY 4.0.
 - Rotate the Materials Project key that appeared in earlier local source copies;

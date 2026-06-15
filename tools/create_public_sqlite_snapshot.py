@@ -22,7 +22,7 @@ PUBLIC_TABLES = {
 def sha256_file(path):
     """
     功能目的：
-        计算公开 SQLite 快照的 SHA256，供 Zenodo/GitHub Release 校验。
+        计算公开 SQLite 中间快照的 SHA256，供本地校验。
     输入参数：
         path: 快照文件路径。
     返回值：
@@ -167,7 +167,7 @@ def create_snapshot(source_path, output_path, metadata_path):
 def main():
     """
     功能目的：
-        命令行生成 Zenodo/GitHub Release 可上传的公开 SQLite 资产。
+        命令行生成可供 CSV 导出的公开 SQLite 中间快照。
     输入参数：
         --source: 私有完整 SQLite；--output: 公开快照；--metadata: 元数据 JSON。
     返回值：
@@ -175,9 +175,9 @@ def main():
     关键流程：
         严格使用 PUBLIC_TABLES 白名单，杜绝复制敏感运行态表。
     可能报错或边界情况：
-        该脚本不上传资产；上传后仍需人工回填 DOI 和 SHA256 到 manifest。
+        该脚本不上传资产；正式发布数据库时优先使用 tools/export_public_csv_assets.py 导出 CSV。
     """
-    parser = argparse.ArgumentParser(description="Create CEMP public SQLite snapshot.")
+    parser = argparse.ArgumentParser(description="Create sanitized CEMP SQLite intermediate for CSV export.")
     parser.add_argument("--source", default=os.environ.get("CEMP_PRIVATE_SQLITE", "db.sqlite3"))
     parser.add_argument("--output", default="release_assets/cemp_public_data.sqlite3")
     parser.add_argument("--metadata", default="release_assets/cemp_public_data.metadata.json")

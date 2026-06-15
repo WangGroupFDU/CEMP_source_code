@@ -31,7 +31,6 @@ from autocompute.models import ComputeTask
 import math  
 from datetime import datetime  
 from pathlib import Path  
-from typing import List, Tuple  
 
 from dateutil.relativedelta import relativedelta  
 from django.http import JsonResponse  
@@ -46,6 +45,7 @@ from django.core.paginator import Paginator
 
 
 NODE_DEBUG_TASK_ID_PREFIX = "node_debug__"
+TASK_FOLDER_TIMESTAMP_PATTERN = re.compile(r"(20\d{6}_\d{6})")
 logger = logging.getLogger(__name__)
 
 
@@ -360,21 +360,256 @@ def toggle_server_enabled(request):
 def gsc_verify_view(request):
     return render(request, 'googlea23ddb018d244e67.html')
 
-def home(request):
-    
-    task_count = ComputeTask.objects.count()
-    user_count = User.objects.count()
 
-    
+def _get_database_file_quarterly_data():
+    """
+    获取数据库文件数的季度累计数据。
+
+    功能目的：
+    - 为首页顶部 database files 数字和数据库增长图表提供统一数据源；
+    - 复用原有 3 个月 Excel 缓存策略，避免首页频繁扫描大目录。
+
+    输入参数：
+    - 无。
+
+    返回值：
+    - (labels, cumulative_counts)，均为 list。
+
+    关键流程：
+    - 优先读取 home/static/QC_data_number/QC_data_number.xlsx；
+    - 缓存不存在或超过 3 个月时扫描 GAUSS_DIR / ORCA_DIR；
+    - 按季度聚合后返回累计文件数。
+
+    可能报错或边界情况：
+    - 两个数据库目录均为空时返回空列表；
+    - 目录不可读时异常向上抛出，便于部署时及时发现路径权限问题。
+    """
+    cache_dir = Path(settings.BASE_DIR) / "home" / "static" / "QC_data_number"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_file = cache_dir / "QC_data_number.xlsx"
+
+    now = datetime.now()
+    quarter_ago = now - relativedelta(months=3)
+
+    if cache_file.exists():
+        ctime = datetime.fromtimestamp(cache_file.stat().st_mtime)
+        if ctime >= quarter_ago:
+            df_cache = pd.read_excel(cache_file)
+            return df_cache["labels"].tolist(), df_cache["counts"].tolist()
+
+    timestamps = []
+    for base_dir in (GAUSS_DIR, ORCA_DIR):
+        for fp in base_dir.rglob("*"):
+            if fp.is_file():
+                stat = fp.stat()
+                ts = getattr(stat, "st_birthtime", stat.st_mtime)
+                timestamps.append(ts)
+
+    if not timestamps:
+        return [], []
+
+    dt_start = datetime.fromtimestamp(min(timestamps)).replace(day=1)
+    dt_end = datetime.fromtimestamp(max(timestamps))
+    n_quarters = math.ceil(
+        (
+            dt_end.year * 12
+            + dt_end.month
+            - dt_start.year * 12
+            - dt_start.month
+            + 1
+        )
+        / 3
+    )
+    quarter_starts = [
+        dt_start + relativedelta(months=+3 * i) for i in range(n_quarters)
+    ]
+    counts = [0] * n_quarters
+
+    for ts in timestamps:
+        dt = datetime.fromtimestamp(ts)
+        idx = ((dt.year - dt_start.year) * 12 + dt.month - dt_start.month) // 3
+        counts[idx] += 1
+
+    labels = [dt.strftime("%Y-%m") for dt in quarter_starts]
+    cumulative_counts = list(itertools.accumulate(counts))
+    pd.DataFrame({"labels": labels, "counts": cumulative_counts}).to_excel(
+        cache_file,
+        index=False,
+    )
+    return labels, cumulative_counts
+
+
+def _parse_task_folder_datetime(folder_path):
+    """
+    从任务目录路径中解析真实提交时间。
+
+    功能目的：
+    - 历史 ComputeTask 记录可能通过数据迁移恢复，数据库 created_at 会变成迁移时间；
+    - 任务目录名保留了提交时的 YYYYMMDD_HHMMSS，更适合作为公开增长图表时间轴。
+
+    输入参数：
+    - folder_path: ComputeTask.folder_path 字符串。
+
+    返回值：
+    - 带当前 Django 时区的 datetime；若无法解析则返回 None。
+
+    关键流程：
+    - 用正则查找目录中的 14 位时间戳；
+    - 按平台创建目录时使用的 %Y%m%d_%H%M%S 格式解析；
+    - 转换为当前时区，方便后续按季度聚合。
+
+    可能报错或边界情况：
+    - 空路径、旧路径、异常字符串均返回 None；
+    - 非法日期字符串返回 None。
+    """
+    if not folder_path:
+        return None
+
+    match = TASK_FOLDER_TIMESTAMP_PATTERN.search(str(folder_path))
+    if not match:
+        return None
+
+    try:
+        naive_dt = datetime.strptime(match.group(1), "%Y%m%d_%H%M%S")
+    except ValueError:
+        return None
+    return timezone.make_aware(naive_dt, timezone.get_current_timezone())
+
+
+def _get_successful_task_quarterly_data():
+    """
+    获取成功生产计算任务的季度累计数据。
+
+    功能目的：
+    - 为首页顶部 successful tasks 数字和成功任务增长图表提供实时数据；
+    - 排除节点调试任务，避免 replay 或资格测试记录污染公开统计。
+
+    输入参数：
+    - 无。
+
+    返回值：
+    - (labels, cumulative_counts)，均为 list。
+
+    关键流程：
+    - 从 ComputeTask 表读取 status='success' 的生产任务；
+    - 优先从 folder_path 解析真实任务目录时间；
+    - 历史任务目录缺少时间戳时回退到 created_at；
+    - 按 3 个月区间聚合并返回累计成功任务数。
+
+    可能报错或边界情况：
+    - 没有成功任务时返回空列表；
+    - folder_path 格式异常时自动使用 created_at，避免单条脏数据导致图表失败。
+    """
+    tasks = _production_compute_tasks().filter(status="success").only(
+        "folder_path",
+        "created_at",
+    )
+    if not tasks.exists():
+        return [], []
+
+    datetimes = []
+    for task in tasks:
+        folder_time = _parse_task_folder_datetime(task.folder_path)
+        if folder_time is not None:
+            datetimes.append(folder_time)
+            continue
+        datetimes.append(task.created_at.astimezone(timezone.get_current_timezone()))
+
+    dt_start = min(datetimes)
+    dt_end = max(datetimes)
+    dt_start = dt_start.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    months_diff = (
+        (dt_end.year * 12 + dt_end.month)
+        - (dt_start.year * 12 + dt_start.month)
+        + 1
+    )
+    n_quarters = math.ceil(months_diff / 3)
+    counts = [0] * n_quarters
+
+    for dt in datetimes:
+        dt = dt.astimezone(timezone.get_current_timezone())
+        idx = ((dt.year - dt_start.year) * 12 + dt.month - dt_start.month) // 3
+        counts[idx] += 1
+
+    labels = [
+        (dt_start + relativedelta(months=3 * i)).strftime("%Y-%m")
+        for i in range(n_quarters)
+    ]
+    cumulative_counts = list(itertools.accumulate(counts))
+    return labels, cumulative_counts
+
+
+def _get_latest_count(counts):
+    """
+    从累计序列中读取最新值。
+
+    功能目的：
+    - 统一处理首页顶部统计数字的空序列边界情况。
+
+    输入参数：
+    - counts: 累计数值列表。
+
+    返回值：
+    - 最新累计值；若列表为空则返回 0。
+
+    关键流程：
+    - 首页顶部数字只需要展示累计序列末尾值。
+
+    可能报错或边界情况：
+    - 空列表返回 0，避免模板显示 None。
+    """
+    return int(counts[-1]) if counts else 0
+
+
+def home(request):
+    # 首页公开统计：注册用户实时读取；成功任务实时读取；数据库文件数沿用缓存策略。
+    user_count = User.objects.count()
+    successful_task_count = _production_compute_tasks().filter(status="success").count()
+    _, database_file_counts = _get_database_file_quarterly_data()
+    database_file_count = _get_latest_count(database_file_counts)
+
     expected = ALLOWED_ADMINS.get(request.user.username, '').lower()
     show_admin = expected and (request.user.email.lower() == expected)
 
-    
     return render(request, 'base.html', {
-        'task_count': task_count,
         'user_count': user_count,
+        'registered_users': user_count,
+        'successful_tasks': successful_task_count,
+        'database_files': database_file_count,
         'show_admin': show_admin,
     })
+
+
+@require_GET
+def homepage_stats(request):
+    """
+    返回首页顶部统计数字。
+
+    功能目的：
+    - 供新版首页每 60 秒刷新 registered users / successful tasks / database files；
+    - 避免前端解析首页 HTML，提高统计接口稳定性。
+
+    输入参数：
+    - request: GET 请求。
+
+    返回值：
+    - JsonResponse，包含 registered_users、successful_tasks、database_files 三个完整整数。
+
+    关键流程：
+    - 注册用户数和成功任务数实时查询；
+    - 数据库文件数复用 3 个月缓存策略。
+
+    可能报错或边界情况：
+    - 数据库文件目录不可读时异常向上抛出，便于部署时暴露配置问题。
+    """
+    _, database_file_counts = _get_database_file_quarterly_data()
+    return JsonResponse({
+        "registered_users": User.objects.count(),
+        "successful_tasks": _production_compute_tasks().filter(status="success").count(),
+        "database_files": _get_latest_count(database_file_counts),
+    })
+
 @csrf_exempt
 @login_required(login_url='/register/login/')
 def admin_view(request):
@@ -689,137 +924,32 @@ def news_and_updates_view(request):
 
 @require_GET  
 def quarterly_counts(request):
-    
-    cache_dir  = Path(settings.BASE_DIR) / "home" / "static" / "QC_data_number"
-    cache_dir.mkdir(parents=True, exist_ok=True)          
-    cache_file = cache_dir / "QC_data_number.xlsx"
-
-    now = datetime.now()
-
-    
-    quarter_ago = now - relativedelta(months=3)
-
-    if cache_file.exists():
-        ctime = datetime.fromtimestamp(cache_file.stat().st_mtime)
-        
-        if ctime >= quarter_ago:
-            df_cache = pd.read_excel(cache_file)
-            return JsonResponse({
-                "labels": df_cache["labels"].tolist(),
-                "counts": df_cache["counts"].tolist()
-            })
-        
-    
-    timestamps: List[float] = []  
-
-    
-    for base_dir in (GAUSS_DIR, ORCA_DIR):
-        for fp in base_dir.rglob("*"):    
-            if fp.is_file():               
-                stat = fp.stat()           
-                
-                ts = getattr(stat, "st_birthtime", stat.st_mtime)
-                timestamps.append(ts)      
-
-    
-    if not timestamps:
-        return JsonResponse({"labels": [], "counts": []})
-
-    
-    dt_start = datetime.fromtimestamp(min(timestamps)).replace(day=1)  
-    dt_end = datetime.fromtimestamp(max(timestamps))                   
-    
-    n_quarters = math.ceil((dt_end.year * 12 + dt_end.month -
-                            dt_start.year * 12 - dt_start.month + 1) / 3)
-
-    
-    quarter_starts: List[datetime] = [
-        dt_start + relativedelta(months=+3 * i) for i in range(n_quarters)
-    ]
-
-    
-    counts = [0] * n_quarters
-
-    
-    for ts in timestamps:
-        dt = datetime.fromtimestamp(ts)
-        
-        idx = ((dt.year - dt_start.year) * 12 + dt.month - dt_start.month) // 3
-        counts[idx] += 1
-
-    
-    labels = [dt.strftime("%Y‑%m") for dt in quarter_starts]  
-
-    
-    cumulative_counts = list(itertools.accumulate(counts))   
-    
-    
-    df_out = pd.DataFrame({"labels": labels, "counts": cumulative_counts})
-    cache_dir.mkdir(parents=True, exist_ok=True)          
-    df_out.to_excel(cache_file, index=False)
-    
-    
-    return JsonResponse({"labels": labels, "counts": cumulative_counts})
+    labels, counts = _get_database_file_quarterly_data()
+    return JsonResponse({"labels": labels, "counts": counts})
 
 
 def calculate_task_quarterly_counts(request):
-    
-    cache_dir  = Path(settings.BASE_DIR) / "home" / "static" / "QC_data_number"
-    cache_file = cache_dir / "calculate_task_number.xlsx"      
-    quarter_ago = timezone.now() - relativedelta(months=3)     
+    """
+    返回成功生产计算任务的季度累计数据。
 
-    if cache_file.exists():
-        ctime = datetime.fromtimestamp(cache_file.stat().st_mtime,
-                                       tz=timezone.get_current_timezone())
-        if ctime >= quarter_ago:                               
-            df = pd.read_excel(cache_file)
-            return JsonResponse({
-                "labels": df["labels"].tolist(),
-                "counts": df["counts"].tolist()
-            })
-        
-    
-    dates_qs = ComputeTask.objects.values_list('created_at', flat=True)
+    功能目的：
+    - 为新版首页 successful tasks 图表提供与顶部数字一致的统计口径；
+    - 排除 node_debug 调试任务，避免公开统计被内部测试记录污染。
 
-    if not dates_qs.exists():                           
-        return JsonResponse({"labels": [], "counts": []})
+    输入参数：
+    - request: GET 请求。
 
-    
-    
-    
-    datetimes: List[datetime] = list(dates_qs)
-    dt_start = min(datetimes).astimezone(timezone.get_current_timezone())
-    dt_end   = max(datetimes).astimezone(timezone.get_current_timezone())
+    返回值：
+    - JsonResponse，包含 labels 和 counts 两个列表。
 
-    
-    dt_start = dt_start.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    关键流程：
+    - 复用 _get_successful_task_quarterly_data 统一统计逻辑。
 
-    
-    months_diff = (dt_end.year * 12 + dt_end.month) - (dt_start.year * 12 + dt_start.month) + 1
-    n_quarters  = math.ceil(months_diff / 3)
-
-    
-    counts = [0] * n_quarters
-
-    
-    for dt in datetimes:
-        
-        idx = ((dt.year - dt_start.year) * 12 + dt.month - dt_start.month) // 3
-        counts[idx] += 1
-
-    
-    labels = [
-        (dt_start + relativedelta(months=3 * i)).strftime("%Y-%m") for i in range(n_quarters)
-    ]
-    
-    cumulative_counts = list(itertools.accumulate(counts))   
-
-    
-    cache_dir.mkdir(parents=True, exist_ok=True)          
-    pd.DataFrame({"labels": labels,
-                  "counts": cumulative_counts}).to_excel(cache_file, index=False)
-
-    return JsonResponse({"labels": labels, "counts": cumulative_counts})
+    可能报错或边界情况：
+    - 没有成功任务时返回空列表。
+    """
+    labels, counts = _get_successful_task_quarterly_data()
+    return JsonResponse({"labels": labels, "counts": counts})
 
 
 

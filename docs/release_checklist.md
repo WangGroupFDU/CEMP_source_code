@@ -9,22 +9,25 @@ python manage.py test
 python manage.py verify_public_release --manifest data/public_manifest.json
 ```
 
-2. Generate full public data asset from the private SQLite source:
+2. Generate public CSV data assets from the private SQLite source. If using a
+   sanitized intermediate SQLite file, keep it local and publish the exported
+   CSV files in `data/public/`:
 
 ```bash
-python tools/create_public_sqlite_snapshot.py \
-  --source /path/to/private/db.sqlite3 \
-  --output release_assets/cemp_public_data.sqlite3 \
-  --metadata release_assets/cemp_public_data.metadata.json
+python tools/export_public_csv_assets.py \
+  --sqlite-path /path/to/private/db.sqlite3 \
+  --paper-sqlite-path /path/to/sanitized_public_intermediate.sqlite3 \
+  --polymer-prediction-csv /path/to/predicted_OMG_polymers_filter_DeepSA_CEMP_property.csv \
+  --output-dir data/public
 ```
 
 3. Package model weights, scalers, data dictionaries, and checksum files into
    `release_assets/`.
 
-4. Upload release assets to Zenodo and create a GitHub Release for
-   `v1.0.0-paper-open`.
+4. Create a GitHub Release for `v1.0.0-paper-open` and attach model archives
+   that are not committed as regular repository files.
 
-5. Replace all `TBD` values in:
+5. Replace release-specific `TBD` values in:
 
 ```text
 README.md

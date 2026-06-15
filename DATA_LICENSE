@@ -16,5 +16,4 @@ https://creativecommons.org/licenses/by/4.0/
 Attribution request:
 
 If you reuse the CEMP public data or model assets, cite the associated CEMP
-manuscript and the archived release DOI listed in data/public_manifest.json.
-The DOI is marked as TBD until the Zenodo archival deposit is completed.
+manuscript and the GitHub release or commit listed in data/public_manifest.json.

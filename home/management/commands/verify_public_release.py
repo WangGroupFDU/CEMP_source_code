@@ -96,9 +96,10 @@ class Command(BaseCommand):
         返回值：
             校验成功时输出 ok，失败时抛出 CommandError。
         关键流程：
-            校验本地 demo 文件存在、SHA256、行数、数据库行数和 README/LICENSE 语言。
+            校验仓库内公开文件存在、SHA256、计数、demo 数据库行数和 README/LICENSE 语言。
         可能报错或边界情况：
-            Zenodo 资产未下载时默认跳过；传入 --include-paper 后必须存在并通过校验。
+            仓库内 local_path 资产总是检查；GitHub Release 模型归档默认跳过，
+            传入 --include-paper 后必须存在并通过校验。
         """
         manifest_path = Path(options["manifest"])
         if not manifest_path.exists():
@@ -111,10 +112,11 @@ class Command(BaseCommand):
         for asset in manifest.get("assets", []):
             check_paper = options["include_paper"] and "paper" in asset.get("required_for", [])
             check_demo = "demo" in asset.get("required_for", [])
-            if not check_demo and not check_paper:
+            local_path_value = asset.get("local_path")
+            check_local = bool(local_path_value)
+            if not check_local and not check_demo and not check_paper:
                 continue
 
-            local_path_value = asset.get("local_path")
             if not local_path_value:
                 release_asset_name = asset.get("release_asset_name")
                 if check_paper and release_asset_name:

@@ -143,7 +143,7 @@ class Command(BaseCommand):
         关键流程：
             过滤 required_for 中包含 mode 的本地 CSV 资产，必要时清空表，再逐个导入。
         可能报错或边界情况：
-            纸面完整数据资产通常由 Zenodo 下载，缺少 local_path 时会跳过，不影响 demo 导入。
+            模型归档等非 CSV 资产缺少 local_path 时会跳过，不影响 demo 导入。
         """
         manifest_path = Path(options["manifest"])
         if not manifest_path.exists():

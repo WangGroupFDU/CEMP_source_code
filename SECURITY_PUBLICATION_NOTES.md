@@ -32,4 +32,4 @@ Do not publish:
 ## Release Gate
 
 Run the checks documented in `PUBLICATION_AUDIT_REPORT.md` before every public
-tag, GitHub Release, or Zenodo deposit.
+tag or GitHub Release.

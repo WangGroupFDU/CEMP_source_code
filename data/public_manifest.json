@@ -4,8 +4,7 @@
   "release_tag": "v1.0.0-paper-open",
   "software_license": "Apache-2.0",
   "data_license": "CC-BY-4.0",
-  "zenodo_doi": "TBD",
-  "notes": "Demo assets are stored in this repository. Full paper-supporting data and model assets are versioned for Zenodo/GitHub Release archival and must be checked before manuscript resubmission.",
+  "notes": "Public database assets are committed as CSV files in data/public/ where file size permits. Model archives may be attached to a GitHub Release when they are not suitable as ordinary repository files.",
   "assets": [
     {
       "name": "demo_ionic_liquid_il",
@@ -16,7 +15,6 @@
       "sha256": "2e348743e01b25e8ae71ad2051f4ee9fca21af3883511ecf1237e15542575a11",
       "license": "CC-BY-4.0",
       "citation": "CEMP public demo data, derived from non-sensitive platform examples.",
-      "zenodo_doi": "TBD",
       "required_for": [
         "demo"
       ],
@@ -33,7 +31,6 @@
       "sha256": "f79a55fd4e3546d86a439f359745adb3def7176f501e8d43a052d106d0997472",
       "license": "CC-BY-4.0",
       "citation": "CEMP public demo data, derived from non-sensitive platform examples.",
-      "zenodo_doi": "TBD",
       "required_for": [
         "demo"
       ],
@@ -48,7 +45,6 @@
       "sha256": "8d666dddf6abe16cebe5e2fd9143c54248a932d585aeb239d7271d1977cf8b70",
       "license": "CC-BY-4.0",
       "citation": "CEMP public demo data, derived from non-sensitive platform examples.",
-      "zenodo_doi": "TBD",
       "required_for": [
         "demo"
       ],
@@ -64,7 +60,6 @@
       "sha256": "a275fc0ef195becb299df65ca9e75beef998d5274539c35a7c45496a8882b2bf",
       "license": "CC-BY-4.0",
       "citation": "CEMP public demo data, derived from non-sensitive platform examples.",
-      "zenodo_doi": "TBD",
       "required_for": [
         "demo"
       ],
@@ -80,7 +75,6 @@
       "sha256": "d4805f0f3be73dd6e3a2bc6e12c1515fdbe91405f926a7596cb22ac678eaa3a7",
       "license": "CC-BY-4.0",
       "citation": "CEMP public demo data, derived from non-sensitive platform examples.",
-      "zenodo_doi": "TBD",
       "required_for": [
         "demo"
       ],
@@ -96,7 +90,6 @@
       "sha256": "7e058ac002bf9849e45654f5bb4c3a67e99180260305f69111095c0c9882f352",
       "license": "CC-BY-4.0",
       "citation": "CEMP public demo data, derived from non-sensitive platform examples.",
-      "zenodo_doi": "TBD",
       "required_for": [
         "demo"
       ],
@@ -112,7 +105,6 @@
       "sha256": "f1db6ecbad5319d3436dfed89d4973134d552859919a0b5894e877630aa30f2d",
       "license": "CC-BY-4.0",
       "citation": "CEMP public demo data, derived from non-sensitive platform examples.",
-      "zenodo_doi": "TBD",
       "required_for": [
         "demo"
       ],
@@ -128,7 +120,6 @@
       "sha256": "024148ada9d19fa2c99f56eb6cfc74b822ce870fbf4f9c1c5522b82501c3fbcc",
       "license": "CC-BY-4.0",
       "citation": "CEMP public demo data, derived from non-sensitive platform examples.",
-      "zenodo_doi": "TBD",
       "required_for": [
         "demo"
       ],
@@ -136,32 +127,132 @@
       "data_points": 2
     },
     {
-      "name": "paper_public_sqlite_snapshot",
-      "version": "2026-06-12",
-      "format": "sqlite",
-      "local_path": "",
-      "release_asset_name": "cemp_public_data.sqlite3",
-      "bytes": 32903168,
-      "sha256": "307ace04834599f4e3d2adce3f092bd810e54e7e73686d3d63e8863712386bab",
+      "name": "paper_ionic_liquid_qc",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/paper_ionic_liquid_il.csv",
+      "django_model": "ionic_liquid.IL",
+      "data_points": 1065,
+      "bytes": 271380,
+      "sha256": "aff01918f0f75c083b358745ba48037c0d544be038f80f136668a645525f401a",
       "license": "CC-BY-4.0",
-      "citation": "CEMP manuscript public data snapshot.",
-      "zenodo_doi": "TBD",
+      "citation": "CEMP manuscript public data exported as repository CSV.",
       "required_for": [
         "paper"
       ],
-      "description": "Full public SQLite snapshot with real users, sessions, tokens, logs, tickets, uploads, and task outputs removed.",
-      "data_points": {
-        "ionic_liquid_il": 1065,
-        "ionic_liquid_cation_qc_data": 3774,
-        "ionic_liquid_anion_qc_data": 2220,
-        "polymer_experiment_polymer_data": 13116,
-        "polymer_calculated_monomer_data": 10519,
-        "polymer_calculated_polymer_data": 1000,
-        "battery_manage_system_bms_experiment_result": 39
-      },
-      "rows": {
-        "ionic_liquid_il_ml_data": 100000
-      }
+      "description": "CEMP paper public ionic-liquid theoretical calculation data."
+    },
+    {
+      "name": "paper_ionic_liquid_ml",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/paper_ionic_liquid_il_ml_data.csv",
+      "django_model": "ionic_liquid.IL_ML_data",
+      "rows": 100000,
+      "bytes": 21310382,
+      "sha256": "d47f4c4e2618ccc35423f8511fab3f5ca872bd15a1ccd3dba0eae6a57717854e",
+      "license": "CC-BY-4.0",
+      "citation": "CEMP manuscript public data exported as repository CSV.",
+      "required_for": [
+        "paper"
+      ],
+      "description": "CEMP paper public ionic-liquid ML table."
+    },
+    {
+      "name": "paper_cation_qc",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/paper_ionic_liquid_cation_qc_data.csv",
+      "django_model": "ionic_liquid.Cation_QC_data",
+      "data_points": 3774,
+      "bytes": 984942,
+      "sha256": "f087fc84cda51b616341313cdf7e2f7b233bd730ff435a6864d0e6437d763e0a",
+      "license": "CC-BY-4.0",
+      "citation": "CEMP manuscript public data exported as repository CSV.",
+      "required_for": [
+        "paper"
+      ],
+      "description": "CEMP paper public cation theoretical calculation data."
+    },
+    {
+      "name": "paper_anion_qc",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/paper_ionic_liquid_anion_qc_data.csv",
+      "django_model": "ionic_liquid.Anion_QC_data",
+      "data_points": 2220,
+      "bytes": 558992,
+      "sha256": "efb1657e8dc9785ac538e934fa87d44e3664e13689329b89a6042d33d84050dc",
+      "license": "CC-BY-4.0",
+      "citation": "CEMP manuscript public data exported as repository CSV.",
+      "required_for": [
+        "paper"
+      ],
+      "description": "CEMP paper public anion theoretical calculation data."
+    },
+    {
+      "name": "paper_polymer_experiment",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/paper_polymer_experiment_polymer_data.csv",
+      "django_model": "polymer.experiment_polymer_data",
+      "data_points": 13116,
+      "bytes": 3138057,
+      "sha256": "e66e4453f2c5d6785bbf2985e44f1e18f70d01399ccb67ddaf4efda6ccffbc50",
+      "license": "CC-BY-4.0",
+      "citation": "CEMP manuscript public data exported as repository CSV.",
+      "required_for": [
+        "paper"
+      ],
+      "description": "CEMP paper public experimental polymer property data."
+    },
+    {
+      "name": "paper_polymer_calculated_monomer",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/paper_polymer_calculated_monomer_data.csv",
+      "django_model": "polymer.calculated_monomer_data",
+      "data_points": 10519,
+      "bytes": 6144896,
+      "sha256": "787527d9c79d3409f5f099149101c216b457bff8a29ed2196021f80021369abc",
+      "license": "CC-BY-4.0",
+      "citation": "CEMP manuscript public data exported as repository CSV.",
+      "required_for": [
+        "paper"
+      ],
+      "description": "CEMP paper public calculated monomer property data."
+    },
+    {
+      "name": "paper_polymer_calculated_polymer",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/paper_polymer_calculated_polymer_data.csv",
+      "django_model": "polymer.calculated_polymer_data",
+      "data_points": 1000,
+      "bytes": 426686,
+      "sha256": "47a2278bbc40060fa5bfb7c327d15bfb83d9325dc892f3cab5ed873f5232de73",
+      "license": "CC-BY-4.0",
+      "citation": "CEMP manuscript public data exported as repository CSV.",
+      "required_for": [
+        "paper"
+      ],
+      "description": "CEMP paper public calculated polymer property data."
+    },
+    {
+      "name": "paper_bms_experiment",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/paper_bms_experiment_result.csv",
+      "django_model": "battery_manage_system.BMS_experiment_result",
+      "data_points": 39,
+      "bytes": 7323,
+      "sha256": "7a582672143c1dd31c74e4593fecaa08883b260cc92ae73b2025d95ff2e59ef0",
+      "license": "CC-BY-4.0",
+      "citation": "CEMP manuscript public data exported as repository CSV.",
+      "required_for": [
+        "paper"
+      ],
+      "description": "CEMP paper public battery experiment data."
     },
     {
       "name": "paper_model_weights_and_scalers",
@@ -173,11 +264,10 @@
       "sha256": "2f502c0b71a6da151265482ec4461b25a969a9417343b7580bfad0f2f7a9d007",
       "license": "CC-BY-4.0",
       "citation": "CEMP manuscript public model assets.",
-      "zenodo_doi": "TBD",
       "required_for": [
         "paper"
       ],
-      "description": "Versioned model weights, scalers, and configuration files required to reproduce manuscript prediction examples."
+      "description": "Versioned model weights, scalers, and configuration files required to reproduce manuscript prediction examples. Attach this archive to the GitHub Release when not committed as regular files."
     },
     {
       "name": "autocompute_cation_qc",
@@ -190,7 +280,6 @@
       "sha256": "631900a06332b7c099aecceaebc8a367796556a5a2032edc9e18ecdddf912755",
       "license": "CC-BY-4.0",
       "citation": "CEMP Autocompute public small-molecule QC data.",
-      "zenodo_doi": "TBD",
       "required_for": [
         "paper",
         "autocompute_database"
@@ -208,7 +297,6 @@
       "sha256": "de79c8edcc581cf6f764a6dda40a6e59c7d3f96331b1630ccb862f9e8d4d6f25",
       "license": "CC-BY-4.0",
       "citation": "CEMP Autocompute public small-molecule QC data.",
-      "zenodo_doi": "TBD",
       "required_for": [
         "paper",
         "autocompute_database"
@@ -226,9 +314,7 @@
       "sha256": "aff01918f0f75c083b358745ba48037c0d544be038f80f136668a645525f401a",
       "license": "CC-BY-4.0",
       "citation": "CEMP Autocompute public ionic-liquid QC data.",
-      "zenodo_doi": "TBD",
       "required_for": [
-        "paper",
         "autocompute_database"
       ],
       "description": "Ionic-liquid theoretical calculation data displayed under /autocompute/Database/IL."
@@ -244,7 +330,6 @@
       "sha256": "5c25ecee5cc705a8a1e074a941830100a357009550240a299f1f49f83a74fed7",
       "license": "CC-BY-4.0",
       "citation": "CEMP Autocompute public electrolyte component data.",
-      "zenodo_doi": "TBD",
       "required_for": [
         "paper",
         "autocompute_database"
@@ -262,7 +347,6 @@
       "sha256": "3d4c7dc02a4e141d115cf59cb529976377c9fdec7583fb4290820856804d0100",
       "license": "CC-BY-4.0",
       "citation": "CEMP Autocompute public Li-electrolyte data.",
-      "zenodo_doi": "TBD",
       "required_for": [
         "paper",
         "autocompute_database"
@@ -280,7 +364,6 @@
       "sha256": "d205d6f85beeb76b0ab7b2769bbdbd5224f8d4f2a0d12678014653a4e5ea4bc7",
       "license": "CC-BY-4.0",
       "citation": "CEMP Autocompute public metal-anion binding energy data.",
-      "zenodo_doi": "TBD",
       "required_for": [
         "paper",
         "autocompute_database"
@@ -298,7 +381,6 @@
       "sha256": "8d51d3ad303e1f3a34d17df8644950f512b31a3d3803a1acbd80984eafc2cb83",
       "license": "CC-BY-4.0",
       "citation": "CEMP Autocompute public example molecule data.",
-      "zenodo_doi": "TBD",
       "required_for": [
         "paper",
         "autocompute_database"
@@ -315,7 +397,6 @@
       "sha256": "d9a2f35a8a20d01db0a6998853d7f7fe38594b33f585235750b67cf6f1eabfbc",
       "license": "CC-BY-4.0",
       "citation": "CEMP public ML-predicted OMG polymer property data generated by DeepSA filtering and CEMP property models.",
-      "zenodo_doi": "TBD",
       "required_for": [
         "paper",
         "polymer_ml_prediction"
