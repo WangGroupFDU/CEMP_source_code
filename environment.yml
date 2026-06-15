@@ -17,9 +17,9 @@ dependencies:
   - beautifulsoup4
   - cairosvg=2.7.0
   - rdkit=2023.03.2
-  - pytorch
+  - pytorch=2.4.*
   - cpuonly
-  - pyg
+  - pyg=2.6.1=py311_torch_2.4.0_cpu
   - pip
   - pip:
       - django-cron
