@@ -106,6 +106,24 @@ def load_csv(model, csv_path):
     return len(objects)
 
 
+def expected_asset_count(asset):
+    """
+    功能目的：
+        读取 manifest 中的资产计数字段。
+    输入参数：
+        asset: 单个 manifest asset 字典。
+    返回值：
+        优先返回 rows；若不存在则返回 data_points；二者都不存在时返回 None。
+    关键流程：
+        ML 数据保留 rows 语义，实验或理论计算数据使用 data_points 语义。
+    可能报错或边界情况：
+        若 manifest 同时提供两个字段，rows 优先用于兼容旧 ML 数据资产。
+    """
+    if asset.get("rows") is not None:
+        return asset.get("rows")
+    return asset.get("data_points")
+
+
 class Command(BaseCommand):
     help = "Load public CEMP demo data from data/public_manifest.json."
 
@@ -143,6 +161,9 @@ class Command(BaseCommand):
                 if asset.get("format") != "csv" or not asset.get("local_path"):
                     self.stdout.write(f"skip {asset.get('name')} (not a local CSV asset)")
                     continue
+                if not asset.get("django_model"):
+                    self.stdout.write(f"skip {asset.get('name')} (no django_model loader)")
+                    continue
 
                 csv_path = manifest_path.parent.parent / asset["local_path"]
                 if not csv_path.exists():
@@ -153,11 +174,11 @@ class Command(BaseCommand):
                     model.objects.all().delete()
                 count = load_csv(model, csv_path)
                 loaded += count
-                expected_rows = asset.get("rows")
-                if expected_rows is not None and expected_rows != count:
+                expected_count = expected_asset_count(asset)
+                if expected_count is not None and expected_count != count:
                     raise CommandError(
-                        f"Row count mismatch for {asset['name']}: expected {expected_rows}, loaded {count}"
+                        f"Count mismatch for {asset['name']}: expected {expected_count}, loaded {count}"
                     )
-                self.stdout.write(self.style.SUCCESS(f"loaded {count} rows into {asset['django_model']}"))
+                self.stdout.write(self.style.SUCCESS(f"loaded {count} records into {asset['django_model']}"))
 
-        self.stdout.write(self.style.SUCCESS(f"public data load complete: {loaded} rows"))
+        self.stdout.write(self.style.SUCCESS(f"public data load complete: {loaded} records"))

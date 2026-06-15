@@ -59,26 +59,32 @@ python manage.py runserver
 | `battery_manage_system/` | Battery experiment models, visualization and prediction views. |
 | `autocompute/` | Optional QC/MD workflow orchestration and task-management modules. |
 | `data/demo/` | Small local demo CSV assets for smoke tests and API examples. |
+| `data/public/` | Public GitHub CSV assets, including Autocompute small molecules and polymer ML predictions. |
 | `data/public_manifest.json` | Versioned data/model manifest, checksums, licenses, and archival pointers. |
 | `docs/` | Installation, data, API, reproducibility, and availability notes. |
 
 ## Public Data and Models
 
-The repository stores only small demo CSV files directly. Full
-manuscript-supporting data and model artifacts are intended for GitHub Release
-and Zenodo archival. The manifest already records the expected public snapshot
-baseline:
+The repository stores demo CSV files and selected GitHub-hosted public CSV
+assets directly. Larger data/model artifacts remain intended for GitHub Release
+and Zenodo archival. The manifest records the expected public snapshot baseline.
+Experimental or theoretical calculation datasets are counted as data points; ML
+datasets are counted as rows.
 
-| Public table | Expected rows |
-| --- | ---: |
-| `ionic_liquid_il` | 1,065 |
-| `ionic_liquid_il_ml_data` | 100,000 |
-| `ionic_liquid_cation_qc_data` | 3,774 |
-| `ionic_liquid_anion_qc_data` | 2,220 |
-| `polymer_experiment_polymer_data` | 13,116 |
-| `polymer_calculated_monomer_data` | 10,519 |
-| `polymer_calculated_polymer_data` | 1,000 |
-| `battery_manage_system_bms_experiment_result` | 39 |
+| Public table | Count type | Expected count |
+| --- | --- | ---: |
+| `ionic_liquid_il` | data points | 1,065 |
+| `ionic_liquid_il_ml_data` | rows | 100,000 |
+| `ionic_liquid_cation_qc_data` | data points | 3,774 |
+| `ionic_liquid_anion_qc_data` | data points | 2,220 |
+| `polymer_experiment_polymer_data` | data points | 13,116 |
+| `polymer_calculated_monomer_data` | data points | 10,519 |
+| `polymer_calculated_polymer_data` | data points | 1,000 |
+| `battery_manage_system_bms_experiment_result` | data points | 39 |
+
+Additional GitHub CSV assets in `data/public/` include Autocompute
+small-molecule database exports and `213,581` rows of ML-predicted OMG polymer
+properties.
 
 The Zenodo DOI is marked as `TBD` until the archival deposit is completed.
 After upload, update `data/public_manifest.json`, `docs/data.md`, and
@@ -94,7 +100,7 @@ python manage.py verify_public_release --manifest data/public_manifest.json
 
 `load_public_data` imports bundled demo CSV assets into SQLite. `seed_public_demo`
 creates a local demo user and token. `verify_public_release` checks local demo
-files, SHA256 values, row counts, and release-language constraints.
+files, SHA256 values, count metadata, and release-language constraints.
 
 ## API Example
 

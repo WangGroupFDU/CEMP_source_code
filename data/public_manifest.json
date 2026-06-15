@@ -13,13 +13,15 @@
       "format": "csv",
       "local_path": "data/demo/ionic_liquid_il.csv",
       "django_model": "ionic_liquid.IL",
-      "rows": 2,
       "sha256": "2e348743e01b25e8ae71ad2051f4ee9fca21af3883511ecf1237e15542575a11",
       "license": "CC-BY-4.0",
       "citation": "CEMP public demo data, derived from non-sensitive platform examples.",
       "zenodo_doi": "TBD",
-      "required_for": ["demo"],
-      "description": "Minimal ionic-liquid QC records for local API and database smoke tests."
+      "required_for": [
+        "demo"
+      ],
+      "description": "Minimal ionic-liquid QC records for local API and database smoke tests.",
+      "data_points": 2
     },
     {
       "name": "demo_ionic_liquid_ml",
@@ -32,7 +34,9 @@
       "license": "CC-BY-4.0",
       "citation": "CEMP public demo data, derived from non-sensitive platform examples.",
       "zenodo_doi": "TBD",
-      "required_for": ["demo"],
+      "required_for": [
+        "demo"
+      ],
       "description": "Minimal ionic-liquid ML records used by local filtering examples."
     },
     {
@@ -41,13 +45,15 @@
       "format": "csv",
       "local_path": "data/demo/ionic_liquid_cation_qc_data.csv",
       "django_model": "ionic_liquid.Cation_QC_data",
-      "rows": 2,
       "sha256": "8d666dddf6abe16cebe5e2fd9143c54248a932d585aeb239d7271d1977cf8b70",
       "license": "CC-BY-4.0",
       "citation": "CEMP public demo data, derived from non-sensitive platform examples.",
       "zenodo_doi": "TBD",
-      "required_for": ["demo"],
-      "description": "Minimal cation QC records for local database checks."
+      "required_for": [
+        "demo"
+      ],
+      "description": "Minimal cation QC records for local database checks.",
+      "data_points": 2
     },
     {
       "name": "demo_anion_qc",
@@ -55,13 +61,15 @@
       "format": "csv",
       "local_path": "data/demo/ionic_liquid_anion_qc_data.csv",
       "django_model": "ionic_liquid.Anion_QC_data",
-      "rows": 2,
       "sha256": "a275fc0ef195becb299df65ca9e75beef998d5274539c35a7c45496a8882b2bf",
       "license": "CC-BY-4.0",
       "citation": "CEMP public demo data, derived from non-sensitive platform examples.",
       "zenodo_doi": "TBD",
-      "required_for": ["demo"],
-      "description": "Minimal anion QC records for local database checks."
+      "required_for": [
+        "demo"
+      ],
+      "description": "Minimal anion QC records for local database checks.",
+      "data_points": 2
     },
     {
       "name": "demo_experiment_polymer_data",
@@ -69,13 +77,15 @@
       "format": "csv",
       "local_path": "data/demo/polymer_experiment_polymer_data.csv",
       "django_model": "polymer.experiment_polymer_data",
-      "rows": 2,
       "sha256": "d4805f0f3be73dd6e3a2bc6e12c1515fdbe91405f926a7596cb22ac678eaa3a7",
       "license": "CC-BY-4.0",
       "citation": "CEMP public demo data, derived from non-sensitive platform examples.",
       "zenodo_doi": "TBD",
-      "required_for": ["demo"],
-      "description": "Minimal experimental polymer records for local database checks."
+      "required_for": [
+        "demo"
+      ],
+      "description": "Minimal experimental polymer records for local database checks.",
+      "data_points": 2
     },
     {
       "name": "demo_calculated_monomer_data",
@@ -83,13 +93,15 @@
       "format": "csv",
       "local_path": "data/demo/polymer_calculated_monomer_data.csv",
       "django_model": "polymer.calculated_monomer_data",
-      "rows": 2,
       "sha256": "7e058ac002bf9849e45654f5bb4c3a67e99180260305f69111095c0c9882f352",
       "license": "CC-BY-4.0",
       "citation": "CEMP public demo data, derived from non-sensitive platform examples.",
       "zenodo_doi": "TBD",
-      "required_for": ["demo"],
-      "description": "Minimal calculated monomer records for local database checks."
+      "required_for": [
+        "demo"
+      ],
+      "description": "Minimal calculated monomer records for local database checks.",
+      "data_points": 2
     },
     {
       "name": "demo_calculated_polymer_data",
@@ -97,13 +109,15 @@
       "format": "csv",
       "local_path": "data/demo/polymer_calculated_polymer_data.csv",
       "django_model": "polymer.calculated_polymer_data",
-      "rows": 2,
       "sha256": "f1db6ecbad5319d3436dfed89d4973134d552859919a0b5894e877630aa30f2d",
       "license": "CC-BY-4.0",
       "citation": "CEMP public demo data, derived from non-sensitive platform examples.",
       "zenodo_doi": "TBD",
-      "required_for": ["demo"],
-      "description": "Minimal calculated polymer records for local database checks."
+      "required_for": [
+        "demo"
+      ],
+      "description": "Minimal calculated polymer records for local database checks.",
+      "data_points": 2
     },
     {
       "name": "demo_bms_experiment_result",
@@ -111,13 +125,15 @@
       "format": "csv",
       "local_path": "data/demo/bms_experiment_result.csv",
       "django_model": "battery_manage_system.BMS_experiment_result",
-      "rows": 2,
       "sha256": "024148ada9d19fa2c99f56eb6cfc74b822ce870fbf4f9c1c5522b82501c3fbcc",
       "license": "CC-BY-4.0",
       "citation": "CEMP public demo data, derived from non-sensitive platform examples.",
       "zenodo_doi": "TBD",
-      "required_for": ["demo"],
-      "description": "Minimal battery experiment metadata for local database checks."
+      "required_for": [
+        "demo"
+      ],
+      "description": "Minimal battery experiment metadata for local database checks.",
+      "data_points": 2
     },
     {
       "name": "paper_public_sqlite_snapshot",
@@ -126,9 +142,16 @@
       "local_path": "",
       "release_asset_name": "cemp_public_data.sqlite3",
       "bytes": 32903168,
-      "rows": {
+      "sha256": "307ace04834599f4e3d2adce3f092bd810e54e7e73686d3d63e8863712386bab",
+      "license": "CC-BY-4.0",
+      "citation": "CEMP manuscript public data snapshot.",
+      "zenodo_doi": "TBD",
+      "required_for": [
+        "paper"
+      ],
+      "description": "Full public SQLite snapshot with real users, sessions, tokens, logs, tickets, uploads, and task outputs removed.",
+      "data_points": {
         "ionic_liquid_il": 1065,
-        "ionic_liquid_il_ml_data": 100000,
         "ionic_liquid_cation_qc_data": 3774,
         "ionic_liquid_anion_qc_data": 2220,
         "polymer_experiment_polymer_data": 13116,
@@ -136,12 +159,9 @@
         "polymer_calculated_polymer_data": 1000,
         "battery_manage_system_bms_experiment_result": 39
       },
-      "sha256": "307ace04834599f4e3d2adce3f092bd810e54e7e73686d3d63e8863712386bab",
-      "license": "CC-BY-4.0",
-      "citation": "CEMP manuscript public data snapshot.",
-      "zenodo_doi": "TBD",
-      "required_for": ["paper"],
-      "description": "Full public SQLite snapshot with real users, sessions, tokens, logs, tickets, uploads, and task outputs removed."
+      "rows": {
+        "ionic_liquid_il_ml_data": 100000
+      }
     },
     {
       "name": "paper_model_weights_and_scalers",
@@ -154,8 +174,153 @@
       "license": "CC-BY-4.0",
       "citation": "CEMP manuscript public model assets.",
       "zenodo_doi": "TBD",
-      "required_for": ["paper"],
+      "required_for": [
+        "paper"
+      ],
       "description": "Versioned model weights, scalers, and configuration files required to reproduce manuscript prediction examples."
+    },
+    {
+      "name": "autocompute_cation_qc",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/autocompute_cation_qc.csv",
+      "django_model": "ionic_liquid.Cation",
+      "data_points": 431,
+      "bytes": 104735,
+      "sha256": "631900a06332b7c099aecceaebc8a367796556a5a2032edc9e18ecdddf912755",
+      "license": "CC-BY-4.0",
+      "citation": "CEMP Autocompute public small-molecule QC data.",
+      "zenodo_doi": "TBD",
+      "required_for": [
+        "paper",
+        "autocompute_database"
+      ],
+      "description": "Cation small-molecule theoretical calculation data displayed under /autocompute/Database/Cation."
+    },
+    {
+      "name": "autocompute_anion_qc",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/autocompute_anion_qc.csv",
+      "django_model": "ionic_liquid.Anion",
+      "data_points": 63,
+      "bytes": 15332,
+      "sha256": "de79c8edcc581cf6f764a6dda40a6e59c7d3f96331b1630ccb862f9e8d4d6f25",
+      "license": "CC-BY-4.0",
+      "citation": "CEMP Autocompute public small-molecule QC data.",
+      "zenodo_doi": "TBD",
+      "required_for": [
+        "paper",
+        "autocompute_database"
+      ],
+      "description": "Anion small-molecule theoretical calculation data displayed under /autocompute/Database/Anion."
+    },
+    {
+      "name": "autocompute_ionic_liquid_qc",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/autocompute_ionic_liquid_qc.csv",
+      "django_model": "ionic_liquid.IL",
+      "data_points": 1065,
+      "bytes": 271380,
+      "sha256": "aff01918f0f75c083b358745ba48037c0d544be038f80f136668a645525f401a",
+      "license": "CC-BY-4.0",
+      "citation": "CEMP Autocompute public ionic-liquid QC data.",
+      "zenodo_doi": "TBD",
+      "required_for": [
+        "paper",
+        "autocompute_database"
+      ],
+      "description": "Ionic-liquid theoretical calculation data displayed under /autocompute/Database/IL."
+    },
+    {
+      "name": "autocompute_electrolyte_qc",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/autocompute_electrolyte_qc.csv",
+      "django_model": "ionic_liquid.electrolyte",
+      "data_points": 1397,
+      "bytes": 319405,
+      "sha256": "5c25ecee5cc705a8a1e074a941830100a357009550240a299f1f49f83a74fed7",
+      "license": "CC-BY-4.0",
+      "citation": "CEMP Autocompute public electrolyte component data.",
+      "zenodo_doi": "TBD",
+      "required_for": [
+        "paper",
+        "autocompute_database"
+      ],
+      "description": "Electrolyte component theoretical calculation data displayed under /autocompute/Database/electrolyte."
+    },
+    {
+      "name": "autocompute_li_electrolyte_qc",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/autocompute_li_electrolyte_qc.csv",
+      "django_model": "ionic_liquid.Li_electrolyte",
+      "data_points": 4197,
+      "bytes": 1782221,
+      "sha256": "3d4c7dc02a4e141d115cf59cb529976377c9fdec7583fb4290820856804d0100",
+      "license": "CC-BY-4.0",
+      "citation": "CEMP Autocompute public Li-electrolyte data.",
+      "zenodo_doi": "TBD",
+      "required_for": [
+        "paper",
+        "autocompute_database"
+      ],
+      "description": "Li-electrolyte theoretical calculation data displayed under /autocompute/Database/Li_electrolyte."
+    },
+    {
+      "name": "autocompute_metal_anion_binding_energy",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/autocompute_metal_anion_binding_energy.csv",
+      "django_model": "ionic_liquid.metal_anion_energy",
+      "data_points": 498,
+      "bytes": 239636,
+      "sha256": "d205d6f85beeb76b0ab7b2769bbdbd5224f8d4f2a0d12678014653a4e5ea4bc7",
+      "license": "CC-BY-4.0",
+      "citation": "CEMP Autocompute public metal-anion binding energy data.",
+      "zenodo_doi": "TBD",
+      "required_for": [
+        "paper",
+        "autocompute_database"
+      ],
+      "description": "Metal-anion binding-energy theoretical calculation data displayed under /autocompute/Database/Salt."
+    },
+    {
+      "name": "autocompute_example_small_molecules",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/autocompute_example_small_molecules.csv",
+      "django_model": "ionic_liquid.Example",
+      "data_points": 4,
+      "bytes": 63,
+      "sha256": "8d51d3ad303e1f3a34d17df8644950f512b31a3d3803a1acbd80984eafc2cb83",
+      "license": "CC-BY-4.0",
+      "citation": "CEMP Autocompute public example molecule data.",
+      "zenodo_doi": "TBD",
+      "required_for": [
+        "paper",
+        "autocompute_database"
+      ],
+      "description": "Example molecules displayed under /autocompute/Database/example."
+    },
+    {
+      "name": "polymer_predicted_omg_deepsa_cemp_property",
+      "version": "2026-06-15",
+      "format": "csv",
+      "local_path": "data/public/polymer_predicted_omg_deepsa_cemp_property.csv",
+      "rows": 213581,
+      "bytes": 71496935,
+      "sha256": "d9a2f35a8a20d01db0a6998853d7f7fe38594b33f585235750b67cf6f1eabfbc",
+      "license": "CC-BY-4.0",
+      "citation": "CEMP public ML-predicted OMG polymer property data generated by DeepSA filtering and CEMP property models.",
+      "zenodo_doi": "TBD",
+      "required_for": [
+        "paper",
+        "polymer_ml_prediction"
+      ],
+      "description": "ML-predicted polymer properties from predicted_OMG_polymers_filter_DeepSA_CEMP_property.csv; count is reported as rows because this is ML-generated prediction data."
     }
   ]
 }
