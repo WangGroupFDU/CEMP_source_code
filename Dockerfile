@@ -1,9 +1,14 @@
-FROM condaforge/mambaforge:23.11.0-0
+ARG CEMP_BASE_IMAGE=quay.io/condaforge/miniforge3:23.11.0-0
+FROM ${CEMP_BASE_IMAGE}
 
 WORKDIR /app
 
 COPY environment.yml /app/environment.yml
-RUN mamba env update -n base -f /app/environment.yml && mamba clean -afy
+RUN if command -v mamba >/dev/null 2>&1; then \
+      mamba env update -n base -f /app/environment.yml && mamba clean -afy; \
+    else \
+      conda env update -n base -f /app/environment.yml && conda clean -afy; \
+    fi
 
 COPY . /app
 

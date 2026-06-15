@@ -5,6 +5,7 @@
 ```bash
 git clone https://github.com/WangGroupFDU/CEMP_source_code.git
 cd CEMP_source_code
+cp .env.example .env
 docker compose up --build
 ```
 
@@ -18,6 +19,10 @@ python manage.py runserver 0.0.0.0:8000
 ```
 
 Open `http://localhost:8000`.
+
+For a shared server, set `CEMP_HOST_PORT` and host/CSRF values in `.env` before
+starting Docker. See `docs/deploy.md` for CentOS, firewall, registry, and
+port-selection notes.
 
 ## Conda
 
@@ -42,6 +47,8 @@ Important variables:
 | Variable | Purpose |
 | --- | --- |
 | `CEMP_SECRET_KEY` | Django secret key for a deployment. |
+| `CEMP_HOST_PORT` | Host port published by Docker Compose. |
+| `CEMP_BASE_IMAGE` | Container base image or site-local mirror. |
 | `CEMP_DEMO_FERNET_SEED` | Local seed used to derive the demo Fernet key. |
 | `CEMP_FERNET_KEY` | Explicit Fernet key for persistent deployments. |
 | `CEMP_SQLITE_PATH` | SQLite database path. |

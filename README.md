@@ -16,6 +16,7 @@ released under CC BY 4.0 unless a specific manifest entry states otherwise.
 ```bash
 git clone https://github.com/WangGroupFDU/CEMP_source_code.git
 cd CEMP_source_code
+cp .env.example .env
 docker compose up --build
 ```
 
@@ -25,6 +26,10 @@ account, and starts Django at:
 ```text
 http://localhost:8000
 ```
+
+On a shared server, choose a free host port and update `.env`, for example
+`CEMP_HOST_PORT=18080`. Full Docker and CentOS deployment notes are in
+`docs/deploy.md`.
 
 Demo credentials:
 
