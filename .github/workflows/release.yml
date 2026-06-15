@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  github-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out release tag
+        uses: actions/checkout@v4
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          ASSET="release_assets/cemp_public_model_assets.tar.gz"
+          NOTES="docs/release_notes/v1.0.0-paper-open.md"
+
+          test -f "$ASSET"
+          test -f "$NOTES"
+
+          if gh release view "$RELEASE_TAG" --repo "$REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" "$ASSET" --repo "$REPOSITORY" --clobber
+          else
+            gh release create "$RELEASE_TAG" "$ASSET" \
+              --repo "$REPOSITORY" \
+              --title "CEMP ${RELEASE_TAG}" \
+              --notes-file "$NOTES" \
+              --verify-tag
+          fi

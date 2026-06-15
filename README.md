@@ -66,6 +66,8 @@ python manage.py runserver
 | `data/demo/` | Small local demo CSV assets for smoke tests and API examples. |
 | `data/public/` | Public GitHub CSV assets, including Autocompute small molecules and polymer ML predictions. |
 | `data/public_manifest.json` | Versioned data/model manifest, checksums, licenses, and release pointers. |
+| `release_assets/` | Public model archive used by prediction examples and GitHub Release assets. |
+| `.github/workflows/release.yml` | Tag-triggered GitHub Release workflow. |
 | `docs/` | Installation, data, API, reproducibility, and availability notes. |
 
 ## Database Files and Locations
@@ -85,12 +87,13 @@ database dump is not committed.
 
 ### CSV Source Files
 
-| Dataset group | GitHub location | Default local import | Notes |
+| Data type | GitHub CSV location | Default local import | Notes |
 | --- | --- | --- | --- |
-| Demo database | `data/demo/*.csv` | Yes, with `--mode demo` | Small records used by Quick Start, API examples, and smoke tests. |
-| Paper public database | `data/public/paper_*.csv` | No, use `--mode paper` | Public CSV snapshots supporting the manuscript data tables. |
-| Autocompute small-molecule database | `data/public/autocompute_*.csv` | No, use `--mode paper` for the paper-linked subset | CSV exports corresponding to the public database pages under `/autocompute/Database`. |
-| OMG polymer ML predictions | `data/public/polymer_predicted_omg_deepsa_cemp_property.csv` | No | File-based public asset with 213,581 ML prediction rows. |
+| Small molecules | `data/public/autocompute_cation_qc.csv`, `data/public/autocompute_anion_qc.csv`, `data/public/autocompute_electrolyte_qc.csv`, `data/public/autocompute_li_electrolyte_qc.csv`, `data/public/autocompute_metal_anion_binding_energy.csv`, `data/public/autocompute_example_small_molecules.csv` | No, use `--mode paper` for the paper-linked subset | Public small-molecule database exports corresponding to `/autocompute/Database`. |
+| Ionic liquids | `data/demo/ionic_liquid_*.csv`, `data/public/paper_ionic_liquid_il.csv`, `data/public/paper_ionic_liquid_il_ml_data.csv`, `data/public/paper_ionic_liquid_cation_qc_data.csv`, `data/public/paper_ionic_liquid_anion_qc_data.csv`, `data/public/autocompute_ionic_liquid_qc.csv` | Demo files with `--mode demo`; paper files with `--mode paper` | Includes ionic-liquid structures, ML rows, cation QC rows, anion QC rows, and the Autocompute ionic-liquid web-database copy. |
+| Polymers | `data/demo/polymer_*.csv`, `data/public/paper_polymer_experiment_polymer_data.csv`, `data/public/paper_polymer_calculated_monomer_data.csv`, `data/public/paper_polymer_calculated_polymer_data.csv`, `data/public/polymer_predicted_omg_deepsa_cemp_property.csv` | Demo files with `--mode demo`; paper-linked CSV files with `--mode paper`; prediction CSV stays file-based | Includes experimental polymer properties, calculated monomer/polymer properties, and 213,581 OMG polymer ML prediction rows. |
+| Crystals | No public crystal CSV snapshot in `data/public/` for this release | Not imported by `load_public_data` | Crystal prediction model weights are public in `release_assets/cemp_public_model_assets.tar.gz`; optional Materials Project refresh scripts require a user-provided `MP_API_KEY`. |
+| Battery data | `data/demo/bms_experiment_result.csv`, `data/public/paper_bms_experiment_result.csv` | Demo file with `--mode demo`; paper file with `--mode paper` | Public battery experiment records used for database browsing and release checks. |
 | Release manifest | `data/public_manifest.json` | Read by loader and verifier | Records paths, SHA256 checksums, licenses, count metadata, and release grouping. |
 
 The default Quick Start path imports only `data/demo/` into the local SQLite
@@ -127,9 +130,10 @@ the following GitHub CSV files:
 
 ## Public Data and Models
 
-The repository includes demo CSV files and public database CSV assets directly
-where file size permits. Larger model artifacts can be attached to the GitHub
-Release. The manifest records the expected public snapshot baseline.
+The repository includes demo CSV files, public database CSV assets, and the
+public model archive directly. The tagged GitHub Release also attaches the
+model archive for convenient download. The manifest records the expected public
+snapshot baseline.
 Experimental datasets are counted as measured property data points. Quantum
 chemistry tables and ML-generated datasets are reported as rows.
 
@@ -166,6 +170,38 @@ Count definitions:
 - ML-generated prediction files are counted as `rows`.
 
 More detailed data notes are available in `docs/data.md`.
+
+### Public Model Archive
+
+All public model files required by the open prediction examples are packaged in:
+
+```text
+release_assets/cemp_public_model_assets.tar.gz
+```
+
+The archive is tracked in this repository and is also uploaded to the
+`v1.0.0-paper-open` GitHub Release. It is licensed under CC BY 4.0 as recorded
+in `data/public_manifest.json`.
+
+```text
+size: 11,545,465 bytes
+sha256: 2f502c0b71a6da151265482ec4461b25a969a9417343b7580bfad0f2f7a9d007
+```
+
+Extract it at the repository root to restore the model files to the runtime
+paths used by the Django views:
+
+```bash
+tar -xzf release_assets/cemp_public_model_assets.tar.gz -C .
+```
+
+The Docker image performs this extraction during image build.
+
+| Model group | Files included in the archive |
+| --- | --- |
+| Ionic-liquid property models | `ionic_liquid/static/model/conductivity_xgb_model.joblib`, `Ea_xgb_model.joblib`, `lnA_xgb_model.joblib`, `ECW_xgb_model.joblib`, `Tm_xgb_model.joblib`, `IL_ECW_xgb_model.joblib`, `Tm_xgb_model_fp.joblib`, `IL_ECW_xgb_model_fp.joblib`, `conductivity_MLP_model_fp.pt`, `MLPModel.py`, `prediction_model.ipynb`, `IL_property_prediction_test.xlsx` |
+| Polymer property models | `polymer/static/model/Youngs_Modulus_xgb_model.joblib`, `Tm_xgb_model.joblib`, `Tg_xgb_model.joblib`, `Tensile_Strength_xgb_model.joblib`, `Dielectric_Constant_Total_xgb_model.joblib` |
+| Crystal prediction models | `crystals/static/prediction_model/average_voltage_MOCO+GAT.pth`, `capacity_grav_MOCO+GAT.pth`, `energy_grav_MOCO+GAT.pth`, `average_voltage_GCN.pth`, `capacity_grav_GCN.pth`, `energy_grav_GCN.pth`, `average_voltage_GAT.pth`, `capacity_grav_GAT.pth`, `energy_grav_GAT.pth` |
 
 ## Local Release Commands
 

@@ -10,7 +10,8 @@ media/
 logs/
 cache/
 staticfiles/
-release_assets/
+release_assets/*
+!release_assets/cemp_public_model_assets.tar.gz
 node_modules/
 dist/
 dist.backup*/

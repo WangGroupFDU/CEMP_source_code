@@ -11,6 +11,9 @@ RUN if command -v mamba >/dev/null 2>&1; then \
     fi
 
 COPY . /app
+RUN if [ -f /app/release_assets/cemp_public_model_assets.tar.gz ]; then \
+      tar -xzf /app/release_assets/cemp_public_model_assets.tar.gz -C /app; \
+    fi
 
 ENV CEMP_DEBUG=true \
     CEMP_SQLITE_PATH=/app/public_demo.sqlite3 \

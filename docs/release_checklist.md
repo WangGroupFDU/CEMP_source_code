@@ -21,20 +21,29 @@ python tools/export_public_csv_assets.py \
   --output-dir data/public
 ```
 
-3. Package model weights, scalers, data dictionaries, and checksum files into
-   `release_assets/`.
+3. Confirm the public model archive is committed and checksum-stable:
 
-4. Create a GitHub Release for `v1.0.0-paper-open` and attach model archives
-   that are not committed as regular repository files.
+```bash
+shasum -a 256 release_assets/cemp_public_model_assets.tar.gz
+```
 
-5. Replace release-specific `TBD` values in:
+4. Tag the manuscript release. The `.github/workflows/release.yml` workflow
+   creates or updates the GitHub Release and uploads
+   `release_assets/cemp_public_model_assets.tar.gz`:
+
+```bash
+git tag -a v1.0.0-paper-open -m "CEMP v1.0.0-paper-open"
+git push origin v1.0.0-paper-open
+```
+
+5. Confirm release-specific values in:
 
 ```text
 README.md
 data/public_manifest.json
 docs/data.md
 docs/availability_statement.md
-GitHub Release notes
+docs/release_notes/v1.0.0-paper-open.md
 ```
 
 6. Confirm the Materials Project API key that appeared in earlier source copies

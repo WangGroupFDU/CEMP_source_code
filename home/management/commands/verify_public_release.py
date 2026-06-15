@@ -117,8 +117,8 @@ class Command(BaseCommand):
         关键流程：
             校验仓库内公开文件存在、SHA256、计数、demo 数据库行数和 README/LICENSE 语言。
         可能报错或边界情况：
-            仓库内 local_path 资产总是检查；GitHub Release 模型归档默认跳过，
-            传入 --include-paper 后必须存在并通过校验。
+            仓库内 local_path 资产总是检查；没有 local_path 的旧 Release 资产仅在
+            传入 --include-paper 后按 release_asset_name 从 release_assets/ 回退检查。
         """
         manifest_path = Path(options["manifest"])
         if not manifest_path.exists():

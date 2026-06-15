@@ -23,6 +23,16 @@ The repository also includes public CSV assets in `data/public/`.
 Experimental datasets are counted as measured property `data_points`. Quantum
 chemistry and ML-generated datasets are counted as `rows`.
 
+The CSV files are grouped by data type as follows:
+
+| Data type | CSV assets |
+| --- | --- |
+| Small molecules | `autocompute_cation_qc.csv`, `autocompute_anion_qc.csv`, `autocompute_electrolyte_qc.csv`, `autocompute_li_electrolyte_qc.csv`, `autocompute_metal_anion_binding_energy.csv`, `autocompute_example_small_molecules.csv` |
+| Ionic liquids | `paper_ionic_liquid_il.csv`, `paper_ionic_liquid_il_ml_data.csv`, `paper_ionic_liquid_cation_qc_data.csv`, `paper_ionic_liquid_anion_qc_data.csv`, `autocompute_ionic_liquid_qc.csv` |
+| Polymers | `paper_polymer_experiment_polymer_data.csv`, `paper_polymer_calculated_monomer_data.csv`, `paper_polymer_calculated_polymer_data.csv`, `polymer_predicted_omg_deepsa_cemp_property.csv` |
+| Crystals | No public crystal CSV snapshot is bundled in `data/public/`; crystal prediction weights are in `release_assets/cemp_public_model_assets.tar.gz`. |
+| Battery data | `paper_bms_experiment_result.csv` |
+
 | Asset | Count type | Count |
 | --- | --- | ---: |
 | `paper_ionic_liquid_il.csv` | rows | 1,065 |
@@ -49,11 +59,18 @@ The manuscript-supporting public database tables are committed as CSV files in
 
 - paper public database CSV files with SHA256 checksums and count metadata;
 - Autocompute small-molecule database CSV files with source attribution;
-- model weights and scalers used by public prediction examples, attached to the
-  GitHub Release when not committed as regular files:
-  `cemp_public_model_assets.tar.gz`, 11,545,465 bytes,
+- model weights and scalers used by public prediction examples, committed as
+  `release_assets/cemp_public_model_assets.tar.gz` and attached to the tagged
+  GitHub Release: 11,545,465 bytes,
   SHA256 `2f502c0b71a6da151265482ec4461b25a969a9417343b7580bfad0f2f7a9d007`;
 - data dictionary and source-attribution notes.
+
+Extract the public model archive at the repository root before running
+model-backed prediction examples outside Docker:
+
+```bash
+tar -xzf release_assets/cemp_public_model_assets.tar.gz -C .
+```
 
 ## Data Dictionary Policy
 

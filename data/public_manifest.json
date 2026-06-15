@@ -4,7 +4,7 @@
   "release_tag": "v1.0.0-paper-open",
   "software_license": "Apache-2.0",
   "data_license": "CC-BY-4.0",
-  "notes": "Public database assets are committed as CSV files in data/public/ where file size permits. Model archives may be attached to a GitHub Release when they are not suitable as ordinary repository files.",
+  "notes": "Public database assets are committed as CSV files in data/public/. Public model assets are committed as release_assets/cemp_public_model_assets.tar.gz and attached to the tagged GitHub Release.",
   "assets": [
     {
       "name": "demo_ionic_liquid_il",
@@ -299,7 +299,7 @@
       "name": "paper_model_weights_and_scalers",
       "version": "2026-06-12",
       "format": "archive",
-      "local_path": "",
+      "local_path": "release_assets/cemp_public_model_assets.tar.gz",
       "release_asset_name": "cemp_public_model_assets.tar.gz",
       "bytes": 11545465,
       "sha256": "2f502c0b71a6da151265482ec4461b25a969a9417343b7580bfad0f2f7a9d007",
@@ -308,7 +308,7 @@
       "required_for": [
         "paper"
       ],
-      "description": "Versioned model weights, scalers, and configuration files required to reproduce manuscript prediction examples. Attach this archive to the GitHub Release when not committed as regular files."
+      "description": "Versioned ionic-liquid, polymer, and crystal model weights, scalers, example input, notebook, and configuration files required to reproduce public prediction examples. The archive is committed in release_assets/ and attached to the tagged GitHub Release."
     },
     {
       "name": "autocompute_cation_qc",
