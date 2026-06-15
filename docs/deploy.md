@@ -86,6 +86,18 @@ sudo firewall-cmd --add-port=18080/tcp --permanent
 sudo firewall-cmd --reload
 ```
 
+Verify both local and remote reachability:
+
+```bash
+curl -fsS http://127.0.0.1:18080/health/
+ss -ltnp | grep ':18080 '
+curl -fsS http://<server-ip-or-domain>:18080/health/
+```
+
+If the first two checks pass but the server IP check fails, the container is
+running and the remaining issue is usually host firewall, campus firewall, or
+network ACL policy.
+
 ## Deployment Steps
 
 Clone the repository and create a local `.env` file:
@@ -251,6 +263,38 @@ docker compose -f docker-compose.host-network.yml up -d --build
 In host-network mode, set `CEMP_HOST_PORT` to the actual host port and update
 `CEMP_ALLOWED_HOSTS`, `CEMP_CSRF_TRUSTED_ORIGINS`, and `CEMP_SITE_DOMAIN` to
 match that port.
+
+### Service Listens Locally but Remote Access Fails
+
+Symptoms:
+
+```text
+curl http://127.0.0.1:18080/health/  # works on the server
+ss -ltnp | grep ':18080 '            # shows 0.0.0.0:18080
+curl http://<server-ip>:18080/health/ # fails from another machine
+```
+
+Fixes:
+
+- open the selected port in firewalld as root:
+
+```bash
+sudo firewall-cmd --add-port=18080/tcp --permanent
+sudo firewall-cmd --reload
+sudo firewall-cmd --list-ports
+```
+
+- if a Conda or Anaconda environment causes `firewall-cmd` D-Bus path errors,
+  run the system command with a clean environment:
+
+```bash
+sudo env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin /usr/bin/firewall-cmd --add-port=18080/tcp --permanent
+sudo env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin /usr/bin/firewall-cmd --reload
+sudo env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin /usr/bin/firewall-cmd --list-ports
+```
+
+- if firewalld is already open, check upstream network policy or campus/VPN
+  routing rules for the selected port.
 
 ### DisallowedHost or CSRF Errors
 
