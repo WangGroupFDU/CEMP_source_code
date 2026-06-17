@@ -1,56 +1,38 @@
+"""Public pseudocode module for autocompute/static/g16_env.py.
+
+Workflow family: g16 env.py
+Workflow role: resolve external scientific-software settings for the local workflow
+Original source SHA256: c2aad63dd8831e5c27939d9f4f0dd6febc63023edbc06379c276956aaa54ba04
+
+This public-release module preserves the high-level workflow contract while
+omitting executable implementation details from the released repository.
+"""
+
+WORKFLOW_NAME = 'g16 env'
+WORKFLOW_PATH = 'autocompute/static/g16_env.py'
+PSEUDOCODE_ONLY = True
+PSEUDOCODE_STEPS = (
+    'Identify the CEMP workflow context for `autocompute/static/g16_env.py`.',
+    'Load only the task metadata, public template inputs, and local paths required for this workflow step.',
+    'Validate required molecular identifiers, structure files, charge records, calculation outputs, and destination folders before processing.',
+    'Execute the high-level workflow role: resolve external scientific-software settings for the local workflow.',
+    'Apply the same input validation, task-status transitions, and output-recording conventions used by the surrounding CEMP workflow.',
+    'Return a structured status object containing success or failure, generated output paths, warning messages, and record identifiers.',
+    'Stop with an actionable validation error if required inputs, external outputs, or permissions are missing.',
+)
 
 
+def describe_workflow():
+    """Return the public pseudocode steps for this workflow helper."""
+    return list(PSEUDOCODE_STEPS)
 
-import os, subprocess, shlex, textwrap, signal
 
-def load_gaussian_env(
-    g16root="/root/Gaussian16_Linux_AVX2/tar",
-    timeout_sec=10
-):
-    profile = f"{g16root}/g16/bsd/g16.profile"
-    if not os.path.exists(profile):
-        raise FileNotFoundError(f"{profile} not found")
+def main():
+    """Placeholder entry point for the private implementation."""
+    raise NotImplementedError(
+        "This public release contains pseudocode only for this workflow helper."
+    )
 
-    
-    bash_cmd = [
-        "bash", "--noprofile", "--norc", "-c",
-        f"source {shlex.quote(profile)} && env"
-    ]
-    
-    env = os.environ.copy()
-    env["g16root"] = g16root                      
-    
-    env["GAUSS_SCRDIR"] = f"{g16root}/g16/scratch"
 
-    
-    try:
-        env_text = subprocess.check_output(
-            bash_cmd,
-            timeout=timeout_sec, 
-            env=env
-        ).decode()
-    except subprocess.TimeoutExpired:
-        raise RuntimeError(
-            f"Loading Gaussian env timed-out after {timeout_sec}s "
-            "(suspect profile hang)."
-        )
-
-    
-    for line in env_text.splitlines():
-        if "=" in line:
-            k, v = line.split("=", 1)
-            os.environ[k] = v
-
-    
-    g16_bin = f"{g16root}/g16"
-    os.environ["PATH"] = g16_bin + os.pathsep + os.environ["PATH"]
-
-    
-    import shutil
-    g16_path = shutil.which("g16")
-    if g16_path:
-        print("✅ Gaussian16 environment loaded:")
-        print("   g16 =", g16_path)
-        print("   GAUSS_EXEDIR =", os.getenv("GAUSS_EXEDIR"))
-    else:
-        raise RuntimeError("g16 still not found in PATH")
+if __name__ == "__main__":
+    main()

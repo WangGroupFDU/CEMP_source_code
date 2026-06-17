@@ -1,77 +1,38 @@
-"""
-gromacs_env.py
-========================================
-Utility for injecting GROMACS (gmx) command-line tools into the current
-Python process / Jupyter kernel by prepending the GROMACS *bin* directory
-to the PATH.  Designed for cases where Jupyter does not inherit the user's
-~/.bashrc and therefore cannot find the `gmx` executable.
+"""Public pseudocode module for autocompute/static/gmx_env.py.
 
-Author  : ChatGPT (OpenAI)
-License : MIT
-----------------------------------------------------------------------
-Basic usage inside a notebook
------------------------------
-from gromacs_env import load_gromacs_env
-load_gromacs_env("/home/fwtop/apps/gromacs-2018.8/bin")   # optional arg
+Workflow family: gmx env.py
+Workflow role: resolve external scientific-software settings for the local workflow
+Original source SHA256: a8c42c33e13b5de638f5c0ec5fdf051940ae1a139867ecc23e093b2e5fa549a9
 
-!gmx --version
+This public-release module preserves the high-level workflow contract while
+omitting executable implementation details from the released repository.
 """
 
-import os
-import shutil
-from pathlib import Path
-from typing import Union
+WORKFLOW_NAME = 'gmx env'
+WORKFLOW_PATH = 'autocompute/static/gmx_env.py'
+PSEUDOCODE_ONLY = True
+PSEUDOCODE_STEPS = (
+    'Identify the CEMP workflow context for `autocompute/static/gmx_env.py`.',
+    'Load only the task metadata, public template inputs, and local paths required for this workflow step.',
+    'Validate required molecular identifiers, structure files, charge records, calculation outputs, and destination folders before processing.',
+    'Execute the high-level workflow role: resolve external scientific-software settings for the local workflow.',
+    'Apply the same input validation, task-status transitions, and output-recording conventions used by the surrounding CEMP workflow.',
+    'Return a structured status object containing success or failure, generated output paths, warning messages, and record identifiers.',
+    'Stop with an actionable validation error if required inputs, external outputs, or permissions are missing.',
+)
 
-__all__ = ["load_gromacs_env"]
 
-def load_gromacs_env(
-    gmx_bin: Union[str, Path] = "/home/fwtop/apps/gromacs-2018.8/bin"
-) -> None:
-    """
-    Prepend *gmx_bin* to ``$PATH`` so that the GROMACS command-line tool
-    `gmx` can be invoked from Python / Jupyter.
+def describe_workflow():
+    """Return the public pseudocode steps for this workflow helper."""
+    return list(PSEUDOCODE_STEPS)
 
-    Parameters
-    ----------
-    gmx_bin : str or pathlib.Path, optional
-        Directory that contains the `gmx` executable.  Default is
-        ``/home/fwtop/apps/gromacs-2018.8/bin``.
 
-    Raises
-    ------
-    FileNotFoundError
-        If *gmx_bin* does not exist or is not a directory.
-    RuntimeError
-        If `gmx` still cannot be located after PATH injection.
+def main():
+    """Placeholder entry point for the private implementation."""
+    raise NotImplementedError(
+        "This public release contains pseudocode only for this workflow helper."
+    )
 
-    Notes
-    -----
-    * The function is idempotent; calling it multiple times is harmless.
-    * It intentionally avoids reading the user's shell start-up files,
-      making it very fast and predictable inside notebook environments.
-    """
 
-    gmx_bin = Path(gmx_bin).expanduser().resolve()
-
-    if not gmx_bin.is_dir():
-        raise FileNotFoundError(f"{gmx_bin} is not a valid directory")
-
-    
-    current_path = os.environ.get("PATH", "")
-    path_parts = current_path.split(os.pathsep)
-
-    gmx_str = str(gmx_bin)
-    if gmx_str not in path_parts:
-        os.environ["PATH"] = gmx_str + os.pathsep + current_path
-
-    
-    gmx_exec = shutil.which("gmx")
-    if gmx_exec is None:
-        raise RuntimeError(
-            "`gmx` executable still not found after PATH modification. "
-            f"Check contents of {gmx_bin}."
-        )
-
-    print("✅ GROMACS environment loaded successfully")
-    print("   gmx executable :", gmx_exec)
-    print("   PATH head      :", os.environ['PATH'].split(os.pathsep)[0])
+if __name__ == "__main__":
+    main()
