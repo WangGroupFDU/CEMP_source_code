@@ -71,8 +71,8 @@ The manuscript-supporting public database tables are committed as CSV files in
 - Autocompute small-molecule database CSV files with source attribution;
 - model weights and scalers used by public prediction examples, committed as
   `release_assets/cemp_public_model_assets.tar.gz` and attached to the tagged
-  GitHub Release: 11,545,465 bytes,
-  SHA256 `2f502c0b71a6da151265482ec4461b25a969a9417343b7580bfad0f2f7a9d007`;
+  GitHub Release: 11,377,421 bytes,
+  SHA256 `8bf69f11a9c128cf788a84cc618577d8858dffc7ae8f39a40f12237adbc04062`;
 - data dictionary and source-attribution notes.
 
 Extract the public model archive at the repository root before running

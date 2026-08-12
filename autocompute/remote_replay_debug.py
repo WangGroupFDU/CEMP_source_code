@@ -290,6 +290,22 @@ REMOTE_REPLAY_SPECS: Dict[str, RemoteReplaySpec] = {
         ),
         reset_patterns=COMMON_MD_RESET,
     ),
+    "MDCoumpute_ORCA": RemoteReplaySpec(
+        task_type="MDCoumpute_ORCA",
+        func_path="autocompute.remote_utils.run_Gromacs_MD_notebook_tasks_ORCA_remote",
+        remote_target_subpath=REMOTE_MD_DOWNLOADS_TARGET,
+        notebooks_to_run=(
+            "1_Polymer_RESP_repeat_unit.ipynb",
+            "2_Polymer_chg_and_Polymer_creation_ Linear_polymer.ipynb",
+            "3_create_Polymer_itp_top.ipynb",
+            "4_generate_Gaussian_inputfile.ipynb",
+            "5_opt+freq_calculation.ipynb",
+            "6_opt+freq_imaginary_frequencies.ipynb",
+            "8_MD_process.ipynb",
+            "9_post_analysis.ipynb",
+        ),
+        reset_patterns=COMMON_MD_RESET,
+    ),
     "DrawESP": RemoteReplaySpec(
         task_type="DrawESP",
         func_path="autocompute.remote_utils.run_draw_ESP_notebook_tasks_remote",
@@ -340,8 +356,6 @@ REMOTE_REPLAY_SPECS: Dict[str, RemoteReplaySpec] = {
         remote_target_subpath=REMOTE_POLYMER_GENERATE_TARGET,
         notebooks_to_run=(
             "1_Polymer_RESP_repeat_unit.ipynb",
-            "2_1_opt+freq_failure_correction.ipynb",
-            "2_2_opt+freq_imaginary_frequencies.ipynb",
             "2_Polymer_chg_and_Polymer_creation_Linear_polymer.ipynb",
             "3_create_Polymer_itp_top.ipynb",
         ),
@@ -353,8 +367,6 @@ REMOTE_REPLAY_SPECS: Dict[str, RemoteReplaySpec] = {
         remote_target_subpath=REMOTE_POLYMER_GENERATE_TARGET,
         notebooks_to_run=(
             "1_Polymer_RESP_repeat_unit.ipynb",
-            "2_1_opt+freq_failure_correction.ipynb",
-            "2_2_opt+freq_imaginary_frequencies.ipynb",
             "2_Polymer_chg_and_Polymer_creation_Linear_polymer.ipynb",
             "3_create_Polymer_itp_top.ipynb",
         ),
@@ -366,8 +378,6 @@ REMOTE_REPLAY_SPECS: Dict[str, RemoteReplaySpec] = {
         remote_target_subpath=REMOTE_POLYMER_GENERATE_TARGET,
         notebooks_to_run=(
             "1_Polymer_RESP_repeat_unit.ipynb",
-            "2_1_opt+freq_failure_correction.ipynb",
-            "2_2_opt+freq_imaginary_frequencies.ipynb",
             "2_Polymer_chg_and_Polymer_creation_Linear_polymer.ipynb",
             "3_create_Polymer_itp_top.ipynb",
         ),
@@ -735,7 +745,7 @@ def _rewrite_system_xlsx_time_ns(system_xlsx_path: str, target_time_ns: int) -> 
 
 def apply_fixture_replay_mutations(root_dir: str, spec: RemoteReplaySpec) -> Dict[str, Any]:
 
-    if spec.task_type != "MDCoumpute":
+    if spec.task_type not in {"MDCoumpute", "MDCoumpute_ORCA"}:
         return {}
 
     system_xlsx_path = os.path.join(root_dir, "System.xlsx")

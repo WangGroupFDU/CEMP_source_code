@@ -4,7 +4,7 @@
 
 
 
-SRC_DIR="/opt/cemp/home/static/tutorial_vedio"
+SRC_DIR="${CEMP_TUTORIAL_VIDEO_DIR:-$(cd "$(dirname "$0")" && pwd)}"
 CRF=24
 FPS=30
 SEG=10

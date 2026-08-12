@@ -16,6 +16,7 @@ from autocompute.remote_utils import (
     _write_worker_heartbeat_signal,
     _write_worker_result_signal,
 )
+from autocompute.workflow_files import copy_workflow_settings_module
 
 remote_IP = "user@demo-host.invalid:"
 
@@ -182,6 +183,8 @@ def generate_polymer_run_notebook_tasks_remote(
             shutil.copy(source_file, download_dir)
         elif os.path.isdir(source_file):
             shutil.copytree(source_file, os.path.join(download_dir, filename))
+
+    copy_workflow_settings_module(download_dir)
 
     
     

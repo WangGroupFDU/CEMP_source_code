@@ -32,8 +32,8 @@ shasum -a 256 release_assets/cemp_public_model_assets.tar.gz
    `release_assets/cemp_public_model_assets.tar.gz`:
 
 ```bash
-git tag -a v1.0.0-paper-open -m "CEMP v1.0.0-paper-open"
-git push origin v1.0.0-paper-open
+git tag -a v1.1.0-paper-open -m "CEMP v1.1.0-paper-open"
+git push origin v1.1.0-paper-open
 ```
 
 5. Confirm release-specific values in:
@@ -43,7 +43,7 @@ README.md
 data/public_manifest.json
 docs/data.md
 docs/availability_statement.md
-docs/release_notes/v1.0.0-paper-open.md
+docs/release_notes/v1.1.0-paper-open.md
 ```
 
 6. Confirm the Materials Project API key that appeared in earlier source copies

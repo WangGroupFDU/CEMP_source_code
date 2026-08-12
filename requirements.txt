@@ -9,7 +9,7 @@ openpyxl
 numpy
 rdkit==2023.3.2
 cairosvg==2.7.0
-xgboost==1.7.6
+xgboost==2.0.3
 beautifulsoup4
 scikit-learn
 ipython

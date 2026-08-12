@@ -15,6 +15,7 @@ from django.conf import settings
 from django.db import transaction
 import json
 from autocompute.remote_utils import select_least_utilized_remote_server
+from autocompute.workflow_files import copy_workflow_settings_module
 
 MAX_RUNNING_LENGTH=6
 
@@ -153,7 +154,7 @@ def decide_remote_server(
     return {
         'server_name': "local",
         'IP': "user@demo-host.invalid:",
-        'remote_target_dir': '/opt/cemp/media',
+        'remote_target_dir': '/srv/cemp/media',
     }
 
 
@@ -166,6 +167,8 @@ def run_Gromacs_MD_notebook_tasks(source_dir, download_dir, task):
             shutil.copy(source_file, download_dir)
         elif os.path.isdir(source_file):
             shutil.copytree(source_file, os.path.join(download_dir, filename))
+
+    copy_workflow_settings_module(download_dir)
 
     notebooks_to_run = [
         '1_Polymer_RESP_repeat_unit.ipynb',
@@ -242,6 +245,8 @@ def run_Gromacs_MD_notebook_tasks_ORCA(source_dir, download_dir, task):
         elif os.path.isdir(source_file):
             shutil.copytree(source_file, os.path.join(download_dir, filename))
 
+    copy_workflow_settings_module(download_dir)
+
     notebooks_to_run = [
         '1_Polymer_RESP_repeat_unit.ipynb',
         '2_Polymer_chg_and_Polymer_creation_ Linear_polymer.ipynb',
@@ -312,6 +317,8 @@ def run_Gaussian_single_point_energy_notebook_tasks(source_dir, download_dir, ta
             shutil.copy(source_file, download_dir)
         elif os.path.isdir(source_file):
             shutil.copytree(source_file, os.path.join(download_dir, filename))
+
+    copy_workflow_settings_module(download_dir)
 
 
     notebooks_to_run = [
@@ -388,6 +395,8 @@ def run_ORCA_single_point_energy_notebook_tasks(source_dir, download_dir, task):
         elif os.path.isdir(source_file):
             shutil.copytree(source_file, os.path.join(download_dir, filename))
 
+    copy_workflow_settings_module(download_dir)
+
 
     notebooks_to_run = [
         'ORCA_Gas_1_generate_ORCA_inputfile.ipynb',
@@ -459,6 +468,8 @@ def run_Gaussian_binding_energy_notebook_tasks(source_dir, download_dir, task):
             shutil.copy(source_file, download_dir)
         elif os.path.isdir(source_file):
             shutil.copytree(source_file, os.path.join(download_dir, filename))
+
+    copy_workflow_settings_module(download_dir)
 
 
     notebooks_to_run = ['Gas_component_1_generate_Gaussian_inputfile.ipynb', 'Gas_component_2_opt+freq_calculation.ipynb'
@@ -544,6 +555,8 @@ def run_ORCA_binding_energy_notebook_tasks(source_dir, download_dir, task):
         elif os.path.isdir(source_file):
             shutil.copytree(source_file, os.path.join(download_dir, filename))
 
+    copy_workflow_settings_module(download_dir)
+
 
     notebooks_to_run = ['ORCA_Gas_component_1_generate_ORCA_inputfile.ipynb', 'ORCA_Gas_component_2_opt+freq_calculation.ipynb'
                     , 'ORCA_Gas_component_3_opt+freq_imaginary_frequencies.ipynb', 'ORCA_Gas_component_4_energy_calculation.ipynb', 'ORCA_Gas_component_5_Extracting_energy_and_free_energy_corrections.ipynb'
@@ -628,6 +641,8 @@ def run_Gaussian_pka_pkb_notebook_tasks(source_dir, download_dir, task):
         elif os.path.isdir(source_file):
             shutil.copytree(source_file, os.path.join(download_dir, filename))
 
+    copy_workflow_settings_module(download_dir)
+
 
     notebooks_to_run = [ 'pkb_DFT_1_generate_Gaussian_inputfile.ipynb', 'pkb_DFT_2_opt+freq_calculation.ipynb', 'pkb_DFT_3_opt+freq_failure_correction.ipynb'
                     , 'pkb_DFT_4_opt+freq_imaginary_frequencies.ipynb', 'pkb_DFT_5_energy_calculation.ipynb', 'pkb_DFT_6_energy_failure_correction.ipynb'
@@ -710,6 +725,8 @@ def run_Gaussian_ox_red_notebook_tasks(source_dir, download_dir, task):
             shutil.copy(source_file, download_dir)
         elif os.path.isdir(source_file):
             shutil.copytree(source_file, os.path.join(download_dir, filename))
+
+    copy_workflow_settings_module(download_dir)
 
 
     notebooks_to_run = ['ox_red_1_generate_Gaussian_inputfile.ipynb', 'ox_red_2_opt+freq_calculation.ipynb'
@@ -795,6 +812,8 @@ def run_ORCA_ox_red_notebook_tasks(source_dir, download_dir, task):
         elif os.path.isdir(source_file):
             shutil.copytree(source_file, os.path.join(download_dir, filename))
 
+    copy_workflow_settings_module(download_dir)
+
 
     notebooks_to_run = ['ORCA_ox_red_1_generate_ORCA_inputfile.ipynb', 'ORCA_ox_red_2_opt+freq_calculation.ipynb'
             , 'ORCA_ox_red_3_opt+freq_imaginary_frequencies.ipynb', 'ORCA_ox_red_4_energy_calculation.ipynb'
@@ -879,6 +898,8 @@ def run_Gaussian_reaction_thermo_notebook_tasks(source_dir, download_dir, task):
         elif os.path.isdir(source_file):
             shutil.copytree(source_file, os.path.join(download_dir, filename))
 
+    copy_workflow_settings_module(download_dir)
+
 
     notebooks_to_run = ['reaction_thermo_1_generate_Gaussian_inputfile.ipynb', 'reaction_thermo_2_opt+freq_calculation.ipynb'
                     , 'reaction_thermo_3_opt+freq_failure_correction.ipynb', 'reaction_thermo_4_opt+freq_imaginary_frequencies.ipynb', 'reaction_thermo_5_energy_calculation.ipynb'
@@ -961,6 +982,8 @@ def run_Gaussian_global_reaction_properties_notebook_tasks(source_dir, download_
             shutil.copy(source_file, download_dir)
         elif os.path.isdir(source_file):
             shutil.copytree(source_file, os.path.join(download_dir, filename))
+
+    copy_workflow_settings_module(download_dir)
 
 
     notebooks_to_run = ['reaction_1_generate_Gaussian_inputfile.ipynb', 'reaction_2_opt+freq_calculation.ipynb'
@@ -1051,6 +1074,8 @@ def run_ORCA_manual_notebook_tasks(source_dir, download_dir, task):
         elif os.path.isdir(source_file):
             shutil.copytree(source_file, os.path.join(download_dir, filename))
 
+    copy_workflow_settings_module(download_dir)
+
 
     notebooks_to_run = [
         'ORCA_Gas_2_opt+freq_calculation.ipynb',
@@ -1122,6 +1147,8 @@ def run_draw_ESP_notebook_tasks(source_dir, download_dir, task):
             shutil.copy(source_file, download_dir)
         elif os.path.isdir(source_file):
             shutil.copytree(source_file, os.path.join(download_dir, filename))
+
+    copy_workflow_settings_module(download_dir)
 
 
     notebooks_to_run = ['auto_draw_ESP.ipynb']
@@ -1210,6 +1237,8 @@ def run_draw_ESP_notebook_tasks_gbw(source_dir, download_dir, task):
             shutil.copy(source_file, download_dir)
         elif os.path.isdir(source_file):
             shutil.copytree(source_file, os.path.join(download_dir, filename))
+
+    copy_workflow_settings_module(download_dir)
 
 
     notebooks_to_run = ['auto_draw_ESP_gbw.ipynb']
@@ -1300,6 +1329,8 @@ def run_draw_HOMO_LUMO_orb_notebook_tasks(source_dir, download_dir, task):
         elif os.path.isdir(source_file):
             shutil.copytree(source_file, os.path.join(download_dir, filename))
 
+    copy_workflow_settings_module(download_dir)
+
 
     notebooks_to_run = ['draw_HOMO_LUMO_orb.ipynb']
 
@@ -1388,6 +1419,8 @@ def run_NCI_SCF_analysis_notebook_tasks(source_dir, download_dir, task):
             shutil.copy(source_file, download_dir)
         elif os.path.isdir(source_file):
             shutil.copytree(source_file, os.path.join(download_dir, filename))
+
+    copy_workflow_settings_module(download_dir)
 
 
     notebooks_to_run = ['NCI_analysis.ipynb']
@@ -1478,6 +1511,8 @@ def run_NCI_promolecular_analysis_notebook_tasks(source_dir, download_dir, task)
         elif os.path.isdir(source_file):
             shutil.copytree(source_file, os.path.join(download_dir, filename))
 
+    copy_workflow_settings_module(download_dir)
+
 
     notebooks_to_run = ['NCI_analysis_promolecular.ipynb']
 
@@ -1566,6 +1601,8 @@ def run_query_name_CAS_tasks(source_dir, download_dir, task):
             shutil.copy(source_file, download_dir)
         elif os.path.isdir(source_file):
             shutil.copytree(source_file, os.path.join(download_dir, filename))
+
+    copy_workflow_settings_module(download_dir)
 
     notebooks_to_run = [
         'query_simliar_monomer.ipynb',

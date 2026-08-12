@@ -1,10 +1,19 @@
 {
   "schema_version": "1.0",
   "project": "CEMP",
-  "release_tag": "v1.0.0-paper-open",
+  "release_tag": "v1.1.0-paper-open",
   "software_license": "Apache-2.0",
   "data_license": "CC-BY-4.0",
   "notes": "Public database assets are committed as CSV files in data/public/. Public model assets are committed as release_assets/cemp_public_model_assets.tar.gz and attached to the tagged GitHub Release.",
+  "algorithm_inventory": {
+    "version": "2026-08-12",
+    "local_path": "autocompute/public_algorithm_inventory.py",
+    "documentation": "docs/algorithms.md",
+    "workflow_notebooks": 118,
+    "inference_notebooks": 5,
+    "total_notebooks": 123,
+    "software_license": "Apache-2.0"
+  },
   "assets": [
     {
       "name": "demo_ionic_liquid_il",
@@ -433,12 +442,12 @@
     },
     {
       "name": "paper_model_weights_and_scalers",
-      "version": "2026-06-12",
+      "version": "2026-08-12",
       "format": "archive",
       "local_path": "release_assets/cemp_public_model_assets.tar.gz",
       "release_asset_name": "cemp_public_model_assets.tar.gz",
-      "bytes": 11545465,
-      "sha256": "2f502c0b71a6da151265482ec4461b25a969a9417343b7580bfad0f2f7a9d007",
+      "bytes": 11377421,
+      "sha256": "8bf69f11a9c128cf788a84cc618577d8858dffc7ae8f39a40f12237adbc04062",
       "license": "CC-BY-4.0",
       "citation": "",
       "required_for": [

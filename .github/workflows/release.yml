@@ -24,7 +24,7 @@ jobs:
           set -euo pipefail
 
           ASSET="release_assets/cemp_public_model_assets.tar.gz"
-          NOTES="docs/release_notes/v1.0.0-paper-open.md"
+          NOTES="docs/release_notes/${RELEASE_TAG}.md"
 
           test -f "$ASSET"
           test -f "$NOTES"

@@ -23,6 +23,7 @@ import shutil
 import glob
 from django.utils import timezone
 from autocompute.models import ComputeTask
+from autocompute.static.cemp_software_settings import load_and_apply_settings
 
 
 def decrypt_download_url_list(encrypted_id):
@@ -693,7 +694,18 @@ def create_ORCA_energy_inputfile(coordinate_str, charge, multiplicity, output_in
 
 
 def convert_chk_to_fchk(chk_path):
-    
+    """
+    功能目的：使用配置的 Gaussian formchk 批量转换任务目录中的 chk 文件。
+    输入参数：chk_path 为包含 chk 文件的目录。
+    返回值：无；在原目录生成同名 fchk 文件。
+    关键流程：读取共享配置并逐个调用 formchk。
+    可能报错或边界情况：未配置 formchk 时抛出可操作的 RuntimeError。
+    """
+    software = load_and_apply_settings()
+    formchk_executable = software.get("gaussian16_formchk")
+    if not formchk_executable:
+        raise RuntimeError("CEMP_GAUSSIAN16_FORMCHK is required for chk-to-fchk conversion.")
+
     for filename in os.listdir(chk_path):
         
         if filename.endswith('.chk'):
@@ -704,7 +716,7 @@ def convert_chk_to_fchk(chk_path):
             
             output_file = os.path.join(chk_path, base_filename + '.fchk')
             
-            command = ['/root/Gaussian16_Linux_AVX2/tar/g16/formchk', input_file, output_file]
+            command = [formchk_executable, input_file, output_file]
             
             try:
                 
@@ -713,14 +725,18 @@ def convert_chk_to_fchk(chk_path):
             except subprocess.CalledProcessError as e:
                 print(f"Failed to convert {input_file}: {e}")
 def convert_gbw_to_molden(path):
-    
-    
-    
-    
-    os.environ['PATH'] = '/home/fwtop/apps/openmpi/bin:' + os.environ.get('PATH', '')
-    
-    os.environ['LD_LIBRARY_PATH'] = '/home/fwtop/apps/openmpi/lib:' + os.environ.get('LD_LIBRARY_PATH', '')
-    
+    """
+    功能目的：使用配置的 ORCA orca_2mkl 批量生成 Molden 文件。
+    输入参数：path 为包含 gbw 文件的任务目录。
+    返回值：无；在原目录生成 molden.input 和 molden 文件。
+    关键流程：共享配置负责 PATH/LD_LIBRARY_PATH，再逐个调用 orca_2mkl。
+    可能报错或边界情况：未配置 orca_2mkl 时抛出可操作的 RuntimeError。
+    """
+    software = load_and_apply_settings()
+    orca_2mkl_executable = software.get("orca_2mkl_path")
+    if not orca_2mkl_executable:
+        raise RuntimeError("CEMP_ORCA_2MKL_PATH is required for gbw-to-Molden conversion.")
+
     os.environ['OMPI_ALLOW_RUN_AS_ROOT'] = '1'
     os.environ['OMPI_ALLOW_RUN_AS_ROOT_CONFIRM'] = '1'
 
@@ -737,7 +753,7 @@ def convert_gbw_to_molden(path):
             input_file = os.path.join(path, base_filename)
             
             command = [
-                '/home/public/orca_6_0_1_linux_x86-64_shared_openmpi416_avx2/orca_2mkl',
+                orca_2mkl_executable,
                 input_file,
                 "-molden"
             ]

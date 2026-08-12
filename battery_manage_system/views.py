@@ -373,7 +373,9 @@ def bms_short_prediction(request):
         print(params)
         print(predictions[:10])
         try:
-            filename = "/opt/cemp/battery_manage_system/predictions.npy"
+            prediction_dir = os.path.join(settings.MEDIA_ROOT, "bms", "predictions")
+            os.makedirs(prediction_dir, exist_ok=True)
+            filename = os.path.join(prediction_dir, "predictions.npy")
             np.save(filename, prediction_data)
         except Exception as e:
             print(e)
@@ -413,7 +415,6 @@ def get_pkl_files():
 def load_pkl_file(filename):
     print(filename)
     pkl_path = os.path.join(settings.MEDIA_ROOT, "bms", "pkl_file", filename)
-    pkl_path = "/opt/cemp/media/bms/pkl_file/battery_data_full_0225_modified_sort_by_cathode_copy.pkl"
     with open(pkl_path, "rb") as f:
         pkl = pickle.load(f)
         return pkl

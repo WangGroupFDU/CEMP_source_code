@@ -621,7 +621,7 @@ class RemoteSchedulerTests(TestCase):
             result_task.status_message,
         )
 
-    def test_dispatch_remote_task_fails_for_deprecated_remote_task_type(self):
+    def test_dispatch_remote_orca_md_requires_orca_md_capability(self):
 
         task_dir = Path(self.temp_dir) / "deprecated_remote_task"
         task_dir.mkdir(parents=True, exist_ok=True)
@@ -655,7 +655,10 @@ class RemoteSchedulerTests(TestCase):
 
         result_task.refresh_from_db()
         self.assertEqual(result_task.status, "failed")
-        self.assertIn("has been deprecated", result_task.status_message)
+        self.assertIn(
+            "No enabled remote servers are registered for capability md_gromacs_orca.",
+            result_task.status_message,
+        )
 
     def test_run_task_immediately_writes_failure_details_when_wrapper_catches_exception(self):
 

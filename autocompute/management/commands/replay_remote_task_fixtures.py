@@ -43,7 +43,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--target-remote-root",
             default="",
-            help="显式指定待测节点上的回放测试根目录，例如 /opt/cemp/test_folder 。",
+            help="显式指定待测节点上的回放测试根目录，例如 /srv/cemp/test_folder 。",
         )
         parser.add_argument(
             "--parallel-workers",

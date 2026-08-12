@@ -35,6 +35,10 @@ from autocompute.sqlite_retry import (
     save_task_with_sqlite_retry,
     touch_task_heartbeat,
 )
+from autocompute.workflow_files import (
+    copy_workflow_settings_module,
+    workflow_settings_source_path,
+)
 from home.md_previews import build_md_preview_manifest
 
 
@@ -453,11 +457,10 @@ def _run_remote_settings_check(
 
     keys_json = json.dumps(required_keys, ensure_ascii=False)
     settings_path = "/etc/cemp/CEMPsettings.ini"
-    python_code = f"""
+    settings_source = workflow_settings_source_path().read_text(encoding="utf-8")
+    python_code = settings_source + "\n\n" + f"""
 import json
 import os
-
-from cemp_software_settings import load_and_apply_settings
 
 required_keys = json.loads({keys_json!r})
 result = load_and_apply_settings({settings_path!r})
@@ -1411,6 +1414,8 @@ def _run_remote_notebook_sequence(
             shutil.copy(source_file, download_dir)
         elif os.path.isdir(source_file):
             shutil.copytree(source_file, os.path.join(download_dir, filename))
+
+    copy_workflow_settings_module(download_dir)
 
     _signal_remote_task_progress(
         task,
@@ -2389,6 +2394,42 @@ def run_Gromacs_MD_notebook_tasks_remote(source_dir, download_dir, task, remote_
         remote_IP=remote_IP,
         notebooks_to_run=notebooks_to_run,
         after_success_local=_after_success_local,
+        scheduler_managed=scheduler_managed,
+    )
+
+
+def run_Gromacs_MD_notebook_tasks_ORCA_remote(
+    source_dir,
+    download_dir,
+    task,
+    remote_target,
+    remote_IP=remote_IP,
+    scheduler_managed: bool = False,
+):
+    """
+    功能目的：在已配置 ORCA-MD 能力的远程节点按当前八步链执行 notebook。
+    输入参数：源码目录、任务目录、任务对象、远程目标、登录信息和调度标记。
+    返回值：远程 notebook 通用执行器的结果。
+    关键流程：严格按页面当前本地入口的八步顺序调用统一远程执行器。
+    可能报错或边界情况：节点缺少 ORCA/GROMACS 等配置时由预检或 notebook 明确失败。
+    """
+    notebooks_to_run = [
+        "1_Polymer_RESP_repeat_unit.ipynb",
+        "2_Polymer_chg_and_Polymer_creation_ Linear_polymer.ipynb",
+        "3_create_Polymer_itp_top.ipynb",
+        "4_generate_Gaussian_inputfile.ipynb",
+        "5_opt+freq_calculation.ipynb",
+        "6_opt+freq_imaginary_frequencies.ipynb",
+        "8_MD_process.ipynb",
+        "9_post_analysis.ipynb",
+    ]
+    return _run_remote_notebook_sequence(
+        source_dir=source_dir,
+        download_dir=download_dir,
+        task=task,
+        remote_target=remote_target,
+        remote_IP=remote_IP,
+        notebooks_to_run=notebooks_to_run,
         scheduler_managed=scheduler_managed,
     )
 

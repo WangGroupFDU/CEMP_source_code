@@ -1,11 +1,20 @@
+import ast
 import csv
 import hashlib
+import importlib.util
 import json
+import re
 from pathlib import Path
 
 from django.apps import apps
 from django.core.management.base import BaseCommand, CommandError
 from django.db import DatabaseError
+
+from autocompute.public_algorithm_inventory import (
+    ACTIVE_NOTEBOOKS,
+    WORKFLOW_HELPER_MODULES,
+    WORKFLOW_NOTEBOOKS,
+)
 
 
 RESTRICTED_PHRASES = [
@@ -18,6 +27,42 @@ RESTRICTED_PHRASES = [
     "non-production " + "reproducibility assessment",
     "CEMP Source Code " + "Review License",
 ]
+
+FORBIDDEN_NOTEBOOK_MARKERS = [
+    "PSEUDOCODE",
+    "Public pseudocode",
+    "Public message removed for release.",
+    "Original notebook SHA256",
+    "Original source SHA256",
+    "/opt/cemp",
+    "/data/ORCA_database",
+    "/home/fwtop/apps/openmpi",
+    "/home/public/orca",
+    "/root/Gaussian16",
+]
+
+FORBIDDEN_NOTEBOOK_PATTERNS = {
+    "RFC 1918 private IPv4 address": re.compile(
+        r"(?<!\d)(?:10(?:\.\d{1,3}){3}|192\.168(?:\.\d{1,3}){2}|"
+        r"172\.(?:1[6-9]|2\d|3[01])(?:\.\d{1,3}){2})(?!\d)"
+    ),
+}
+
+REQUIRED_SOFTWARE_SETTING_KEYS = {
+    "gaussian16_bin",
+    "gaussian16_formchk",
+    "gaussian_database_path",
+    "orca_path",
+    "orca_2mkl_path",
+    "orca_database_path",
+    "gmx_bin",
+    "multiwfn_exe",
+    "sobtop_home",
+    "openmpi_bin",
+    "openmpi_lib",
+    "vmd_exe",
+    "workflow_state_dir",
+}
 
 
 def sha256_file(path):
@@ -99,6 +144,108 @@ def resolve_model(model_path):
     return apps.get_model(app_label, model_name)
 
 
+def validate_public_algorithms(root):
+    """
+    功能目的：校验公开 notebook 白名单、源码完整性和无运行态输出要求。
+    输入参数：root 为仓库根目录。
+    返回值：失败说明列表；空列表表示通过。
+    关键流程：比较 118+5 白名单、解析 JSON/Python、检查输出和发布清理标记。
+    可能报错或边界情况：任意 notebook JSON 损坏时记录错误并继续检查其他文件。
+    """
+    failures = []
+    expected = set(ACTIVE_NOTEBOOKS)
+    actual = {
+        path.relative_to(root).as_posix()
+        for path in root.rglob("*.ipynb")
+        if ".git" not in path.parts
+    }
+
+    if len(WORKFLOW_NOTEBOOKS) != 118:
+        failures.append(f"algorithm inventory: expected 118 workflow notebooks, found {len(WORKFLOW_NOTEBOOKS)}")
+    if len(ACTIVE_NOTEBOOKS) != 123:
+        failures.append(f"algorithm inventory: expected 123 total notebooks, found {len(ACTIVE_NOTEBOOKS)}")
+    for relative_path in sorted(expected - actual):
+        failures.append(f"algorithm notebook missing: {relative_path}")
+    for relative_path in sorted(actual - expected):
+        failures.append(f"unregistered notebook found: {relative_path}")
+
+    for relative_path in sorted(expected & actual):
+        path = root / relative_path
+        try:
+            notebook = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            failures.append(f"{relative_path}: invalid notebook JSON: {exc}")
+            continue
+
+        for cell_index, cell in enumerate(notebook.get("cells", [])):
+            source_value = cell.get("source", [])
+            source = "".join(source_value) if isinstance(source_value, list) else str(source_value)
+            for marker in FORBIDDEN_NOTEBOOK_MARKERS:
+                if marker in source:
+                    failures.append(f"{relative_path}: forbidden marker remains in cell {cell_index}: {marker}")
+            for description, pattern in FORBIDDEN_NOTEBOOK_PATTERNS.items():
+                if pattern.search(source):
+                    failures.append(
+                        f"{relative_path}: forbidden {description} remains in cell {cell_index}"
+                    )
+
+            if cell.get("cell_type") != "code":
+                continue
+            if cell.get("execution_count") is not None:
+                failures.append(f"{relative_path}: execution_count remains in cell {cell_index}")
+            if cell.get("outputs"):
+                failures.append(f"{relative_path}: output remains in cell {cell_index}")
+            try:
+                ast.parse(source)
+            except SyntaxError as exc:
+                failures.append(
+                    f"{relative_path}: Python syntax error in cell {cell_index}, line {exc.lineno}: {exc.msg}"
+                )
+
+    return failures
+
+
+def validate_workflow_support_files(root):
+    """
+    功能目的：校验 notebook 实际导入的辅助模块与共享软件配置模块。
+    输入参数：root 为仓库根目录。
+    返回值：失败说明列表。
+    关键流程：逐个解析辅助模块，再动态加载共享配置并核对公共键。
+    可能报错或边界情况：模块导入或配置解析失败时记录异常，不影响后续检查汇总。
+    """
+    failures = []
+    for relative_path in WORKFLOW_HELPER_MODULES:
+        path = root / relative_path
+        if not path.is_file():
+            failures.append(f"workflow helper missing: {relative_path}")
+            continue
+        try:
+            ast.parse(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, SyntaxError) as exc:
+            failures.append(f"{relative_path}: helper module cannot be parsed: {exc}")
+
+    settings_path = root / "autocompute" / "static" / "cemp_software_settings.py"
+    if not settings_path.is_file():
+        failures.append(f"workflow settings module missing: {settings_path.relative_to(root)}")
+        return failures
+
+    try:
+        spec = importlib.util.spec_from_file_location("cemp_public_software_settings", settings_path)
+        if spec is None or spec.loader is None:
+            raise ImportError("unable to create module specification")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        parsed = module.load_and_apply_settings()
+    except Exception as exc:
+        failures.append(f"workflow settings module cannot be loaded: {type(exc).__name__}: {exc}")
+        return failures
+
+    missing_keys = sorted(REQUIRED_SOFTWARE_SETTING_KEYS - set(parsed))
+    if missing_keys:
+        failures.append(f"workflow settings keys missing: {', '.join(missing_keys)}")
+    return failures
+
+
 class Command(BaseCommand):
     help = "Verify public release manifest, demo data, and repository release language."
 
@@ -127,6 +274,22 @@ class Command(BaseCommand):
         root = manifest_path.parent.parent
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         failures = []
+
+        failures.extend(validate_public_algorithms(root))
+        failures.extend(validate_workflow_support_files(root))
+
+        algorithm_inventory = manifest.get("algorithm_inventory", {})
+        expected_algorithm_metadata = {
+            "workflow_notebooks": len(WORKFLOW_NOTEBOOKS),
+            "inference_notebooks": len(ACTIVE_NOTEBOOKS) - len(WORKFLOW_NOTEBOOKS),
+            "total_notebooks": len(ACTIVE_NOTEBOOKS),
+        }
+        for key, expected_value in expected_algorithm_metadata.items():
+            if algorithm_inventory.get(key) != expected_value:
+                failures.append(
+                    f"manifest algorithm_inventory.{key}: expected {expected_value}, "
+                    f"found {algorithm_inventory.get(key)!r}"
+                )
 
         for asset in manifest.get("assets", []):
             check_paper = options["include_paper"] and "paper" in asset.get("required_for", [])

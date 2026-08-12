@@ -21,7 +21,3 @@ def replace_spaces_in_column(excel_path, column_name, save_path=None):
 
     except Exception as e:
         print(f"发生错误: {e}")
-
-
-replace_spaces_in_column(excel_path="/opt/cemp/Li+-electrolyte.xlsx", column_name="Dimer_Name", save_path="/opt/cemp/Li+-electrolyte.xlsx")
-replace_spaces_in_column(excel_path="/opt/cemp/Dimer.xlsx", column_name="Dimer Name", save_path="/opt/cemp/Dimer.xlsx")

@@ -36,7 +36,7 @@ class Command(BaseCommand):
             "remote_target", type=str,
             help=(
                 "计算节点的工作路径"
-                "形如 '/opt/cemp/AutoCompute/QcCompute/Downloads'"
+                "形如 '/srv/cemp/AutoCompute/QcCompute/Downloads'"
             ),
         )
 

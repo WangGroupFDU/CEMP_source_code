@@ -8,5 +8,5 @@ authors:
 repository-code: "https://github.com/WangGroupFDU/CEMP_source_code"
 url: "https://github.com/WangGroupFDU/CEMP_source_code"
 license: "Apache-2.0"
-version: "v1.0.0-paper-open"
+version: "v1.1.0-paper-open"
 abstract: "CEMP is a Django-based clean energy materials data platform with database browsing, machine-learning prediction workflows, and optional computational chemistry workflow orchestration."

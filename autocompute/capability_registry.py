@@ -8,6 +8,7 @@ from typing import Dict, List, Optional
 GAUSSIAN_HTQC = "gaussian_htqc"
 ORCA_HTQC = "orca_htqc"
 MD_GROMACS_GAUSSIAN = "md_gromacs_gaussian"
+MD_GROMACS_ORCA = "md_gromacs_orca"
 VISUALIZATION_ANALYSIS = "visualization_analysis"
 MARKOV_ANALYSIS = "markov_analysis"
 POLYMER_GENERATION = "polymer_generation"
@@ -27,6 +28,7 @@ TASK_TYPE_TO_CAPABILITY: Dict[str, str] = {
     "Manual_Mode_QCcompute": ORCA_HTQC,
     "Manual_Mode_QCcompute_energy": ORCA_HTQC,
     "MDCoumpute": MD_GROMACS_GAUSSIAN,
+    "MDCoumpute_ORCA": MD_GROMACS_ORCA,
     "DrawESP": VISUALIZATION_ANALYSIS,
     "DrawESP_remote": VISUALIZATION_ANALYSIS,
     "Draw_HOMO_LUMO_orb": VISUALIZATION_ANALYSIS,
@@ -40,9 +42,7 @@ TASK_TYPE_TO_CAPABILITY: Dict[str, str] = {
 
 
 
-DEPRECATED_REMOTE_TASK_TYPES = {
-    "MDCoumpute_ORCA",
-}
+DEPRECATED_REMOTE_TASK_TYPES = set()
 
 
 
@@ -68,6 +68,18 @@ CAPABILITY_REQUIRED_SETTINGS_KEYS: Dict[str, List[str]] = {
         "gaussian16_formchk",
         "multiwfn_exe",
         "sobtop_home",
+    ],
+    MD_GROMACS_ORCA: [
+        "gmx_bin",
+        "orca_path",
+        "orca_2mkl_path",
+        "orca_database_path",
+        "multiwfn_exe",
+        "sobtop_home",
+        "openmpi_bin",
+        "openmpi_lib",
+        "vmd_exe",
+        "workflow_state_dir",
     ],
     
     VISUALIZATION_ANALYSIS: [

@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd  
 from pymongo import MongoClient
 import matplotlib.pyplot as plt  
+import os
 
 
 
@@ -21,7 +22,9 @@ def convert_numpy(obj):
     return obj
 
 
-pkl_path = "/opt/cemp/media/bms/pkl_file/battery_data_full_0225_modified_sort_by_cathode.pkl"
+pkl_path = os.environ.get("CEMP_BMS_IMPORT_PKL", "")
+if not pkl_path:
+    raise RuntimeError("CEMP_BMS_IMPORT_PKL must point to the BMS pickle file to import.")
 with open(pkl_path, "rb") as f:
     data = pickle.load(f)
 

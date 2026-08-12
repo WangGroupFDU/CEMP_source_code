@@ -5,7 +5,12 @@
 
 set -euo pipefail
 
-TARGET_DIR="/root/Gaussian16_Linux_AVX2/tar/g16/scratch"
+if [ -z "${CEMP_GAUSSIAN_SCRATCH_DIR:-}" ]; then
+  echo "CEMP_GAUSSIAN_SCRATCH_DIR is not configured." >&2
+  exit 2
+fi
+
+TARGET_DIR="${CEMP_GAUSSIAN_SCRATCH_DIR}"
 
 
 if [ -d "${TARGET_DIR}" ]; then
@@ -14,4 +19,3 @@ fi
 
 
 mkdir -p "${TARGET_DIR}"
-

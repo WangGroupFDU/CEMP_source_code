@@ -128,6 +128,17 @@ docker compose up -d --build
 The first build creates a conda environment from `environment.yml`. This can
 take several minutes and requires access to conda-forge.
 
+The XGBoost version is pinned to `2.0.3` because the distributed polymer and
+ionic-liquid model files were serialized with the XGBoost 2.0 model wrapper.
+Changing this version can make a model load successfully but fail during
+prediction because estimator attributes differ between releases.
+
+The image also sets `LD_LIBRARY_PATH=/opt/conda/lib`. This keeps Pillow,
+RDKit, PyTorch, XGBoost, and their compiled dependencies on the same Conda C++
+runtime when several native libraries are imported in one process. Removing
+this setting on older Linux hosts can produce a `GLIBCXX` symbol error even
+when each package imports successfully in isolation.
+
 If Docker bridge networking is broken on the host, use the host-network Compose
 file instead:
 
@@ -161,6 +172,34 @@ curl -fsS http://127.0.0.1:${CEMP_HOST_PORT:-8000}/health/
 curl -fsS http://127.0.0.1:${CEMP_HOST_PORT:-8000}/homepage_stats/
 ```
 
+Validate the demo login, public data API, and one model prediction:
+
+```bash
+BASE_URL=http://127.0.0.1:${CEMP_HOST_PORT:-8000}
+TOKEN=$(curl -fsS -X POST "${BASE_URL}/api/token/" \
+  -d "username=cemp_demo" \
+  -d "password=cemp_demo_local" \
+  | python -c 'import json,sys; print(json.load(sys.stdin)["token"])')
+
+curl -fsS "${BASE_URL}/polymer/api/public/experiment-polymer-data/?page_size=1"
+curl -fsS -X POST "${BASE_URL}/ionic_liquid/api/similarity_search/" \
+  -H "Content-Type: application/json" \
+  -d '{"smiles":"CC(=O)[O-].CC[NH3+]","mol_type":"il","source":"experiment","topk":1,"method":"tanimoto"}'
+curl -fsS -X POST "${BASE_URL}/polymer/api/polymer_predict_psmiles/" \
+  -H "Authorization: Token ${TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{"psmiles":"[*]CC[*]"}' \
+  -o polymer_prediction_result.json
+```
+
+The final command also verifies that an API result can be exported to a local
+JSON file. Run the complete release validator inside the container with:
+
+```bash
+docker compose exec cemp \
+  python manage.py verify_public_release --manifest data/public_manifest.json
+```
+
 Expected local demo account:
 
 ```text
@@ -191,6 +230,42 @@ With `docker-compose.host-network.yml`, the open port is simply:
 ```
 
 No Docker port publishing rule is created in host-network mode.
+
+## CentOS 8 Validation Record
+
+The public image was built and tested on CentOS Linux 8 on 2026-08-12 with
+Docker Engine 26.1.3 and Docker Compose 5.1.4. Port `8000` was already in use on
+the shared test host, so the validated service listened on `0.0.0.0:8001` by
+setting `CEMP_HOST_PORT=8001` and using
+`docker-compose.host-network.yml`. The validation covered migrations, demo data
+loading, demo token authentication, public polymer data retrieval,
+ionic-liquid similarity search, polymer and ionic-liquid model-backed
+prediction, result-file export, and the release integrity command.
+
+The same CentOS 8 container also loaded the complete `paper` CSV set into a
+separate SQLite file without replacing the running demo database:
+
+```bash
+docker compose exec \
+  -e CEMP_SQLITE_PATH=/tmp/cemp_paper_validation.sqlite3 \
+  cemp python manage.py migrate --noinput
+docker compose exec \
+  -e CEMP_SQLITE_PATH=/tmp/cemp_paper_validation.sqlite3 \
+  cemp python manage.py load_public_data \
+    --manifest data/public_manifest.json --mode paper
+```
+
+The import loaded 231,187 database records. The verified core counts were
+`IL=1,065`, `IL_ML_data=100,000`, `Cation_QC_data=3,774`,
+`Anion_QC_data=2,220`, `experiment_polymer_data=13,116` rows and `21,402`
+experimental property data points, `calculated_monomer_data=10,519`,
+`calculated_polymer_data=1,000`, `BMS_experiment_result=39`, and
+`Crystal=92,864`. The 213,581-row OMG polymer prediction CSV is intentionally
+file-based and is verified by the manifest rather than imported into a Django
+model.
+
+This record documents one tested environment; `8001` is not a required CEMP
+port. Any free TCP port can be selected through `CEMP_HOST_PORT`.
 
 ## Common Failures
 
@@ -263,6 +338,48 @@ docker compose -f docker-compose.host-network.yml up -d --build
 In host-network mode, set `CEMP_HOST_PORT` to the actual host port and update
 `CEMP_ALLOWED_HOSTS`, `CEMP_CSRF_TRUSTED_ORIGINS`, and `CEMP_SITE_DOMAIN` to
 match that port.
+
+If Docker fails before Compose creates a network with a firewalld
+`ZONE_CONFLICT`, first inspect the current assignment instead of deleting Docker
+state:
+
+```bash
+sudo firewall-cmd --get-zone-of-interface=docker0
+sudo firewall-cmd --get-active-zones
+```
+
+When `docker0` has been manually assigned to a zone that conflicts with the
+Docker daemon's own firewalld integration, remove only that incorrect interface
+assignment from the reported zone, both at runtime and permanently, and then
+restart Docker. Do not delete `/var/lib/docker/network/files/local-kv.db` on a
+shared host: it contains Docker network state used by existing containers.
+
+If the daemon then reports multiple persisted networks with the same bridge
+name, an administrator should inventory the existing Docker networks and repair
+the daemon state during a maintenance window. The host-network Compose file can
+be used with an isolated Docker daemon for non-destructive validation, but that
+is an administrator operation rather than the normal CEMP deployment path.
+
+### Compose Requires a Newer Buildx Plugin
+
+Symptom:
+
+```text
+Docker Compose requires buildx ... or later
+```
+
+The preferred fix is to update the Docker Buildx plugin to the minimum version
+reported by Compose. If package changes are not permitted, build the image with
+the Docker legacy builder and let Compose start the prebuilt image:
+
+```bash
+DOCKER_BUILDKIT=0 docker build --network host -t cemp_public-cemp .
+COMPOSE_PROJECT_NAME=cemp_public \
+  docker compose -f docker-compose.host-network.yml up -d --no-build
+```
+
+The image name must match the Compose project and service naming convention:
+`<project>-cemp` for service `cemp`.
 
 ### Service Listens Locally but Remote Access Fails
 

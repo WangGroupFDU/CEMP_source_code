@@ -5,7 +5,7 @@ Draft text for manuscript or response letter:
 The source code of CEMP is available at
 `https://github.com/WangGroupFDU/CEMP_source_code` under the Apache License 2.0
 (`Apache-2.0`). The manuscript-associated source release is tagged as
-`v1.0.0-paper-open`.
+`v1.1.0-paper-open`.
 
 The public datasets, model metadata, data dictionary, and public model/data
 assets supporting the manuscript are released under the Creative Commons
@@ -16,7 +16,7 @@ in `data/public_manifest.json`.
 
 Public model weights, model configuration files, and example prediction assets
 are provided in `release_assets/cemp_public_model_assets.tar.gz` and are also
-attached to the `v1.0.0-paper-open` GitHub Release. The archive SHA256 checksum
+attached to the `v1.1.0-paper-open` GitHub Release. The archive SHA256 checksum
 is recorded in `data/public_manifest.json`.
 
 The repository provides a local demo workflow that can be deployed without
@@ -36,6 +36,13 @@ python manage.py verify_public_release --manifest data/public_manifest.json
 python manage.py runserver
 ```
 
-Optional ORCA, Gaussian, GROMACS, and Multiwfn workflows require independent
-installation and license compliance, but the core public demo and manuscript
-data/model checks use public data, public model assets, and precomputed records.
+The source release includes the 118 notebook stages used by the active MD, QC,
+analysis, query, and polymer-generation executors, together with five maintained
+model-inference notebooks. Their locations and execution order are documented in
+`docs/algorithms.md`.
+
+External scientific programs are not redistributed. Their official project
+links and configuration variables are documented in the repository. Gaussian
+16 requires a separately obtained valid license. The core public demo and
+manuscript data/model checks use public data, public model assets, and
+precomputed records without requiring these optional programs.

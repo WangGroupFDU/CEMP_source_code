@@ -20,7 +20,8 @@ ENV CEMP_DEBUG=true \
     CEMP_CONTAINER_PORT=8000 \
     CEMP_ALLOWED_HOSTS=127.0.0.1,localhost,0.0.0.0 \
     CEMP_CSRF_TRUSTED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000 \
-    CEMP_SITE_DOMAIN=http://localhost:8000
+    CEMP_SITE_DOMAIN=http://localhost:8000 \
+    LD_LIBRARY_PATH=/opt/conda/lib
 
 EXPOSE 8000
 

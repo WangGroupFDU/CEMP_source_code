@@ -31,6 +31,11 @@ On a shared server, choose a free host port and update `.env`, for example
 `CEMP_HOST_PORT=18080`. If Docker bridge networking fails on CentOS, use the
 host-network Compose file documented in `docs/deploy.md`.
 
+The image and model-backed API path were validated on CentOS 8 using port
+`8001` because port `8000` was occupied on the shared test host. The port is
+configurable; see `docs/deploy.md` for the tested login, data-query, prediction,
+export, and troubleshooting commands.
+
 Demo credentials:
 
 ```text
@@ -63,6 +68,9 @@ python manage.py runserver
 | `crystals/` | Crystal/material models, optional Materials Project fetch script, prediction code. |
 | `battery_manage_system/` | Battery experiment models, visualization and prediction views. |
 | `autocompute/` | Optional QC/MD workflow orchestration and task-management modules. |
+| `autocompute/static/` | Maintained MD, QC, analysis, and query notebook source used by task executors. |
+| `polymer/static/programe/` | Maintained polymer generation and polymer inference notebooks. |
+| `autocompute/public_algorithm_inventory.py` | Machine-readable allowlist for all 118 workflow and 5 inference notebooks. |
 | `data/demo/` | Small local demo CSV assets for smoke tests and API examples. |
 | `data/public/` | Public GitHub CSV assets, including Autocompute small molecules and polymer ML predictions. |
 | `data/public_manifest.json` | Versioned data/model manifest, checksums, licenses, and release pointers. |
@@ -189,12 +197,12 @@ release_assets/cemp_public_model_assets.tar.gz
 ```
 
 The archive is tracked in this repository and is also uploaded to the
-`v1.0.0-paper-open` GitHub Release. It is licensed under CC BY 4.0 as recorded
-in `data/public_manifest.json`.
+[`v1.1.0-paper-open` GitHub Release](https://github.com/WangGroupFDU/CEMP_source_code/releases/tag/v1.1.0-paper-open).
+It is licensed under CC BY 4.0 as recorded in `data/public_manifest.json`.
 
 ```text
-size: 11,545,465 bytes
-sha256: 2f502c0b71a6da151265482ec4461b25a969a9417343b7580bfad0f2f7a9d007
+size: 11,377,421 bytes
+sha256: 8bf69f11a9c128cf788a84cc618577d8858dffc7ae8f39a40f12237adbc04062
 ```
 
 Extract it at the repository root to restore the model files to the runtime
@@ -212,6 +220,62 @@ The Docker image performs this extraction during image build.
 | Polymer property models | `polymer/static/model/Youngs_Modulus_xgb_model.joblib`, `Tm_xgb_model.joblib`, `Tg_xgb_model.joblib`, `Tensile_Strength_xgb_model.joblib`, `Dielectric_Constant_Total_xgb_model.joblib` |
 | Crystal prediction models | `crystals/static/prediction_model/average_voltage_MOCO+GAT.pth`, `capacity_grav_MOCO+GAT.pth`, `energy_grav_MOCO+GAT.pth`, `average_voltage_GCN.pth`, `capacity_grav_GCN.pth`, `energy_grav_GCN.pth`, `average_voltage_GAT.pth`, `capacity_grav_GAT.pth`, `energy_grav_GAT.pth` |
 
+## Algorithm Source And Execution
+
+The repository contains the source notebooks that are currently called by a
+CEMP page, API, task executor, or maintained prediction example. The release
+allowlist contains 123 notebooks:
+
+| Algorithm group | Notebooks | Main source location |
+| --- | ---: | --- |
+| Standard molecular dynamics | 12 | `autocompute/static/MDAutocompute_programe/` |
+| ORCA molecular dynamics | 8 | `autocompute/static/MDAutocompute_programe_ORCA/` |
+| Gaussian quantum-chemistry workflows | 48 | `autocompute/static/QcAutocompute_programe/HTQC_*/` |
+| ORCA quantum chemistry and manual mode | 26 | `autocompute/static/QcAutocompute_programe/ORCA_*/` |
+| ESP, orbital, NCI, and SMILES-query workflows | 6 | `autocompute/static/drawESP/`, `draw_HOMO_LUMO_orb/`, `NCIanalysis/`, `NCI_analysis_promolecular/`, and `query_SMILES/` |
+| Linear and cyclic polymer generation | 18 | `polymer/static/programe/generate_*/` |
+| Model inference examples | 5 | `ionic_liquid/static/` and `polymer/static/programe/predict_*/` |
+
+AutoCompute copies the selected workflow and
+`autocompute/static/cemp_software_settings.py` into a task directory, then runs
+the registered notebooks sequentially with `jupyter nbconvert --execute`.
+Notebook order, task types, execution functions, helper modules, and external
+dependencies are documented in `docs/algorithms.md` and defined in
+`autocompute/public_algorithm_inventory.py`.
+
+The ionic-liquid notebook at
+`ionic_liquid/static/model/prediction_model.ipynb` is also maintained as an
+independent CPU inference example. Extract the model archive first, then set
+`CEMP_IL_MODEL_DIR` if the models are not under
+`ionic_liquid/static/model/`. Polymer examples use `CEMP_POLYMER_MODEL_DIR` in
+the same way.
+
+### Scientific Software Configuration
+
+Scientific software is configured through environment variables. Empty values
+are acceptable for the Docker data/demo path; a workflow requires only the
+variables for the software it calls.
+
+| Variable | Value |
+| --- | --- |
+| `CEMP_GAUSSIAN16_BIN` | Gaussian 16 executable, such as `g16`. |
+| `CEMP_GAUSSIAN16_FORMCHK` | Gaussian `formchk` executable. |
+| `CEMP_GAUSSIAN_DATABASE_PATH` | Writable Gaussian calculation cache/database directory. |
+| `CEMP_GAUSSIAN_SCRATCH_DIR` | Writable Gaussian scratch directory used by the cleanup helper. |
+| `CEMP_ORCA_PATH` | ORCA executable. |
+| `CEMP_ORCA_2MKL_PATH` | ORCA `orca_2mkl` executable. |
+| `CEMP_ORCA_DATABASE_PATH` | Writable ORCA calculation cache/database directory. |
+| `CEMP_GMX_BIN` | GROMACS executable, such as `gmx` or `gmx_mpi`. |
+| `CEMP_MULTIWFFN_EXE` | Multiwfn executable. |
+| `CEMP_SOBTOP_HOME` | Sobtop installation directory. |
+| `CEMP_OPENMPI_BIN` | Open MPI executable directory. |
+| `CEMP_OPENMPI_LIB` | Open MPI library directory. |
+| `CEMP_VMD_BIN` | VMD executable. |
+| `CEMP_WORKFLOW_STATE_DIR` | Writable directory for workflow caches and timing records. |
+
+An optional INI file may be selected with `CEMP_SETTINGS_FILE`; environment
+variables override values from the INI file.
+
 ## Local Release Commands
 
 ```bash
@@ -222,7 +286,9 @@ python manage.py verify_public_release --manifest data/public_manifest.json
 
 `load_public_data` imports bundled demo CSV assets into SQLite. `seed_public_demo`
 creates a local demo user and token. `verify_public_release` checks local demo
-files, SHA256 values, count metadata, and release wording.
+files, SHA256 values, count metadata, release wording, the 123-notebook
+allowlist, notebook syntax and output state, helper modules, and shared workflow
+configuration.
 
 For a more complete local database, replace `--mode demo` with `--mode paper`.
 Large file-based assets without a Django loader, such as the OMG polymer
@@ -242,12 +308,26 @@ curl -X POST http://localhost:8000/api/token/ \
 Use the returned token for authenticated endpoints. Public API notes are in
 `docs/api.md`.
 
-## Optional Scientific Software
+## External Scientific Software
 
-The AutoCompute modules include workflow templates for ORCA, Gaussian, GROMACS,
-and Multiwfn. These tools have separate installation and license requirements.
-They are optional for the public demo path. The bundled reproducibility checks
-use public data, public model artifacts, and precomputed records.
+External scientific programs are not distributed with CEMP. Install only the
+programs required by the workflow being run and follow the upstream license and
+registration terms.
+
+| Software | Use in CEMP | Official download or project page | Distributed with CEMP | Requirement |
+| --- | --- | --- | --- | --- |
+| Gaussian 16 | Gaussian QC, RESP, and selected MD preparation stages | [Gaussian 16](https://gaussian.com/gaussian16/) | No | Proprietary software; a separately obtained valid license is required. |
+| ORCA | ORCA QC and ORCA-MD quantum-chemistry stages | [ORCA](https://www.faccts.de/orca/) | No | Install and use under the current FACCTs/ORCA terms. |
+| GROMACS | Molecular-dynamics preparation, simulation, and analysis | [GROMACS downloads](https://manual.gromacs.org/current/download.html) | No | Install and use under the upstream license. |
+| Sobtop | Molecular topology generation and topology repair | [Sobtop](http://sobereva.com/soft/Sobtop/) | No | Follow the terms published by the author. |
+| Multiwfn | Wavefunction, charge, ESP, orbital, and NCI analysis | [Multiwfn](http://sobereva.com/multiwfn/) | No | Follow the terms published by the author. |
+| Open Babel | Molecular format conversion and structure handling | [Open Babel installation](https://openbabel.org/docs/Installation/install.html) | No | Install and use under the upstream license. |
+| Open MPI | Parallel runtime used by configured ORCA/GROMACS installations | [Open MPI](https://www.open-mpi.org/software/ompi/) | No | Install and use under the upstream license. |
+| VMD | Trajectory, orbital, ESP, and NCI visualization | [VMD](https://www.ks.uiuc.edu/Research/vmd/) | No | Registration or license acceptance may be required by the upstream distributor. |
+
+These programs are optional for the public web demo. Database browsing, CSV
+validation, demo login, and the bundled CPU model checks use the public data,
+public model assets, and precomputed records.
 
 Materials Project refresh scripts require a user-provided API key through
 `MP_API_KEY`. No API key is stored in this repository.
@@ -280,7 +360,9 @@ npm run build
 | `docs/data.md` | Dataset descriptions, public CSV inventory, and source attribution notes. |
 | `docs/api.md` | API usage examples with the local demo server. |
 | `docs/reproduce.md` | Reproducibility workflow using the public assets. |
+| `docs/algorithms.md` | Active algorithm inventory, notebook order, task executors, and external dependencies. |
 | `docs/availability_statement.md` | Data and code availability wording for manuscript or response use. |
+| `docs/release_notes/v1.1.0-paper-open.md` | Changes and validation notes for the algorithm-source release. |
 
 ## Citation
 

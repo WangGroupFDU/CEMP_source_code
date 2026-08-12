@@ -22,6 +22,7 @@ import time
 import json
 from django.core.cache import cache
 from rdkit import Chem
+from rdkit.Chem import AllChem
 from datetime import datetime 
 import zipfile 
 import os
@@ -31,7 +32,14 @@ import mimetypes
 from pathlib import Path
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
-from ionic_liquid.models import ILgenerator_IL, IL_ML_data, Cation_QC_data, Anion_QC_data, IL_Tm_conductivity_ECW_data 
+from ionic_liquid.models import (
+    IL,
+    ILgenerator_IL,
+    IL_ML_data,
+    Cation_QC_data,
+    Anion_QC_data,
+    IL_Tm_conductivity_ECW_data,
+)
 
 def ionic_liquid_base_page(request):
     return render(request,"ionic_base_display.html")
@@ -477,11 +485,163 @@ _IL_FINGERPRINT_CACHE = {}
 IL_PROPERTY_COLS = ["ECW (V)", "Tm (K)", "Conductivity (mS/cm)"]
 ION_PROPERTY_COLS = ["HOMO (Hatree)", "LUMO (Hatree)"]
 
+
+def _similarity_item(smiles, name="", properties=None):
+    """
+    功能目的：把公开数据库记录转换为相似性检索使用的 Morgan 指纹记录。
+    输入参数：smiles 为分子字符串，name 为名称，properties 为需要返回的性质字典。
+    返回值：包含 SMILES、名称、性质和 2048 位指纹的字典；无效 SMILES 返回 None。
+    关键流程：先由 RDKit 解析结构，再计算半径为 2 的 Morgan bit vector。
+    可能报错或边界情况：空值或 RDKit 无法解析的结构会被跳过，避免单条坏数据中断索引。
+    """
+    normalized_smiles = str(smiles or "").strip()
+    if not normalized_smiles:
+        return None
+
+    molecule = Chem.MolFromSmiles(normalized_smiles)
+    if molecule is None:
+        return None
+
+    fingerprint = AllChem.GetMorganFingerprintAsBitVect(
+        molecule,
+        radius=2,
+        nBits=2048,
+    )
+    return {
+        "SMILES": normalized_smiles,
+        "Name": str(name or "").strip(),
+        "CAS": "",
+        "morgan_fp": fingerprint.ToBitString(),
+        "properties": properties or {},
+    }
+
+
+def _build_database_similarity_indexes():
+    """
+    功能目的：从当前 Django 公共数据库构建六类离子液体相似性检索索引。
+    输入参数：无，读取已经由 load_public_data 导入的 ORM 表。
+    返回值：键为 experiment/generated 与 il/cation/anion 组合，值为指纹记录列表。
+    关键流程：实验离子液体优先使用含实验性质的表；该表为空时使用公开 IL QC 表。
+    可能报错或边界情况：无效 SMILES 会被忽略；生成离子按 SMILES 去重以控制内存占用。
+    """
+    databases = {
+        "experiment_il": [],
+        "generated_il": [],
+        "experiment_cation": [],
+        "generated_cation": [],
+        "experiment_anion": [],
+        "generated_anion": [],
+    }
+
+    experimental_rows = IL_Tm_conductivity_ECW_data.objects.values(
+        "Name", "SMILES", "ECW_V", "Tm_K", "Conductivity_mS_per_cm"
+    )
+    if experimental_rows.exists():
+        for row in experimental_rows.iterator():
+            item = _similarity_item(
+                row["SMILES"],
+                row["Name"],
+                {
+                    "ECW (V)": row["ECW_V"],
+                    "Tm (K)": row["Tm_K"],
+                    "Conductivity (mS/cm)": row["Conductivity_mS_per_cm"],
+                },
+            )
+            if item is not None:
+                databases["experiment_il"].append(item)
+    else:
+        for row in IL.objects.values("Name", "SMILES", "ECW_V").iterator():
+            item = _similarity_item(
+                row["SMILES"],
+                row["Name"],
+                {
+                    "ECW (V)": row["ECW_V"],
+                    "Tm (K)": "",
+                    "Conductivity (mS/cm)": "",
+                },
+            )
+            if item is not None:
+                databases["experiment_il"].append(item)
+
+    generated_cations = {}
+    generated_anions = {}
+    generated_rows = IL_ML_data.objects.values(
+        "Name",
+        "SMILES",
+        "Cation_SMILES",
+        "Anion_SMILES",
+        "Cation_SMILES_type",
+        "Anion_SMILES_type",
+        "ECW_V",
+        "Tm_K",
+        "Conductivity_mS_per_cm",
+    )
+    for row in generated_rows.iterator():
+        item = _similarity_item(
+            row["SMILES"],
+            row["Name"],
+            {
+                "ECW (V)": row["ECW_V"],
+                "Tm (K)": row["Tm_K"],
+                "Conductivity (mS/cm)": row["Conductivity_mS_per_cm"],
+            },
+        )
+        if item is not None:
+            databases["generated_il"].append(item)
+
+        cation_smiles = str(row["Cation_SMILES"] or "").strip()
+        if cation_smiles and cation_smiles not in generated_cations:
+            generated_cations[cation_smiles] = row["Cation_SMILES_type"]
+        anion_smiles = str(row["Anion_SMILES"] or "").strip()
+        if anion_smiles and anion_smiles not in generated_anions:
+            generated_anions[anion_smiles] = row["Anion_SMILES_type"]
+
+    for row in Cation_QC_data.objects.values(
+        "Name", "SMILES", "HOMO_Hatree", "LUMO_Hatree"
+    ).iterator():
+        item = _similarity_item(
+            row["SMILES"],
+            row["Name"],
+            {
+                "HOMO (Hatree)": row["HOMO_Hatree"],
+                "LUMO (Hatree)": row["LUMO_Hatree"],
+            },
+        )
+        if item is not None:
+            databases["experiment_cation"].append(item)
+
+    for row in Anion_QC_data.objects.values(
+        "Name", "SMILES", "HOMO_Hatree", "LUMO_Hatree"
+    ).iterator():
+        item = _similarity_item(
+            row["SMILES"],
+            row["Name"],
+            {
+                "HOMO (Hatree)": row["HOMO_Hatree"],
+                "LUMO (Hatree)": row["LUMO_Hatree"],
+            },
+        )
+        if item is not None:
+            databases["experiment_anion"].append(item)
+
+    for smiles, name in generated_cations.items():
+        item = _similarity_item(smiles, name, {})
+        if item is not None:
+            databases["generated_cation"].append(item)
+    for smiles, name in generated_anions.items():
+        item = _similarity_item(smiles, name, {})
+        if item is not None:
+            databases["generated_anion"].append(item)
+
+    return databases
+
 def _load_il_databases():
     """
-    Load all 6 fingerprint databases once and cache globally.
-    Returns dict with keys: experiment_IL, generated_IL, experiment_cation,
-    generated_cation, experiment_anion, generated_anion
+    功能目的：载入并缓存六类离子液体相似性检索索引。
+    输入参数：无。
+    返回值：实验/生成数据与离子液体/阳离子/阴离子的六类索引字典。
+    关键流程：索引直接由已公开并导入 SQLite 的 CSV 数据生成，不依赖隐藏 JSON 文件。
+    可能报错或边界情况：数据库为空时对应列表为空，由 API 返回可操作的 404 信息。
     """
     if _IL_FINGERPRINT_CACHE:
         return _IL_FINGERPRINT_CACHE
@@ -489,51 +649,11 @@ def _load_il_databases():
     import logging
     logger = logging.getLogger("django")
 
-    
-    from ionic_liquid.ionic_liquid_utils import load_morgan_fp_data_list
-
-    
-    test_box_path = os.path.join(os.path.dirname(__file__), 'test_box', 'query_similar_IL')
-
-    
-    
-
-    logger.info(f"Loading databases from: {test_box_path}")
-    logger.info(f"Directory exists: {os.path.exists(test_box_path)}")
-    if os.path.exists(test_box_path):
-        
-        logger.info(f"Files in directory: {os.listdir(test_box_path)}")
-
-    db_files = {
-        'experiment_il': 'experiment_IL_smiles_morgan_fp.json.gz',
-        'generated_il': 'generated_IL_smiles_morgan_fp.json.gz',
-        'experiment_cation': 'experiment_cation_smiles_morgan_fp.json.gz',
-        'generated_cation': 'generated_cation_smiles_morgan_fp.json.gz',
-        'experiment_anion': 'experiment_anion_smiles_morgan_fp.json.gz',
-        'generated_anion': 'generated_anion_smiles_morgan_fp.json.gz',
-    }
-
-    
-    for key, filename in db_files.items():
-        file_path = os.path.join(test_box_path, filename)
-        logger.info(f"Checking {key}: {file_path}")
-        logger.info(f"  File exists: {os.path.exists(file_path)}")
-
-        if os.path.exists(file_path):
-            try:
-                data = load_morgan_fp_data_list(file_path)
-                print(f"{file_path} safely loaded!,length is {len(data)}")
-                _IL_FINGERPRINT_CACHE[key] = data
-                logger.info(f"  Loaded {len(data)} entries for {key}")
-            except Exception as e:
-                logger.error(f"  Failed to load {key}: {e}")
-                _IL_FINGERPRINT_CACHE[key] = []
-        else:
-            logger.warning(f"  File not found: {file_path}")
-            _IL_FINGERPRINT_CACHE[key] = []
-
-    logger.info(f"Cache keys: {list(_IL_FINGERPRINT_CACHE.keys())}")
-    logger.info(f"Cache sizes: {[(k, len(v)) for k, v in _IL_FINGERPRINT_CACHE.items()]}")
+    _IL_FINGERPRINT_CACHE.update(_build_database_similarity_indexes())
+    logger.info(
+        "Loaded public ionic-liquid similarity indexes: %s",
+        {key: len(value) for key, value in _IL_FINGERPRINT_CACHE.items()},
+    )
 
     return _IL_FINGERPRINT_CACHE
 

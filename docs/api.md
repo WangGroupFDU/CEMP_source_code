@@ -43,6 +43,12 @@ Similarity and property-filter APIs are documented in
 `ionic_liquid/API_TEST_EXAMPLES.md`. The examples use `http://localhost:8000`
 and the demo token flow.
 
+The similarity service builds and caches its Morgan fingerprint indexes from
+the ionic-liquid, cation, and anion records already loaded into SQLite. There
+is no separate private fingerprint database to download. Restart the Django
+process after replacing the loaded dataset so that the in-process indexes are
+rebuilt from the new records.
+
 ## Error Handling
 
 Endpoints generally return JSON responses:

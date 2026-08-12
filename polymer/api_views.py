@@ -7,11 +7,13 @@ from rest_framework.response import Response
 from rest_framework import status
 import numpy as np
 import joblib
+import os
 from functools import lru_cache
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
 
 from polymer.views import process_polymer_predict_view
 from .api_service import *
+from django.conf import settings
 
 
 
@@ -55,7 +57,10 @@ process_polymer_predict_view_api = make_api_excel_upload_return_ID(process_polym
 
 
 
-MODEL_BASE_DIR = "/opt/cemp/polymer/static/model"
+MODEL_BASE_DIR = os.environ.get(
+    "CEMP_POLYMER_MODEL_DIR",
+    os.path.join(settings.BASE_DIR, "polymer", "static", "model"),
+)
 
 MODEL_TO_PREDICT_PROPERTY_LIST = [
     "Tg",
@@ -99,7 +104,7 @@ def _limit_model_threads(model, prop_name: str) -> None:
 def _load_models_once():
     model_dict = {}
     for prop in MODEL_TO_PREDICT_PROPERTY_LIST:
-        model_path = f"{MODEL_BASE_DIR}/{prop}_xgb_model.joblib"
+        model_path = os.path.join(MODEL_BASE_DIR, f"{prop}_xgb_model.joblib")
         model = joblib.load(model_path)
         _limit_model_threads(model, prop_name=prop)
         model_dict[prop] = model
